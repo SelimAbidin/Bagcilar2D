@@ -4,7 +4,9 @@
   "description": "2D pet engine",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "gulp dev",
+    "watch-dev": "gulp watch-dev"
   },
   "repository": {
     "type": "git",
@@ -23,6 +25,9 @@
   "homepage": "https://github.com/SelimAbidin/Bagcilar2D#readme",
   "dependencies": {},
   "devDependencies": {
-    "webpack": "^3.0.0"
+    "gulp": "^3.9.1",
+    "gulp-connect": "^5.0.0",
+    "pump": "^1.0.2",
+    "rollup": "^0.43.0"
   }
 }
