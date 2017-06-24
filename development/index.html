@@ -15,6 +15,9 @@
 
         }
 
+        window.meydan = new Bagcilar.BagcilarMeydan(renderCanvas);
+       // window.meydan2 = new Bagcilar.BagcilarMeydan(renderCanvas);
+
 
         window.b.addEventListener("test", this, f, 0);
         window.b.addEventListener("test", this, f, 2);
@@ -27,6 +30,8 @@
 
 </script>
 <body onload="init()">
+
+<canvas id="renderCanvas" style="width: 500px;  height:500px; background:#888888;" ></canvas>
 
 </body>
 </html>
