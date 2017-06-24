@@ -10,9 +10,9 @@ var CoreObject = (function(){
 
         toString : function () {
             var functionName = this.constructor.toString();
-            functionName = functionName.substr('function'.length);
-            functionName = functionName.substr(0, functionName.indexOf('('));
-            return '[' + functionName.trim() + ' Object]';
+            functionName = functionName.substr("function".length);
+            functionName = functionName.substr(0, functionName.indexOf("("));
+            return "[" + functionName.trim() + " Object]";
         }
 
     });
@@ -22,4 +22,4 @@ var CoreObject = (function(){
 
 
 
-export {CoreObject}
+export {CoreObject};

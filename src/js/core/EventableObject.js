@@ -1,6 +1,6 @@
 
-import {CoreObject} from './CoreObject.js';
-import {Event} from '../events/Event.js';
+import {CoreObject} from "./CoreObject.js";
+import {Event} from "../events/Event.js";
 
 
 function EventableObject() {
@@ -46,4 +46,4 @@ EventableObject.prototype = Object.assign(Object.create(CoreObject.prototype), {
 
 });
 
-export {EventableObject}
+export {EventableObject};

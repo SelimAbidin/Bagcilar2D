@@ -16,7 +16,7 @@ gulp.task('watch-dev', function (callBack) {
     });
 
     console.log("Bundle Başlıyor");
-    gulp.watch(['./src/js/*.js', './src/js/*/*.js'], ['bundle', 'reload']);
+    gulp.watch(['./src/js/*.js', './src/js/*/*.js'], ['bundle' ,'reload']);
     gulp.watch('./development/*.html', ['reload']);
 });
 
@@ -32,8 +32,11 @@ gulp.task('reload', function (callBack) {
     
 });
 
+
+
 gulp.task('bundle', function (callBack) {
 
+console.log("bundle started");
     return rollup2.rollup({
             entry : './src/js/Bagcilar2D.js'
         }).then(function (bundle) {
@@ -41,7 +44,7 @@ gulp.task('bundle', function (callBack) {
              bundle.write({
                 indent : '\t',
                 format : 'umd',
-                dest : 'build/test.js',
+                dest : 'build/Bagcilar2d.js',
                 moduleName : 'Bagcilar'
              });
 

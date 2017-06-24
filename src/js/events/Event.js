@@ -1,5 +1,5 @@
 
-import {CoreObject} from '../core/CoreObject.js';
+import {CoreObject} from "../core/CoreObject.js";
 
 
 function Event(type, context, listener, priority){
@@ -18,7 +18,7 @@ function Event(type, context, listener, priority){
 
 Event.prototype = Object.assign(Object.create(CoreObject.prototype), {
     
-    constructor : Event
+    constructor : Event,
 
 });
 

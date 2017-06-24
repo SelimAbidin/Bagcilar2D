@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "gulp dev",
-    "watch-dev": "gulp watch-dev"
+    "watch-dev": "gulp watch-dev",
+    "eslint": "eslint src/js/*/*.js"
   },
   "repository": {
     "type": "git",
@@ -25,6 +26,10 @@
   "homepage": "https://github.com/SelimAbidin/Bagcilar2D#readme",
   "dependencies": {},
   "devDependencies": {
+    "eslint": "^4.0.0",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-standard": "^3.0.1",
     "gulp": "^3.9.1",
     "gulp-connect": "^5.0.0",
     "pump": "^1.0.2",

@@ -14,9 +14,9 @@
 
 	        toString : function () {
 	            var functionName = this.constructor.toString();
-	            functionName = functionName.substr('function'.length);
-	            functionName = functionName.substr(0, functionName.indexOf('('));
-	            return '[' + functionName.trim() + ' Object]';
+	            functionName = functionName.substr("function".length);
+	            functionName = functionName.substr(0, functionName.indexOf("("));
+	            return "[" + functionName.trim() + " Object]";
 	        }
 
 	    });
@@ -40,7 +40,7 @@
 
 	Event.prototype = Object.assign(Object.create(CoreObject.prototype), {
 	    
-	    constructor : Event
+	    constructor : Event,
 
 	});
 
@@ -87,12 +87,19 @@
 
 	});
 
-	window.onload = function(){
-	    console.log("pppppppp");
-	};
+	function Vector2 (x,y){
+	    this.x = x;
+	    this.y = y;
+	}
+
+	Vector2.prototype = Object.assign(Vector2.prototype, {
+
+
+	});
 
 	exports.CoreObject = CoreObject;
 	exports.EventableObject = EventableObject;
+	exports.Vector2 = Vector2;
 
 	Object.defineProperty(exports, '__esModule', { value: true });
 
