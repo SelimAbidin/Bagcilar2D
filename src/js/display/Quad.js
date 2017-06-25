@@ -49,10 +49,18 @@ Quad.prototype = Object.assign(Object.create(Object2D.prototype), {
         
         this.material.draw(gl);
 
+        this.updateRotation();
+
+        gl.uniformMatrix2fv(this.material.params.modelMatrix, false, this.rotationMatrix.matrixArray);
+
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
         gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(0);
         gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+
+        this.setRotation(this.getRotation() + 0.1);
+       // console.log(this.rotationMatrix.matrixArray);
     }
 
 } );

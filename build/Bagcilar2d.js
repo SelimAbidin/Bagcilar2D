@@ -109,12 +109,13 @@
 	            var  gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
 	            
 	            if(!gl){
+	             
 	                var error = "WebGL isn't supported on device";
 	                this.dispatchEvent(BagcilarMeydan.ERROR, {message:error});
+	            
 	            }
 	            
 
-	            
 	            this.renderDom = canvas;
 	            this.setWebGLContext(gl);
 	            this.init();
@@ -215,19 +216,78 @@
 	    return BagcilarMeydan;
 	})();
 
-	function Object2D(){
-	    EventableObject.apply(this, arguments);
+	function Matrix2() {
+	    
+	    this.matrixArray = [
+	        1,0,
+	        0,1
+	    ];
 	}
 
 
-	Object2D.prototype = Object.assign(Object.create(EventableObject.prototype), {
 
-	    constructer : Object2D,
-
+	Matrix2.prototype = Object.assign(Matrix2.prototype, {
 	    
+	    makeIdentity : function (){
 
+	        this.setMatrix(1,0,0,1);
+	        
+	    } ,
+
+	    setMatrix : function (n00, n10, n01, n11){
+
+	        var m = this.matrixArray;
+	        m[0] = n00; m[1] = n10;
+	        m[2] = n01; m[3] = n11;
+	    },
+
+	    setRotationZ : function (radian){
+	        
+	        var m = this.matrixArray;
+	        m[0] = Math.cos(radian); m[1] = -Math.sin(radian);
+	        m[2] = Math.sin(radian); m[3] = Math.cos(radian);
+	        
+	    } 
 
 	});
+
+	var Object2D = (function(){
+
+	    function Object2D(){
+	        EventableObject.apply(this, arguments);
+	    }
+
+	    var rotation = 0;
+
+	    Object2D.prototype = Object.assign(Object.create(EventableObject.prototype), {
+
+	        constructer : Object2D,
+	        isRotationDirty : true,
+	        rotationMatrix : new Matrix2(),
+
+	        setRotation : function (v){
+	            rotation = v;
+	            this.isRotationDirty = true;
+	        },
+
+	        getRotation : function(){
+	            return rotation;
+	        },
+
+	        updateRotation : function(){
+
+	            if(this.isRotationDirty){
+	                this.rotationMatrix.setRotationZ(rotation);
+	                this.isRotationDirty = false;
+	            }
+	            
+	        }
+
+
+	    });
+
+	return Object2D;
+	})();
 
 	function Sprite2D (){
 	    Object2D.apply(this, []);
@@ -250,15 +310,19 @@
 
 	Default.prototype = Object.assign(Default.prototype, {
 
+	    params : {},
 
 	    upload : function(gl){
 
-	        var vertexShaderSRC = "attribute vec3 position;"+      
-	                                "void main() {"+        
-	                                "   gl_Position = vec4(position, 1.0);"+     
+	        var vertexShaderSRC =   "uniform mat2 modelMatrix;"+
+	                                "attribute vec3 position;"+      
+	                                "void main() {"+  
+	                                "   vec2 pm = modelMatrix * position.xy;"+     
+	                                "   gl_Position = vec4(pm,position.z, 1.0);"+     
 	                                "}";
 
-	        var fragmentShaderSRC =     "void main() {"+        
+	        var fragmentShaderSRC = ""+
+	                                "void main() {"+        
 	                                "   gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);"+     
 	                                "}";
 
@@ -285,7 +349,13 @@
 	        this.shaderProgram = gl.createProgram();
 	        gl.attachShader(this.shaderProgram, this.vertexSahderBuffer);
 	        gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
+
 	        gl.linkProgram(this.shaderProgram);
+
+	        this.params.modelMatrix = gl.getUniformLocation(this.shaderProgram, "modelMatrix");
+	        
+
+	        
 	        
 	    },
 
@@ -295,6 +365,9 @@
 	            this.upload(gl);
 	        }
 	        gl.useProgram(this.shaderProgram);
+
+
+
 	    }
 
 	});
@@ -345,10 +418,18 @@
 	        
 	        this.material.draw(gl);
 
+	        this.updateRotation();
+
+	        gl.uniformMatrix2fv(this.material.params.modelMatrix, false, this.rotationMatrix.matrixArray);
+
 	        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
 	        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
 	        gl.enableVertexAttribArray(0);
 	        gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+
+	        this.setRotation(this.getRotation() + 0.1);
+	       // console.log(this.rotationMatrix.matrixArray);
 	    }
 
 	} );

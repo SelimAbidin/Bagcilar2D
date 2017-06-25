@@ -13,12 +13,13 @@ var BagcilarMeydan = (function(){
             var  gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
             
             if(!gl){
+             
                 var error = "WebGL isn't supported on device";
                 this.dispatchEvent(BagcilarMeydan.ERROR, {message:error});
+            
             }
             
 
-            
             this.renderDom = canvas;
             this.setWebGLContext(gl);
             this.init();

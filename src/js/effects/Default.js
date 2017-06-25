@@ -8,15 +8,19 @@ function Default(){
 
 Default.prototype = Object.assign(Default.prototype, {
 
+    params : {},
 
     upload : function(gl){
 
-        var vertexShaderSRC = "attribute vec3 position;"+      
-                                "void main() {"+        
-                                "   gl_Position = vec4(position, 1.0);"+     
+        var vertexShaderSRC =   "uniform mat2 modelMatrix;"+
+                                "attribute vec3 position;"+      
+                                "void main() {"+  
+                                "   vec2 pm = modelMatrix * position.xy;"+     
+                                "   gl_Position = vec4(pm,position.z, 1.0);"+     
                                 "}";
 
-        var fragmentShaderSRC =     "void main() {"+        
+        var fragmentShaderSRC = ""+
+                                "void main() {"+        
                                 "   gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);"+     
                                 "}";
 
@@ -43,7 +47,13 @@ Default.prototype = Object.assign(Default.prototype, {
         this.shaderProgram = gl.createProgram();
         gl.attachShader(this.shaderProgram, this.vertexSahderBuffer);
         gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
+
         gl.linkProgram(this.shaderProgram);
+
+        this.params.modelMatrix = gl.getUniformLocation(this.shaderProgram, "modelMatrix");
+        
+
+        
         
     },
 
@@ -53,6 +63,9 @@ Default.prototype = Object.assign(Default.prototype, {
             this.upload(gl);
         }
         gl.useProgram(this.shaderProgram);
+
+
+
     }
 
 });
