@@ -15,7 +15,12 @@ var Object2D = (function(){
 
         constructer : Object2D,
         isRotationDirty : true,
+        isScaleDirty : true,
         rotationMatrix : new Matrix2(),
+        scaleMatrix : new Matrix2(),
+        worldMatrix : new Matrix2(),
+        scaleX :1, 
+        scaleY :1, 
 
         setRotation : function (v){
             rotation = v;
@@ -27,11 +32,58 @@ var Object2D = (function(){
         },
 
         updateRotation : function(){
-
-            if(this.isRotationDirty){
                 this.rotationMatrix.setRotationZ(rotation);
                 this.isRotationDirty = false;
+        },
+
+        updateScale : function(){
+                this.scaleMatrix.setScale(this.scaleX, this.scaleY);
+                this.isScaleDirty = false;
+        },
+
+        setScale : function (scale) {
+            this.scaleX = scale;
+            this.scaley = scale;
+            //this.scaleMatrix.setScale(scale, scale);
+            this.isScaleDirty = true;
+        },
+
+        setScaleX : function (x) {
+            this.scaleX = x;
+            this.isScaleDirty = true;
+        },
+
+        setScaleY : function (y) {
+            this.scaleY = y;
+            this.isScaleDirty = true;
+        },
+
+        getScaleY : function(){
+            return this.scaleY;
+        },
+
+        getScaleX : function(){
+            return this.scaleX;
+        },
+
+        updateWorldMatrix : function (){
+
+            this.worldMatrix.makeIdentity();
+
+            if(this.isScaleDirty){
+                this.updateScale();
+                //console.log(this.scaleMatrix.matrixArray);
+                this.worldMatrix.multiplyMatrix2(this.scaleMatrix);
             }
+
+            if(this.isRotationDirty){
+
+                this.updateRotation();
+                this.worldMatrix.multiplyMatrix2(this.rotationMatrix);
+            }  
+
+            
+
             
         }
 

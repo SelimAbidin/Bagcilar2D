@@ -27,6 +27,17 @@
         window.b.addEventListener("test", this, f, 0);
         window.b.addEventListener("test", this, f, 4);
         window.b.addEventListener("test", this, f, 3);
+
+
+
+        var m1 = new Bagcilar.Matrix2();
+        m1.setMatrix(1,0, 0,1);
+
+        var m2 = new Bagcilar.Matrix2();
+        m2.setMatrix(-8,4, 2,5);
+        m1.multiplyMatrix2(m2);
+
+        console.log(m1.matrixArray);
     }
 
 

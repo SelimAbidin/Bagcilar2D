@@ -97,6 +97,68 @@
 
 	});
 
+	function Matrix2() {
+	    
+	    this.matrixArray = [
+	        1,0,
+	        0,1
+	    ];
+	}
+
+
+
+	Matrix2.prototype = Object.assign(Matrix2.prototype, {
+	    
+	    makeIdentity : function (){
+
+	        this.setMatrix(1,0,0,1);
+	        
+	    } ,
+
+	    setMatrix : function (n00, n10, n01, n11){
+
+	        var m = this.matrixArray;
+	        m[0] = n00; m[1] = n10;
+	        m[2] = n01; m[3] = n11;
+	    },
+
+	    setRotationZ : function (radian){
+	        
+	        var m = this.matrixArray;
+	        m[0] = Math.cos(radian); m[1] = -Math.sin(radian);
+	        m[2] = Math.sin(radian); m[3] = Math.cos(radian);
+
+	    },
+	    
+
+	    setScale : function (x,y){
+	        
+	        var m = this.matrixArray;
+	        m[0] = x;
+	        m[3] = y;
+
+	    }, 
+
+
+	    multiplyMatrix2 : function(matrix){
+
+	        var m1 = this.matrixArray;
+	        var m2 = matrix.matrixArray;
+
+	        var n0 = m1[0] * m2[0] + m1[1] * m2[2]; 
+	        var n1 = m1[0] * m2[1] + m1[1] * m2[3];
+	        
+	        var n2 = m1[2] * m2[0] + m1[3] * m2[2]; 
+	        var n3 = m1[2] * m2[1] + m1[3] * m2[3];
+
+	        m1[0] = n0; m1[1] = n1;
+	        m1[2] = n2; m1[3] = n3;
+	    },
+
+
+
+	});
+
 	var BagcilarMeydan = (function(){
 
 	    function BagcilarMeydan(canvasID) {
@@ -200,7 +262,7 @@
 	            // Clear the color as well as the depth buffer.
 
 	            
-
+	            
 	            if(this.testChilderen){
 	                
 	                for (var i = 0; i < this.testChilderen.length; i++) {
@@ -216,7 +278,7 @@
 	    return BagcilarMeydan;
 	})();
 
-	function Matrix2() {
+	function Matrix2$1() {
 	    
 	    this.matrixArray = [
 	        1,0,
@@ -226,7 +288,7 @@
 
 
 
-	Matrix2.prototype = Object.assign(Matrix2.prototype, {
+	Matrix2$1.prototype = Object.assign(Matrix2$1.prototype, {
 	    
 	    makeIdentity : function (){
 
@@ -246,8 +308,35 @@
 	        var m = this.matrixArray;
 	        m[0] = Math.cos(radian); m[1] = -Math.sin(radian);
 	        m[2] = Math.sin(radian); m[3] = Math.cos(radian);
+
+	    },
+	    
+
+	    setScale : function (x,y){
 	        
-	    } 
+	        var m = this.matrixArray;
+	        m[0] = x;
+	        m[3] = y;
+
+	    }, 
+
+
+	    multiplyMatrix2 : function(matrix){
+
+	        var m1 = this.matrixArray;
+	        var m2 = matrix.matrixArray;
+
+	        var n0 = m1[0] * m2[0] + m1[1] * m2[2]; 
+	        var n1 = m1[0] * m2[1] + m1[1] * m2[3];
+	        
+	        var n2 = m1[2] * m2[0] + m1[3] * m2[2]; 
+	        var n3 = m1[2] * m2[1] + m1[3] * m2[3];
+
+	        m1[0] = n0; m1[1] = n1;
+	        m1[2] = n2; m1[3] = n3;
+	    },
+
+
 
 	});
 
@@ -263,7 +352,12 @@
 
 	        constructer : Object2D,
 	        isRotationDirty : true,
-	        rotationMatrix : new Matrix2(),
+	        isScaleDirty : true,
+	        rotationMatrix : new Matrix2$1(),
+	        scaleMatrix : new Matrix2$1(),
+	        worldMatrix : new Matrix2$1(),
+	        scaleX :1, 
+	        scaleY :1, 
 
 	        setRotation : function (v){
 	            rotation = v;
@@ -275,11 +369,58 @@
 	        },
 
 	        updateRotation : function(){
-
-	            if(this.isRotationDirty){
 	                this.rotationMatrix.setRotationZ(rotation);
 	                this.isRotationDirty = false;
+	        },
+
+	        updateScale : function(){
+	                this.scaleMatrix.setScale(this.scaleX, this.scaleY);
+	                this.isScaleDirty = false;
+	        },
+
+	        setScale : function (scale) {
+	            this.scaleX = scale;
+	            this.scaley = scale;
+	            //this.scaleMatrix.setScale(scale, scale);
+	            this.isScaleDirty = true;
+	        },
+
+	        setScaleX : function (x) {
+	            this.scaleX = x;
+	            this.isScaleDirty = true;
+	        },
+
+	        setScaleY : function (y) {
+	            this.scaleY = y;
+	            this.isScaleDirty = true;
+	        },
+
+	        getScaleY : function(){
+	            return this.scaleY;
+	        },
+
+	        getScaleX : function(){
+	            return this.scaleX;
+	        },
+
+	        updateWorldMatrix : function (){
+
+	            this.worldMatrix.makeIdentity();
+
+	            if(this.isScaleDirty){
+	                this.updateScale();
+	                //console.log(this.scaleMatrix.matrixArray);
+	                this.worldMatrix.multiplyMatrix2(this.scaleMatrix);
 	            }
+
+	            if(this.isRotationDirty){
+
+	                this.updateRotation();
+	                this.worldMatrix.multiplyMatrix2(this.rotationMatrix);
+	            }  
+
+	            
+
 	            
 	        }
 
@@ -395,14 +536,22 @@
 	        this.buffer = gl.createBuffer();
 	        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
 
-	        var f = 0.9;
+	        var f = 0.7;
 	        var vertices = [
-	             0.0,  f,  0.0,
-	            -f, -f,  0.0,
-	             f, -f,  0.0
+	            -f,  f,  0.0, // left - top
+	            -f, -f, 0.0, // left - bottom
+	             f,  f,  0.0, // right - top
+	             f, -f,  0.0, // right - bottom
 	        ];
 
+	        this.vertices = vertices;
 	        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+
+	        // var indices = [0,1,2, 2, 4,0];
+	        // this.indexBuffer = gl.createBuffer();
+	        // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+	        // gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+	        
 
 	    },
 
@@ -418,17 +567,28 @@
 	        
 	        this.material.draw(gl);
 
-	        this.updateRotation();
 
-	        gl.uniformMatrix2fv(this.material.params.modelMatrix, false, this.rotationMatrix.matrixArray);
+	        if(this.rad === undefined){
+	            this.rad = 0;
+	        }
+	        this.rad += 0.01;
+	        this.setScaleX(Math.cos(this.rad));
+	        this.setScaleY(Math.sin(this.rad));
+
+	        this.setRotation(this.getRotation() + 0.01);
+	        this.updateWorldMatrix();
+	        gl.uniformMatrix2fv(this.material.params.modelMatrix, false, this.worldMatrix.matrixArray);
 
 	        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
 	        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
 	        gl.enableVertexAttribArray(0);
-	        gl.drawArrays(gl.TRIANGLES, 0, 3);
+	       // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+	        gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vertices.length / 3);
 
 
-	        this.setRotation(this.getRotation() + 0.1);
+
+
+	        //this.setRotation(this.getRotation() + 0.01);
 	       // console.log(this.rotationMatrix.matrixArray);
 	    }
 
@@ -437,6 +597,7 @@
 	exports.CoreObject = CoreObject;
 	exports.EventableObject = EventableObject;
 	exports.Vector2 = Vector2;
+	exports.Matrix2 = Matrix2;
 	exports.BagcilarMeydan = BagcilarMeydan;
 	exports.Object2D = Object2D;
 	exports.Sprite2D = Sprite2D;

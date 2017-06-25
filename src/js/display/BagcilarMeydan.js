@@ -104,7 +104,7 @@ var BagcilarMeydan = (function(){
             // Clear the color as well as the depth buffer.
 
             
-
+            
             if(this.testChilderen){
                 
                 for (var i = 0; i < this.testChilderen.length; i++) {

@@ -26,14 +26,22 @@ Quad.prototype = Object.assign(Object.create(Object2D.prototype), {
         this.buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
 
-        var f = 0.9;
+        var f = 0.7;
         var vertices = [
-             0.0,  f,  0.0,
-            -f, -f,  0.0,
-             f, -f,  0.0
+            -f,  f,  0.0, // left - top
+            -f, -f, 0.0, // left - bottom
+             f,  f,  0.0, // right - top
+             f, -f,  0.0, // right - bottom
         ];
 
+        this.vertices = vertices;
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+
+        // var indices = [0,1,2, 2, 4,0];
+        // this.indexBuffer = gl.createBuffer();
+        // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+        // gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+        
 
     },
 
@@ -49,17 +57,28 @@ Quad.prototype = Object.assign(Object.create(Object2D.prototype), {
         
         this.material.draw(gl);
 
-        this.updateRotation();
 
-        gl.uniformMatrix2fv(this.material.params.modelMatrix, false, this.rotationMatrix.matrixArray);
+        if(this.rad === undefined){
+            this.rad = 0;
+        }
+        this.rad += 0.01;
+        this.setScaleX(Math.cos(this.rad));
+        this.setScaleY(Math.sin(this.rad));
+
+        this.setRotation(this.getRotation() + 0.01);
+        this.updateWorldMatrix();
+        gl.uniformMatrix2fv(this.material.params.modelMatrix, false, this.worldMatrix.matrixArray);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
         gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(0);
-        gl.drawArrays(gl.TRIANGLES, 0, 3);
+       // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vertices.length / 3);
 
 
-        this.setRotation(this.getRotation() + 0.1);
+
+
+        //this.setRotation(this.getRotation() + 0.01);
        // console.log(this.rotationMatrix.matrixArray);
     }
 
