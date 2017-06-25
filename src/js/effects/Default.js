@@ -30,17 +30,17 @@ Default.prototype = Object.assign(Default.prototype, {
         gl.compileShader( this.fragmentShaderBuffer );
         
         if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
-            var info = gl.getShaderInfoLog( this.fragmentShaderBuffer );
-            throw 'Could not compile WebGL program. \n\n' + info;
+            let finfo = gl.getShaderInfoLog( this.fragmentShaderBuffer );
+            throw "Could not compile WebGL program. \n\n" + finfo;
         }
 
         this.vertexSahderBuffer = gl.createShader(gl.VERTEX_SHADER);
         gl.shaderSource( this.vertexSahderBuffer, vertexShaderSRC );
         gl.compileShader( this.vertexSahderBuffer );
 
-         if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
-            var info = gl.getShaderInfoLog( this.fragmentShaderBuffer );
-            throw 'Could not compile WebGL program. \n\n' + info;
+        if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
+            let info = gl.getShaderInfoLog( this.fragmentShaderBuffer );
+            throw "Could not compile WebGL program. \n\n" + info;
         }
 
 

@@ -110,9 +110,7 @@
 	Matrix2.prototype = Object.assign(Matrix2.prototype, {
 	    
 	    makeIdentity : function (){
-
 	        this.setMatrix(1,0,0,1);
-	        
 	    } ,
 
 	    setMatrix : function (n00, n10, n01, n11){
@@ -168,7 +166,7 @@
 	        if(canvasID !== undefined){
 	            
 	            var canvas =  document.getElementById(canvasID);
-	            var  gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+	            var  gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
 	            
 	            if(!gl){
 	             
@@ -216,7 +214,7 @@
 	        constructor : BagcilarMeydan,
 	        
 	        init : function (){
-	           this.setAutoUpdate(true);
+	            this.setAutoUpdate(true);
 	        },
 
 	        setWebGLContext : function (gl){
@@ -291,9 +289,7 @@
 	Matrix2$1.prototype = Object.assign(Matrix2$1.prototype, {
 	    
 	    makeIdentity : function (){
-
 	        this.setMatrix(1,0,0,1);
-	        
 	    } ,
 
 	    setMatrix : function (n00, n10, n01, n11){
@@ -346,22 +342,23 @@
 	        EventableObject.apply(this, arguments);
 	    }
 
-	    var rotation = 0;
+	    let rotation = 0;
+	    let isRotationDirty = true;
+	    let isScaleDirty = true;
+	    let scaleX = 1, scaleY = 1;
 
 	    Object2D.prototype = Object.assign(Object.create(EventableObject.prototype), {
 
 	        constructer : Object2D,
-	        isRotationDirty : true,
-	        isScaleDirty : true,
+	        
 	        rotationMatrix : new Matrix2$1(),
 	        scaleMatrix : new Matrix2$1(),
 	        worldMatrix : new Matrix2$1(),
-	        scaleX :1, 
-	        scaleY :1, 
+	        
 
 	        setRotation : function (v){
 	            rotation = v;
-	            this.isRotationDirty = true;
+	            isRotationDirty = true;
 	        },
 
 	        getRotation : function(){
@@ -369,30 +366,30 @@
 	        },
 
 	        updateRotation : function(){
-	                this.rotationMatrix.setRotationZ(rotation);
-	                this.isRotationDirty = false;
+	            this.rotationMatrix.setRotationZ(rotation);
+	            isRotationDirty = false;
 	        },
 
 	        updateScale : function(){
-	                this.scaleMatrix.setScale(this.scaleX, this.scaleY);
-	                this.isScaleDirty = false;
+	            this.scaleMatrix.setScale(this.scaleX, this.scaleY);
+	            isScaleDirty = false;
 	        },
 
 	        setScale : function (scale) {
 	            this.scaleX = scale;
 	            this.scaley = scale;
 	            //this.scaleMatrix.setScale(scale, scale);
-	            this.isScaleDirty = true;
+	            isScaleDirty = true;
 	        },
 
 	        setScaleX : function (x) {
 	            this.scaleX = x;
-	            this.isScaleDirty = true;
+	            isScaleDirty = true;
 	        },
 
 	        setScaleY : function (y) {
 	            this.scaleY = y;
-	            this.isScaleDirty = true;
+	            isScaleDirty = true;
 	        },
 
 	        getScaleY : function(){
@@ -407,27 +404,22 @@
 
 	            this.worldMatrix.makeIdentity();
 
-	            if(this.isScaleDirty){
+	            if(isScaleDirty){
 	                this.updateScale();
-	                //console.log(this.scaleMatrix.matrixArray);
-	                this.worldMatrix.multiplyMatrix2(this.scaleMatrix);
+	                this.worldMatrix.multiplyMatrix2(this.scaleMatrix);            
 	            }
 
-	            if(this.isRotationDirty){
-
+	            if(isRotationDirty){
 	                this.updateRotation();
 	                this.worldMatrix.multiplyMatrix2(this.rotationMatrix);
 	            }  
 
-	            
-
-	            
 	        }
 
 
 	    });
 
-	return Object2D;
+	    return Object2D;
 	})();
 
 	function Sprite2D (){
@@ -473,17 +465,17 @@
 	        gl.compileShader( this.fragmentShaderBuffer );
 	        
 	        if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
-	            var info = gl.getShaderInfoLog( this.fragmentShaderBuffer );
-	            throw 'Could not compile WebGL program. \n\n' + info;
+	            let finfo = gl.getShaderInfoLog( this.fragmentShaderBuffer );
+	            throw "Could not compile WebGL program. \n\n" + finfo;
 	        }
 
 	        this.vertexSahderBuffer = gl.createShader(gl.VERTEX_SHADER);
 	        gl.shaderSource( this.vertexSahderBuffer, vertexShaderSRC );
 	        gl.compileShader( this.vertexSahderBuffer );
 
-	         if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
-	            var info = gl.getShaderInfoLog( this.fragmentShaderBuffer );
-	            throw 'Could not compile WebGL program. \n\n' + info;
+	        if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
+	            let info = gl.getShaderInfoLog( this.fragmentShaderBuffer );
+	            throw "Could not compile WebGL program. \n\n" + info;
 	        }
 
 
@@ -540,8 +532,8 @@
 	        var vertices = [
 	            -f,  f,  0.0, // left - top
 	            -f, -f, 0.0, // left - bottom
-	             f,  f,  0.0, // right - top
-	             f, -f,  0.0, // right - bottom
+	            f,  f,  0.0, // right - top
+	            f, -f,  0.0, // right - bottom
 	        ];
 
 	        this.vertices = vertices;
@@ -567,6 +559,7 @@
 	        
 	        this.material.draw(gl);
 
+	        
 
 	        if(this.rad === undefined){
 	            this.rad = 0;
@@ -582,14 +575,14 @@
 	        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
 	        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
 	        gl.enableVertexAttribArray(0);
-	       // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+	        // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
 	        gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vertices.length / 3);
 
 
 
 
 	        //this.setRotation(this.getRotation() + 0.01);
-	       // console.log(this.rotationMatrix.matrixArray);
+	        // console.log(this.rotationMatrix.matrixArray);
 	    }
 
 	} );

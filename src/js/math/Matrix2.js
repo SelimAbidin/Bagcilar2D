@@ -14,9 +14,7 @@ function Matrix2() {
 Matrix2.prototype = Object.assign(Matrix2.prototype, {
     
     makeIdentity : function (){
-
         this.setMatrix(1,0,0,1);
-        
     } ,
 
     setMatrix : function (n00, n10, n01, n11){

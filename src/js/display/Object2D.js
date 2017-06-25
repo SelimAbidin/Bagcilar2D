@@ -1,6 +1,6 @@
 
-import {EventableObject} from '../core/EventableObject.js';
-import {Matrix2} from '../Math/Matrix2.js';
+import {EventableObject} from "../core/EventableObject.js";
+import {Matrix2} from "../Math/Matrix2.js";
 
 
 var Object2D = (function(){
@@ -9,22 +9,23 @@ var Object2D = (function(){
         EventableObject.apply(this, arguments);
     }
 
-    var rotation = 0;
+    let rotation = 0;
+    let isRotationDirty = true;
+    let isScaleDirty = true;
+    let scaleX = 1, scaleY = 1;
 
     Object2D.prototype = Object.assign(Object.create(EventableObject.prototype), {
 
         constructer : Object2D,
-        isRotationDirty : true,
-        isScaleDirty : true,
+        
         rotationMatrix : new Matrix2(),
         scaleMatrix : new Matrix2(),
         worldMatrix : new Matrix2(),
-        scaleX :1, 
-        scaleY :1, 
+        
 
         setRotation : function (v){
             rotation = v;
-            this.isRotationDirty = true;
+            isRotationDirty = true;
         },
 
         getRotation : function(){
@@ -32,30 +33,30 @@ var Object2D = (function(){
         },
 
         updateRotation : function(){
-                this.rotationMatrix.setRotationZ(rotation);
-                this.isRotationDirty = false;
+            this.rotationMatrix.setRotationZ(rotation);
+            isRotationDirty = false;
         },
 
         updateScale : function(){
-                this.scaleMatrix.setScale(this.scaleX, this.scaleY);
-                this.isScaleDirty = false;
+            this.scaleMatrix.setScale(this.scaleX, this.scaleY);
+            isScaleDirty = false;
         },
 
         setScale : function (scale) {
             this.scaleX = scale;
             this.scaley = scale;
             //this.scaleMatrix.setScale(scale, scale);
-            this.isScaleDirty = true;
+            isScaleDirty = true;
         },
 
         setScaleX : function (x) {
             this.scaleX = x;
-            this.isScaleDirty = true;
+            isScaleDirty = true;
         },
 
         setScaleY : function (y) {
             this.scaleY = y;
-            this.isScaleDirty = true;
+            isScaleDirty = true;
         },
 
         getScaleY : function(){
@@ -70,27 +71,22 @@ var Object2D = (function(){
 
             this.worldMatrix.makeIdentity();
 
-            if(this.isScaleDirty){
+            if(isScaleDirty){
                 this.updateScale();
-                //console.log(this.scaleMatrix.matrixArray);
-                this.worldMatrix.multiplyMatrix2(this.scaleMatrix);
+                this.worldMatrix.multiplyMatrix2(this.scaleMatrix);            
             }
 
-            if(this.isRotationDirty){
-
+            if(isRotationDirty){
                 this.updateRotation();
                 this.worldMatrix.multiplyMatrix2(this.rotationMatrix);
             }  
 
-            
-
-            
         }
 
 
     });
 
-return Object2D;
+    return Object2D;
 })();
 
 export {Object2D};

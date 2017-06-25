@@ -1,5 +1,5 @@
 
-import {EventableObject} from '../core/EventableObject';
+import {EventableObject} from "../core/EventableObject";
 
 var BagcilarMeydan = (function(){
 
@@ -10,7 +10,7 @@ var BagcilarMeydan = (function(){
         if(canvasID !== undefined){
             
             var canvas =  document.getElementById(canvasID);
-            var  gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            var  gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
             
             if(!gl){
              
@@ -58,7 +58,7 @@ var BagcilarMeydan = (function(){
         constructor : BagcilarMeydan,
         
         init : function (){
-           this.setAutoUpdate(true);
+            this.setAutoUpdate(true);
         },
 
         setWebGLContext : function (gl){

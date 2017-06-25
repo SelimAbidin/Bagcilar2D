@@ -1,5 +1,5 @@
 
-import {Object2D} from './Object2D.js'
+import {Object2D} from "./Object2D.js";
 
 function Sprite2D (){
     Object2D.apply(this, []);

@@ -1,6 +1,6 @@
 
-import {Object2D} from './Object2D';
-import {Default} from '../effects/Default';
+import {Object2D} from "./Object2D";
+import {Default} from "../effects/Default";
 
 
 function Quad() {
@@ -30,8 +30,8 @@ Quad.prototype = Object.assign(Object.create(Object2D.prototype), {
         var vertices = [
             -f,  f,  0.0, // left - top
             -f, -f, 0.0, // left - bottom
-             f,  f,  0.0, // right - top
-             f, -f,  0.0, // right - bottom
+            f,  f,  0.0, // right - top
+            f, -f,  0.0, // right - bottom
         ];
 
         this.vertices = vertices;
@@ -57,6 +57,7 @@ Quad.prototype = Object.assign(Object.create(Object2D.prototype), {
         
         this.material.draw(gl);
 
+        
 
         if(this.rad === undefined){
             this.rad = 0;
@@ -72,14 +73,14 @@ Quad.prototype = Object.assign(Object.create(Object2D.prototype), {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
         gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(0);
-       // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+        // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vertices.length / 3);
 
 
 
 
         //this.setRotation(this.getRotation() + 0.01);
-       // console.log(this.rotationMatrix.matrixArray);
+        // console.log(this.rotationMatrix.matrixArray);
     }
 
 } );
