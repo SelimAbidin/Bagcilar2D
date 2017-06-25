@@ -157,6 +157,17 @@
 
 	});
 
+	class Matrix3 {
+	  constructor() {
+	      this.matrixArray = [
+	                           1,0,0,
+	                           0,1,0,
+	                           0,0,1
+	                         ];
+	  }
+	  
+	}
+
 	var BagcilarMeydan = (function(){
 
 	    function BagcilarMeydan(canvasID) {
@@ -591,6 +602,7 @@
 	exports.EventableObject = EventableObject;
 	exports.Vector2 = Vector2;
 	exports.Matrix2 = Matrix2;
+	exports.Matrix3 = Matrix3;
 	exports.BagcilarMeydan = BagcilarMeydan;
 	exports.Object2D = Object2D;
 	exports.Sprite2D = Sprite2D;
