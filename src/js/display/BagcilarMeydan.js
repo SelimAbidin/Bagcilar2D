@@ -3,18 +3,23 @@ import {EventableObject} from '../core/EventableObject';
 
 var BagcilarMeydan = (function(){
 
-    function BagcilarMeydan(canvas) {
+    function BagcilarMeydan(canvasID) {
+
         EventableObject.apply(this, arguments);
         
-        if(canvas !== undefined){
-            this.renderDom = document.getElementById(canvas);
+        if(canvasID !== undefined){
+            
+            var canvas =  document.getElementById(canvasID);
             var  gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
             
             if(!gl){
                 var error = "WebGL isn't supported on device";
                 this.dispatchEvent(BagcilarMeydan.ERROR, {message:error});
             }
+            
 
+            
+            this.renderDom = canvas;
             this.setWebGLContext(gl);
             this.init();
         }
@@ -24,7 +29,6 @@ var BagcilarMeydan = (function(){
 
     var _meydanInstances = [];
     function addMeydan(meydan){
-        console.log("meydan added");
         if(_meydanInstances.indexOf(meydan) == -1){
             _meydanInstances.push(meydan);
             requestAnimationFrame(updateMeydans);
@@ -37,12 +41,11 @@ var BagcilarMeydan = (function(){
 
     function updateMeydans(){
 
-        console.log("update");
         for (var i = 0; i < _meydanInstances.length; i++) {
             _meydanInstances[i].update();
         }
         
-        if(updateMeydans.length > 0){
+        if(_meydanInstances.length > 0){
             requestAnimationFrame(updateMeydans);
         }
     }
@@ -74,17 +77,41 @@ var BagcilarMeydan = (function(){
             }
         },
 
+
+        // TODO silinecek. Testing method 
+        addQuadForTest : function (quad){
+            if(!this.testChilderen) {
+                this.testChilderen = [];
+            }
+            this.testChilderen.push(quad);
+        } ,
+
         update : function (){
 
-            console.log("update");
             var gl = this.context;
-            gl.clearColor(1.0, 1.0, 0.0, 0.2);
-            // Enable depth testing
-            gl.enable(gl.DEPTH_TEST);
-            // Near things obscure far things
-            gl.depthFunc(gl.LEQUAL);
-            // Clear the color as well as the depth buffer.
+            
+            //console.log(this.renderDom);
+            
+            gl.viewport(0, 0, this.renderDom.width, this.renderDom.height);
+            gl.clearColor(0.0, 0.0, 0.0, 1.0);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+            // Enable depth testing
+            //gl.enable(gl.DEPTH_TEST);
+            // Near things obscure far things
+            //gl.depthFunc(gl.LEQUAL);
+            // Clear the color as well as the depth buffer.
+
+            
+
+            if(this.testChilderen){
+                
+                for (var i = 0; i < this.testChilderen.length; i++) {
+                    this.testChilderen[i].draw(gl);
+                }
+            }
+
+
 
         }
     });
