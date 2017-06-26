@@ -153,19 +153,88 @@
 	        m1[2] = n2; m1[3] = n3;
 	    },
 
+	  
+
 
 
 	});
 
 	class Matrix3 {
-	  constructor() {
-	      this.matrixArray = [
-	                           1,0,0,
-	                           0,1,0,
-	                           0,0,1
-	                         ];
-	  }
-	  
+	    constructor() {
+	        this.matrixArray = [
+	                            1,0,0,
+	                            0,1,0,
+	                            0,0,1
+	                            ];
+	    }
+
+	    makeIdentity (){
+	        this.setMatrix(
+	                        1,0,0,
+	                        0,1,0,
+	                        0,0,1);
+	    }
+
+	    setMatrix  (    
+	                n00, n10, n20, 
+	                n01, n11, n21,
+	                n02, n12, n22,
+	                ){
+
+	        var m = this.matrixArray;
+	        m[0] = n00; m[1] = n10; m[2] = n20;
+	        m[3] = n01; m[4] = n11; m[5] = n21;
+	        m[6] = n02; m[7] = n12; m[8] = n22;
+	    }
+
+	    setRotationZ  (radian){
+	        
+	        var m = this.matrixArray;
+	        m[0] = Math.cos(radian); m[1] = -Math.sin(radian);
+	        m[3] = Math.sin(radian); m[4] = Math.cos(radian);
+
+	    }
+
+	    setScale  (x,y){
+	        
+	        var m = this.matrixArray;
+	        m[0] = x;
+	        m[4] = y;
+
+	    }
+
+	    translate (x,y) {
+	        let m = this.matrixArray;
+	        m[2] = x;
+	        m[5] = y;
+	    }
+
+	    multiplyMatrix (matrix){
+
+	        var m1 = this.matrixArray;
+	        var m2 = matrix.matrixArray;
+
+	        var n0 = m1[0] * m2[0] + m1[1] * m2[3] + m1[2] * m2[6]; 
+	        var n1 = m1[0] * m2[1] + m1[1] * m2[4] + m1[2] * m2[7]; 
+	        var n2 = m1[0] * m2[2] + m1[1] * m2[5] + m1[2] * m2[8]; 
+	        
+	        var n3 = m1[3] * m2[0] + m1[4] * m2[3] + m1[5] * m2[6]; 
+	        var n4 = m1[3] * m2[1] + m1[4] * m2[4] + m1[5] * m2[7]; 
+	        var n5 = m1[3] * m2[2] + m1[4] * m2[5] + m1[5] * m2[8]; 
+	        
+	        var n6 = m1[6] * m2[0] + m1[7] * m2[3] + m1[8] * m2[6]; 
+	        var n7 = m1[6] * m2[1] + m1[7] * m2[4] + m1[8] * m2[7]; 
+	        var n8 = m1[6] * m2[2] + m1[7] * m2[5] + m1[8] * m2[8]; 
+	        
+	        
+	        m1[0] = n0; m1[1] = n1; m1[2] = n2;
+	        m1[3] = n3; m1[4] = n4; m1[5] = n5;
+	        m1[6] = n6; m1[7] = n7; m1[8] = n8;
+	    }
+
+
+
+
 	}
 
 	var BagcilarMeydan = (function(){
@@ -287,65 +356,83 @@
 	    return BagcilarMeydan;
 	})();
 
-	function Matrix2$1() {
-	    
-	    this.matrixArray = [
-	        1,0,
-	        0,1
-	    ];
-	}
+	class Matrix3$1 {
+	    constructor() {
+	        this.matrixArray = [
+	                            1,0,0,
+	                            0,1,0,
+	                            0,0,1
+	                            ];
+	    }
 
+	    makeIdentity (){
+	        this.setMatrix(
+	                        1,0,0,
+	                        0,1,0,
+	                        0,0,1);
+	    }
 
-
-	Matrix2$1.prototype = Object.assign(Matrix2$1.prototype, {
-	    
-	    makeIdentity : function (){
-	        this.setMatrix(1,0,0,1);
-	    } ,
-
-	    setMatrix : function (n00, n10, n01, n11){
+	    setMatrix  (    
+	                n00, n10, n20, 
+	                n01, n11, n21,
+	                n02, n12, n22,
+	                ){
 
 	        var m = this.matrixArray;
-	        m[0] = n00; m[1] = n10;
-	        m[2] = n01; m[3] = n11;
-	    },
+	        m[0] = n00; m[1] = n10; m[2] = n20;
+	        m[3] = n01; m[4] = n11; m[5] = n21;
+	        m[6] = n02; m[7] = n12; m[8] = n22;
+	    }
 
-	    setRotationZ : function (radian){
+	    setRotationZ  (radian){
 	        
 	        var m = this.matrixArray;
 	        m[0] = Math.cos(radian); m[1] = -Math.sin(radian);
-	        m[2] = Math.sin(radian); m[3] = Math.cos(radian);
+	        m[3] = Math.sin(radian); m[4] = Math.cos(radian);
 
-	    },
-	    
+	    }
 
-	    setScale : function (x,y){
+	    setScale  (x,y){
 	        
 	        var m = this.matrixArray;
 	        m[0] = x;
-	        m[3] = y;
+	        m[4] = y;
 
-	    }, 
+	    }
 
+	    translate (x,y) {
+	        let m = this.matrixArray;
+	        m[2] = x;
+	        m[5] = y;
+	    }
 
-	    multiplyMatrix2 : function(matrix){
+	    multiplyMatrix (matrix){
 
 	        var m1 = this.matrixArray;
 	        var m2 = matrix.matrixArray;
 
-	        var n0 = m1[0] * m2[0] + m1[1] * m2[2]; 
-	        var n1 = m1[0] * m2[1] + m1[1] * m2[3];
+	        var n0 = m1[0] * m2[0] + m1[1] * m2[3] + m1[2] * m2[6]; 
+	        var n1 = m1[0] * m2[1] + m1[1] * m2[4] + m1[2] * m2[7]; 
+	        var n2 = m1[0] * m2[2] + m1[1] * m2[5] + m1[2] * m2[8]; 
 	        
-	        var n2 = m1[2] * m2[0] + m1[3] * m2[2]; 
-	        var n3 = m1[2] * m2[1] + m1[3] * m2[3];
+	        var n3 = m1[3] * m2[0] + m1[4] * m2[3] + m1[5] * m2[6]; 
+	        var n4 = m1[3] * m2[1] + m1[4] * m2[4] + m1[5] * m2[7]; 
+	        var n5 = m1[3] * m2[2] + m1[4] * m2[5] + m1[5] * m2[8]; 
+	        
+	        var n6 = m1[6] * m2[0] + m1[7] * m2[3] + m1[8] * m2[6]; 
+	        var n7 = m1[6] * m2[1] + m1[7] * m2[4] + m1[8] * m2[7]; 
+	        var n8 = m1[6] * m2[2] + m1[7] * m2[5] + m1[8] * m2[8]; 
+	        
+	        
+	        m1[0] = n0; m1[1] = n1; m1[2] = n2;
+	        m1[3] = n3; m1[4] = n4; m1[5] = n5;
+	        m1[6] = n6; m1[7] = n7; m1[8] = n8;
+	    }
 
-	        m1[0] = n0; m1[1] = n1;
-	        m1[2] = n2; m1[3] = n3;
-	    },
 
 
 
-	});
+	}
 
 	var Object2D = (function(){
 
@@ -356,15 +443,19 @@
 	    let rotation = 0;
 	    let isRotationDirty = true;
 	    let isScaleDirty = true;
+	    let isPositionDirty = true;
 	    let scaleX = 1, scaleY = 1;
+	    let xPos = 0, yPos = 0; 
+
 
 	    Object2D.prototype = Object.assign(Object.create(EventableObject.prototype), {
 
 	        constructer : Object2D,
 	        
-	        rotationMatrix : new Matrix2$1(),
-	        scaleMatrix : new Matrix2$1(),
-	        worldMatrix : new Matrix2$1(),
+	        rotationMatrix : new Matrix3$1(),
+	        scaleMatrix : new Matrix3$1(),
+	        positionMatrix : new Matrix3$1(),
+	        worldMatrix : new Matrix3$1(),
 	        
 
 	        setRotation : function (v){
@@ -386,10 +477,14 @@
 	            isScaleDirty = false;
 	        },
 
+	        updatePosition : function(){
+	            this.positionMatrix.translate(xPos, yPos);
+	            isPositionDirty = false;
+	        },
+
 	        setScale : function (scale) {
 	            this.scaleX = scale;
 	            this.scaley = scale;
-	            //this.scaleMatrix.setScale(scale, scale);
 	            isScaleDirty = true;
 	        },
 
@@ -411,19 +506,41 @@
 	            return this.scaleX;
 	        },
 
+	        setX : function(x) {
+	            xPos = x;
+	            isPositionDirty = true;
+	        },
+
+	        setY : function(y) {
+	            yPos = y;
+	            isPositionDirty = y;
+	        },
+
+	        getX : function() {
+	            return xPos;
+	        },
+
+	        getY : function() {
+	            return yPos;
+	        },
+	        
+
 	        updateWorldMatrix : function (){
 
-	            this.worldMatrix.makeIdentity();
+	            if(isScaleDirty || isPositionDirty || isRotationDirty){
 
-	            if(isScaleDirty){
+	                this.worldMatrix.makeIdentity();
+
 	                this.updateScale();
-	                this.worldMatrix.multiplyMatrix2(this.scaleMatrix);            
-	            }
-
-	            if(isRotationDirty){
 	                this.updateRotation();
-	                this.worldMatrix.multiplyMatrix2(this.rotationMatrix);
-	            }  
+	                this.updatePosition();
+
+	                this.worldMatrix.multiplyMatrix(this.scaleMatrix); 
+	                this.worldMatrix.multiplyMatrix(this.rotationMatrix);
+	                this.worldMatrix.multiplyMatrix(this.positionMatrix);
+	                
+	            }
+	            
 
 	        }
 
@@ -458,11 +575,12 @@
 
 	    upload : function(gl){
 
-	        var vertexShaderSRC =   "uniform mat2 modelMatrix;"+
+	        var vertexShaderSRC =   "uniform mat3 modelMatrix;"+
 	                                "attribute vec3 position;"+      
 	                                "void main() {"+  
-	                                "   vec2 pm = modelMatrix * position.xy;"+     
-	                                "   gl_Position = vec4(pm,position.z, 1.0);"+     
+	                                "   vec3 pm = modelMatrix * position;"+     
+	                                //"   pm.x += 0.5; "+     
+	                                "   gl_Position = vec4(pm, 1.0);"+     
 	                                "}";
 
 	        var fragmentShaderSRC = ""+
@@ -581,7 +699,8 @@
 
 	        this.setRotation(this.getRotation() + 0.01);
 	        this.updateWorldMatrix();
-	        gl.uniformMatrix2fv(this.material.params.modelMatrix, false, this.worldMatrix.matrixArray);
+	        
+	        gl.uniformMatrix3fv(this.material.params.modelMatrix, false, this.worldMatrix.matrixArray);
 
 	        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
 	        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);

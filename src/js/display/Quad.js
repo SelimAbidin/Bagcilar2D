@@ -68,7 +68,8 @@ Quad.prototype = Object.assign(Object.create(Object2D.prototype), {
 
         this.setRotation(this.getRotation() + 0.01);
         this.updateWorldMatrix();
-        gl.uniformMatrix2fv(this.material.params.modelMatrix, false, this.worldMatrix.matrixArray);
+        
+        gl.uniformMatrix3fv(this.material.params.modelMatrix, false, this.worldMatrix.matrixArray);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
         gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);

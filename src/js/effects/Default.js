@@ -12,11 +12,12 @@ Default.prototype = Object.assign(Default.prototype, {
 
     upload : function(gl){
 
-        var vertexShaderSRC =   "uniform mat2 modelMatrix;"+
+        var vertexShaderSRC =   "uniform mat3 modelMatrix;"+
                                 "attribute vec3 position;"+      
                                 "void main() {"+  
-                                "   vec2 pm = modelMatrix * position.xy;"+     
-                                "   gl_Position = vec4(pm,position.z, 1.0);"+     
+                                "   vec3 pm = modelMatrix * position;"+     
+                                //"   pm.x += 0.5; "+     
+                                "   gl_Position = vec4(pm, 1.0);"+     
                                 "}";
 
         var fragmentShaderSRC = ""+
