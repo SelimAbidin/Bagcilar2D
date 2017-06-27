@@ -32,8 +32,11 @@ class Matrix3 {
     setRotationZ  (radian){
         
         var m = this.matrixArray;
-        m[0] = Math.cos(radian); m[1] = -Math.sin(radian);
-        m[3] = Math.sin(radian); m[4] = Math.cos(radian);
+        let c = Math.cos(radian);
+        let s = Math.sin(radian);
+
+        m[0] = c; m[1] = -s;
+        m[3] = s; m[4] = c;
 
     }
 
@@ -47,8 +50,16 @@ class Matrix3 {
 
     translate (x,y) {
         let m = this.matrixArray;
-        m[2] = x;
-        m[5] = y;
+        
+        let m00 = m[0], m10 = m[1], m20 = m[0];
+        let m01 = m[3], m11 = m[4], m21 = m[5];
+        let m02 = m[6], m12 = m[7], m22 = m[8];
+
+        m[6] = x;
+        m[7] = y;
+        // m[2] = x * m00 + y * m10 + m20;
+		// m[5] = x * m01 + y * m11 + m21;
+    	// m[8] = x * m02 + y * m12 + m22;
     }
 
     multiplyMatrix (matrix){
@@ -56,22 +67,57 @@ class Matrix3 {
         var m1 = this.matrixArray;
         var m2 = matrix.matrixArray;
 
-        var n0 = m1[0] * m2[0] + m1[1] * m2[3] + m1[2] * m2[6]; 
-        var n1 = m1[0] * m2[1] + m1[1] * m2[4] + m1[2] * m2[7]; 
-        var n2 = m1[0] * m2[2] + m1[1] * m2[5] + m1[2] * m2[8]; 
+        var a00 = m1[0], a01 = m1[3], a02 = m1[6];
+        var a10 = m1[1], a11 = m1[4], a12 = m1[7];
+        var a20 = m1[2], a21 = m1[5], a22 = m1[8];
+
+        var b00 = m2[0], b01 = m2[3], b02 = m2[6];
+        var b10 = m2[1], b11 = m2[4], b12 = m2[7];
+        var b20 = m2[2], b21 = m2[5], b22 = m2[8];
+
+        m1[0] = a00 * b00 + a01 * b10 + a02 * b20; 
+        m1[3] = a00 * b01 + a01 * b11 + a02 * b21; 
+        m1[6] = a00 * b02 + a01 * b12 + a02 * b22; 
+
+        m1[1] = a10 * b00 + a11 * b10 + a12 * b20; 
+        m1[4] = a10 * b01 + a11 * b11 + a12 * b21; 
+        m1[7] = a10 * b02 + a11 * b12 + a12 * b22; 
         
-        var n3 = m1[3] * m2[0] + m1[4] * m2[3] + m1[5] * m2[6]; 
-        var n4 = m1[3] * m2[1] + m1[4] * m2[4] + m1[5] * m2[7]; 
-        var n5 = m1[3] * m2[2] + m1[4] * m2[5] + m1[5] * m2[8]; 
+        m1[2] = a20 * b00 + a21 * b10 + a22 * b20; 
+        m1[5] = a20 * b01 + a21 * b11 + a22 * b21; 
+        m1[8] = a20 * b02 + a21 * b12 + a22 * b22; 
         
-        var n6 = m1[6] * m2[0] + m1[7] * m2[3] + m1[8] * m2[6]; 
-        var n7 = m1[6] * m2[1] + m1[7] * m2[4] + m1[8] * m2[7]; 
-        var n8 = m1[6] * m2[2] + m1[7] * m2[5] + m1[8] * m2[8]; 
+        return this;
+
+        // var n0 = m1[0] * m2[0] + m1[1] * m2[3] + m1[2] * m2[6]; 
+        // var n1 = m1[0] * m2[1] + m1[1] * m2[4] + m1[2] * m2[7]; 
+        // var n2 = m1[0] * m2[2] + m1[1] * m2[5] + m1[2] * m2[8]; 
+        
+        // var n3 = m1[3] * m2[0] + m1[4] * m2[3] + m1[5] * m2[6]; 
+        // var n4 = m1[3] * m2[1] + m1[4] * m2[4] + m1[5] * m2[7]; 
+        // var n5 = m1[3] * m2[2] + m1[4] * m2[5] + m1[5] * m2[8]; 
+        
+        // var n6 = m1[6] * m2[0] + m1[7] * m2[3] + m1[8] * m2[6]; 
+        // var n7 = m1[6] * m2[1] + m1[7] * m2[4] + m1[8] * m2[7]; 
+        // var n8 = m1[6] * m2[2] + m1[7] * m2[5] + m1[8] * m2[8]; 
         
         
-        m1[0] = n0; m1[1] = n1; m1[2] = n2;
-        m1[3] = n3; m1[4] = n4; m1[5] = n5;
-        m1[6] = n6; m1[7] = n7; m1[8] = n8;
+        // m1[0] = n0; m1[1] = n1; m1[2] = n2;
+        // m1[3] = n3; m1[4] = n4; m1[5] = n5;
+        // m1[6] = n6; m1[7] = n7; m1[8] = n8;
+    }
+
+    makeOrtho (left, right,  top, bottom){
+
+        let m = this.matrixArray;
+
+        m[0] = 2 / (right - left); 
+        m[2] = -((right + left) / (right - left));
+
+        m[4] = 2 / (top-bottom);
+        m[5] = -((right + left) / (right - left));
+        
+
     }
 
 

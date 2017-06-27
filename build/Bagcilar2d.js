@@ -97,68 +97,6 @@
 
 	});
 
-	function Matrix2() {
-	    
-	    this.matrixArray = [
-	        1,0,
-	        0,1
-	    ];
-	}
-
-
-
-	Matrix2.prototype = Object.assign(Matrix2.prototype, {
-	    
-	    makeIdentity : function (){
-	        this.setMatrix(1,0,0,1);
-	    } ,
-
-	    setMatrix : function (n00, n10, n01, n11){
-
-	        var m = this.matrixArray;
-	        m[0] = n00; m[1] = n10;
-	        m[2] = n01; m[3] = n11;
-	    },
-
-	    setRotationZ : function (radian){
-	        
-	        var m = this.matrixArray;
-	        m[0] = Math.cos(radian); m[1] = -Math.sin(radian);
-	        m[2] = Math.sin(radian); m[3] = Math.cos(radian);
-
-	    },
-	    
-
-	    setScale : function (x,y){
-	        
-	        var m = this.matrixArray;
-	        m[0] = x;
-	        m[3] = y;
-
-	    }, 
-
-
-	    multiplyMatrix2 : function(matrix){
-
-	        var m1 = this.matrixArray;
-	        var m2 = matrix.matrixArray;
-
-	        var n0 = m1[0] * m2[0] + m1[1] * m2[2]; 
-	        var n1 = m1[0] * m2[1] + m1[1] * m2[3];
-	        
-	        var n2 = m1[2] * m2[0] + m1[3] * m2[2]; 
-	        var n3 = m1[2] * m2[1] + m1[3] * m2[3];
-
-	        m1[0] = n0; m1[1] = n1;
-	        m1[2] = n2; m1[3] = n3;
-	    },
-
-	  
-
-
-
-	});
-
 	class Matrix3 {
 	    constructor() {
 	        this.matrixArray = [
@@ -190,8 +128,11 @@
 	    setRotationZ  (radian){
 	        
 	        var m = this.matrixArray;
-	        m[0] = Math.cos(radian); m[1] = -Math.sin(radian);
-	        m[3] = Math.sin(radian); m[4] = Math.cos(radian);
+	        let c = Math.cos(radian);
+	        let s = Math.sin(radian);
+
+	        m[0] = c; m[1] = -s;
+	        m[3] = s; m[4] = c;
 
 	    }
 
@@ -205,8 +146,16 @@
 
 	    translate (x,y) {
 	        let m = this.matrixArray;
-	        m[2] = x;
-	        m[5] = y;
+	        
+	        let m00 = m[0], m10 = m[1], m20 = m[0];
+	        let m01 = m[3], m11 = m[4], m21 = m[5];
+	        let m02 = m[6], m12 = m[7], m22 = m[8];
+
+	        m[6] = x;
+	        m[7] = y;
+	        // m[2] = x * m00 + y * m10 + m20;
+			// m[5] = x * m01 + y * m11 + m21;
+	    	// m[8] = x * m02 + y * m12 + m22;
 	    }
 
 	    multiplyMatrix (matrix){
@@ -214,22 +163,57 @@
 	        var m1 = this.matrixArray;
 	        var m2 = matrix.matrixArray;
 
-	        var n0 = m1[0] * m2[0] + m1[1] * m2[3] + m1[2] * m2[6]; 
-	        var n1 = m1[0] * m2[1] + m1[1] * m2[4] + m1[2] * m2[7]; 
-	        var n2 = m1[0] * m2[2] + m1[1] * m2[5] + m1[2] * m2[8]; 
+	        var a00 = m1[0], a01 = m1[3], a02 = m1[6];
+	        var a10 = m1[1], a11 = m1[4], a12 = m1[7];
+	        var a20 = m1[2], a21 = m1[5], a22 = m1[8];
+
+	        var b00 = m2[0], b01 = m2[3], b02 = m2[6];
+	        var b10 = m2[1], b11 = m2[4], b12 = m2[7];
+	        var b20 = m2[2], b21 = m2[5], b22 = m2[8];
+
+	        m1[0] = a00 * b00 + a01 * b10 + a02 * b20; 
+	        m1[3] = a00 * b01 + a01 * b11 + a02 * b21; 
+	        m1[6] = a00 * b02 + a01 * b12 + a02 * b22; 
+
+	        m1[1] = a10 * b00 + a11 * b10 + a12 * b20; 
+	        m1[4] = a10 * b01 + a11 * b11 + a12 * b21; 
+	        m1[7] = a10 * b02 + a11 * b12 + a12 * b22; 
 	        
-	        var n3 = m1[3] * m2[0] + m1[4] * m2[3] + m1[5] * m2[6]; 
-	        var n4 = m1[3] * m2[1] + m1[4] * m2[4] + m1[5] * m2[7]; 
-	        var n5 = m1[3] * m2[2] + m1[4] * m2[5] + m1[5] * m2[8]; 
+	        m1[2] = a20 * b00 + a21 * b10 + a22 * b20; 
+	        m1[5] = a20 * b01 + a21 * b11 + a22 * b21; 
+	        m1[8] = a20 * b02 + a21 * b12 + a22 * b22; 
 	        
-	        var n6 = m1[6] * m2[0] + m1[7] * m2[3] + m1[8] * m2[6]; 
-	        var n7 = m1[6] * m2[1] + m1[7] * m2[4] + m1[8] * m2[7]; 
-	        var n8 = m1[6] * m2[2] + m1[7] * m2[5] + m1[8] * m2[8]; 
+	        return this;
+
+	        // var n0 = m1[0] * m2[0] + m1[1] * m2[3] + m1[2] * m2[6]; 
+	        // var n1 = m1[0] * m2[1] + m1[1] * m2[4] + m1[2] * m2[7]; 
+	        // var n2 = m1[0] * m2[2] + m1[1] * m2[5] + m1[2] * m2[8]; 
+	        
+	        // var n3 = m1[3] * m2[0] + m1[4] * m2[3] + m1[5] * m2[6]; 
+	        // var n4 = m1[3] * m2[1] + m1[4] * m2[4] + m1[5] * m2[7]; 
+	        // var n5 = m1[3] * m2[2] + m1[4] * m2[5] + m1[5] * m2[8]; 
+	        
+	        // var n6 = m1[6] * m2[0] + m1[7] * m2[3] + m1[8] * m2[6]; 
+	        // var n7 = m1[6] * m2[1] + m1[7] * m2[4] + m1[8] * m2[7]; 
+	        // var n8 = m1[6] * m2[2] + m1[7] * m2[5] + m1[8] * m2[8]; 
 	        
 	        
-	        m1[0] = n0; m1[1] = n1; m1[2] = n2;
-	        m1[3] = n3; m1[4] = n4; m1[5] = n5;
-	        m1[6] = n6; m1[7] = n7; m1[8] = n8;
+	        // m1[0] = n0; m1[1] = n1; m1[2] = n2;
+	        // m1[3] = n3; m1[4] = n4; m1[5] = n5;
+	        // m1[6] = n6; m1[7] = n7; m1[8] = n8;
+	    }
+
+	    makeOrtho (left, right,  top, bottom){
+
+	        let m = this.matrixArray;
+
+	        m[0] = 2 / (right - left); 
+	        m[2] = -((right + left) / (right - left));
+
+	        m[4] = 2 / (top-bottom);
+	        m[5] = -((right + left) / (right - left));
+	        
+
 	    }
 
 
@@ -356,146 +340,72 @@
 	    return BagcilarMeydan;
 	})();
 
-	class Matrix3$1 {
-	    constructor() {
-	        this.matrixArray = [
-	                            1,0,0,
-	                            0,1,0,
-	                            0,0,1
-	                            ];
-	    }
-
-	    makeIdentity (){
-	        this.setMatrix(
-	                        1,0,0,
-	                        0,1,0,
-	                        0,0,1);
-	    }
-
-	    setMatrix  (    
-	                n00, n10, n20, 
-	                n01, n11, n21,
-	                n02, n12, n22,
-	                ){
-
-	        var m = this.matrixArray;
-	        m[0] = n00; m[1] = n10; m[2] = n20;
-	        m[3] = n01; m[4] = n11; m[5] = n21;
-	        m[6] = n02; m[7] = n12; m[8] = n22;
-	    }
-
-	    setRotationZ  (radian){
-	        
-	        var m = this.matrixArray;
-	        m[0] = Math.cos(radian); m[1] = -Math.sin(radian);
-	        m[3] = Math.sin(radian); m[4] = Math.cos(radian);
-
-	    }
-
-	    setScale  (x,y){
-	        
-	        var m = this.matrixArray;
-	        m[0] = x;
-	        m[4] = y;
-
-	    }
-
-	    translate (x,y) {
-	        let m = this.matrixArray;
-	        m[2] = x;
-	        m[5] = y;
-	    }
-
-	    multiplyMatrix (matrix){
-
-	        var m1 = this.matrixArray;
-	        var m2 = matrix.matrixArray;
-
-	        var n0 = m1[0] * m2[0] + m1[1] * m2[3] + m1[2] * m2[6]; 
-	        var n1 = m1[0] * m2[1] + m1[1] * m2[4] + m1[2] * m2[7]; 
-	        var n2 = m1[0] * m2[2] + m1[1] * m2[5] + m1[2] * m2[8]; 
-	        
-	        var n3 = m1[3] * m2[0] + m1[4] * m2[3] + m1[5] * m2[6]; 
-	        var n4 = m1[3] * m2[1] + m1[4] * m2[4] + m1[5] * m2[7]; 
-	        var n5 = m1[3] * m2[2] + m1[4] * m2[5] + m1[5] * m2[8]; 
-	        
-	        var n6 = m1[6] * m2[0] + m1[7] * m2[3] + m1[8] * m2[6]; 
-	        var n7 = m1[6] * m2[1] + m1[7] * m2[4] + m1[8] * m2[7]; 
-	        var n8 = m1[6] * m2[2] + m1[7] * m2[5] + m1[8] * m2[8]; 
-	        
-	        
-	        m1[0] = n0; m1[1] = n1; m1[2] = n2;
-	        m1[3] = n3; m1[4] = n4; m1[5] = n5;
-	        m1[6] = n6; m1[7] = n7; m1[8] = n8;
-	    }
-
-
-
-
-	}
-
 	var Object2D = (function(){
 
 	    function Object2D(){
 	        EventableObject.apply(this, arguments);
 	    }
 
-	    let rotation = 0;
-	    let isRotationDirty = true;
-	    let isScaleDirty = true;
-	    let isPositionDirty = true;
-	    let scaleX = 1, scaleY = 1;
-	    let xPos = 0, yPos = 0; 
+
 
 
 	    Object2D.prototype = Object.assign(Object.create(EventableObject.prototype), {
 
+	        isRotationDirty : true,
+	        rotation : 0,
+	        isScaleDirty : true,
+	        isPositionDirty : true,
+	        scaleX : 1, 
+	        scaleY : 1,
+	        xPos : 0,
+	        yPos : 0,
+
 	        constructer : Object2D,
 	        
-	        rotationMatrix : new Matrix3$1(),
-	        scaleMatrix : new Matrix3$1(),
-	        positionMatrix : new Matrix3$1(),
-	        worldMatrix : new Matrix3$1(),
+	        rotationMatrix : new Matrix3(),
+	        scaleMatrix : new Matrix3(),
+	        positionMatrix : new Matrix3(),
+	        worldMatrix : new Matrix3(),
 	        
 
 	        setRotation : function (v){
-	            rotation = v;
-	            isRotationDirty = true;
+	            this.rotation = v;
+	            this.isRotationDirty = true;
 	        },
 
 	        getRotation : function(){
-	            return rotation;
+	            return this.rotation;
 	        },
 
 	        updateRotation : function(){
-	            this.rotationMatrix.setRotationZ(rotation);
-	            isRotationDirty = false;
+	            this.rotationMatrix.setRotationZ(this.rotation);
+	            this.isRotationDirty = false;
 	        },
 
 	        updateScale : function(){
 	            this.scaleMatrix.setScale(this.scaleX, this.scaleY);
-	            isScaleDirty = false;
+	            this.isScaleDirty = false;
 	        },
 
 	        updatePosition : function(){
-	            this.positionMatrix.translate(xPos, yPos);
-	            isPositionDirty = false;
+	            this.positionMatrix.translate(this.xPos, this.yPos);
+	            this.isPositionDirty = false;
 	        },
 
 	        setScale : function (scale) {
 	            this.scaleX = scale;
 	            this.scaley = scale;
-	            isScaleDirty = true;
+	            this.isScaleDirty = true;
 	        },
 
 	        setScaleX : function (x) {
 	            this.scaleX = x;
-	            isScaleDirty = true;
+	            this.isScaleDirty = true;
 	        },
 
 	        setScaleY : function (y) {
 	            this.scaleY = y;
-	            isScaleDirty = true;
+	            this.isScaleDirty = true;
 	        },
 
 	        getScaleY : function(){
@@ -507,40 +417,40 @@
 	        },
 
 	        setX : function(x) {
-	            xPos = x;
-	            isPositionDirty = true;
+	            this.xPos = x;
+	            this.isPositionDirty = true;
 	        },
 
 	        setY : function(y) {
-	            yPos = y;
-	            isPositionDirty = y;
+	            this.yPos = y;
+	            this.isPositionDirty = y;
 	        },
 
 	        getX : function() {
-	            return xPos;
+	            return this.xPos;
 	        },
 
 	        getY : function() {
-	            return yPos;
+	            return this.yPos;
 	        },
 	        
 
 	        updateWorldMatrix : function (){
-
-	            if(isScaleDirty || isPositionDirty || isRotationDirty){
+	            
+	            
+	            if(this.isScaleDirty || this.isPositionDirty || this.isRotationDirty){
 
 	                this.worldMatrix.makeIdentity();
-
+	                
 	                this.updateScale();
 	                this.updateRotation();
 	                this.updatePosition();
 
-	                this.worldMatrix.multiplyMatrix(this.scaleMatrix); 
-	                this.worldMatrix.multiplyMatrix(this.rotationMatrix);
+	               // this.worldMatrix.multiplyMatrix(this.scaleMatrix); 
+	              //  this.worldMatrix.multiplyMatrix(this.rotationMatrix);
 	                this.worldMatrix.multiplyMatrix(this.positionMatrix);
-	                
+
 	            }
-	            
 
 	        }
 
@@ -576,18 +486,32 @@
 	    upload : function(gl){
 
 	        var vertexShaderSRC =   "uniform mat3 modelMatrix;"+
+	                               "uniform mat3 projectionMatrix;"+
 	                                "attribute vec3 position;"+      
-	                                "void main() {"+  
-	                                "   vec3 pm = modelMatrix * position;"+     
-	                                //"   pm.x += 0.5; "+     
+	                                "void main() {"+
+	                                "   mat3 pmtx = projectionMatrix;"+
+	                                // "   pmtx[0][0] = 1.0;"+
+	                                // "   pmtx[1][0] = 0.0;"+
+	                                // "   pmtx[2][0] = 2.0;"+
+	                                
+	                                // "   pmtx[0][1] = 0.0;"+
+	                                // "   pmtx[1][1] = 1.0;"+
+	                                // "   pmtx[2][1] = 0.0;"+
+	                                
+	                                // "   pmtx[0][2] = 0.0;"+
+	                                // "   pmtx[1][2] = 0.0;"+
+	                                // "   pmtx[2][2] = 1.0;"+
+	                                "   vec3 p = vec3(position.x,position.y, -1.0);"+
+	                                "   mat3 m =  pmtx * modelMatrix;"+  
+	                                "   vec3 pm = m * p;"+     
 	                                "   gl_Position = vec4(pm, 1.0);"+     
+	                                "   gl_PointSize = 10.0;"+     
 	                                "}";
 
 	        var fragmentShaderSRC = ""+
 	                                "void main() {"+        
 	                                "   gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);"+     
 	                                "}";
-
 
 	        this.fragmentShaderBuffer = gl.createShader(gl.FRAGMENT_SHADER);
 	        gl.shaderSource( this.fragmentShaderBuffer, fragmentShaderSRC );
@@ -611,14 +535,12 @@
 	        this.shaderProgram = gl.createProgram();
 	        gl.attachShader(this.shaderProgram, this.vertexSahderBuffer);
 	        gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
-
+	        
 	        gl.linkProgram(this.shaderProgram);
 
 	        this.params.modelMatrix = gl.getUniformLocation(this.shaderProgram, "modelMatrix");
-	        
+	        this.params.projectionMatrix = gl.getUniformLocation(this.shaderProgram, "projectionMatrix");
 
-	        
-	        
 	    },
 
 	    draw : function (gl){
@@ -636,6 +558,7 @@
 
 	function Quad() {
 	    Object2D.apply(this, arguments);
+	    this.camera = undefined;
 	}
 
 
@@ -657,7 +580,7 @@
 	        this.buffer = gl.createBuffer();
 	        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
 
-	        var f = 0.7;
+	        var f = 0.5;
 	        var vertices = [
 	            -f,  f,  0.0, // left - top
 	            -f, -f, 0.0, // left - bottom
@@ -668,10 +591,10 @@
 	        this.vertices = vertices;
 	        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 
-	        // var indices = [0,1,2, 2, 4,0];
-	        // this.indexBuffer = gl.createBuffer();
-	        // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-	        // gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+	         this.indices = [0,1,2,  1,3,2];
+	         this.indexBuffer = gl.createBuffer();
+	         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+	         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
 	        
 
 	    },
@@ -688,28 +611,47 @@
 	        
 	        this.material.draw(gl);
 
-	        
-
 	        if(this.rad === undefined){
 	            this.rad = 0;
 	        }
-	        this.rad += 0.01;
-	        this.setScaleX(Math.cos(this.rad));
-	        this.setScaleY(Math.sin(this.rad));
 
-	        this.setRotation(this.getRotation() + 0.01);
+	        this.rad += 0.01;
+	        // this.setScaleX(10);
+	        //  this.setScaleY(10);
+	        // this.setScaleX(Math.cos(this.rad) * 500);
+	        // this.setScaleY(Math.sin(this.rad) * 500);
+
+	        this.setX(Math.cos(this.rad) * 2);
+
+	        //this.setRotation(this.getRotation() + 0.01);
+	        //this.camera.projectionMatrix.matrixArray[4] = 100;
+	       // this.camera.setRotation(this.camera.getRotation() + 0.01);
+	        //this.camera.setX(100);
+	        this.camera.updateWorldMatrix();
+
+	        //console.log(this.camera.worldMatrix.matrixArray);
+
 	        this.updateWorldMatrix();
+	        //console.log( this.worldMatrix.matrixArray);
 	        
-	        gl.uniformMatrix3fv(this.material.params.modelMatrix, false, this.worldMatrix.matrixArray);
+	        var mvMatrix = [1,0,0,  0,1,0,  0,0,1];
+	        var camera = [1,0,0, 0,1,0,   1,0,1];
+	        
+	        //this.worldMatrix.matrixArray;
+	        gl.uniformMatrix3fv(this.material.params.modelMatrix, false, mvMatrix);
+	        gl.uniformMatrix3fv(this.material.params.projectionMatrix, false, camera);//this.camera.projectionMatrix.matrixArray);
+
 
 	        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
 	        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
 	        gl.enableVertexAttribArray(0);
-	        // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-	        gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vertices.length / 3);
+	        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
 
-
-
+	    
+	        let size = this.indices.length;
+	        gl.drawElements(gl.TRIANGLES ,size , gl.UNSIGNED_SHORT, 0);
+	         // gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vertices.length / 3);
+	        //gl.drawArrays(gl.POINTS, 0, this.vertices.length / 3);
 
 	        //this.setRotation(this.getRotation() + 0.01);
 	        // console.log(this.rotationMatrix.matrixArray);
@@ -717,15 +659,38 @@
 
 	} );
 
+	class Camera extends Object2D{
+
+	    constructor (){
+	        super();
+	        this.projectionMatrix = new Matrix3();
+	        this.projectionMatrix.makeOrtho(-250, 250, -250, 250);
+	        
+	    }
+
+
+
+	    updateWorldMatrix (){
+	        
+	        super.updateWorldMatrix();
+
+	        this.projectionMatrix.makeIdentity();
+	        this.projectionMatrix.makeOrtho(-250, 250, -250, 250);
+	        
+	        this.projectionMatrix.multiplyMatrix(this.worldMatrix);
+	    }
+
+	}
+
 	exports.CoreObject = CoreObject;
 	exports.EventableObject = EventableObject;
 	exports.Vector2 = Vector2;
-	exports.Matrix2 = Matrix2;
 	exports.Matrix3 = Matrix3;
 	exports.BagcilarMeydan = BagcilarMeydan;
 	exports.Object2D = Object2D;
 	exports.Sprite2D = Sprite2D;
 	exports.Quad = Quad;
+	exports.Camera = Camera;
 
 	Object.defineProperty(exports, '__esModule', { value: true });
 
