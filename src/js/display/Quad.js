@@ -28,12 +28,12 @@ Quad.prototype = Object.assign(Object.create(Object2D.prototype), {
         this.buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
 
-        var f = 0.5;
+        var f = 10;
         var vertices = [
-            -f,  f,  0.0, // left - top
-            -f, -f, 0.0, // left - bottom
-            f,  f,  0.0, // right - top
-            f, -f,  0.0, // right - bottom
+            -f,  f, // left - top
+            -f, -f, // left - bottom
+            f,  f, // right - top
+            f, -f, // right - bottom
         ];
 
         this.vertices = vertices;
@@ -63,35 +63,31 @@ Quad.prototype = Object.assign(Object.create(Object2D.prototype), {
             this.rad = 0;
         }
 
-        this.rad += 0.01;
-        // this.setScaleX(10);
-        //  this.setScaleY(10);
-        // this.setScaleX(Math.cos(this.rad) * 500);
+        this.rad += 0.1;
+        //this.setScaleX(10);
+        //this.setScaleY(10);
+        this.setScaleX(Math.cos(this.rad) * 5);
         // this.setScaleY(Math.sin(this.rad) * 500);
 
-        this.setX(Math.cos(this.rad) * 2);
-
-        //this.setRotation(this.getRotation() + 0.01);
+        this.setX(Math.cos(this.rad) * 2); 
+        this.setY(this.rad);
+        this.setRotation(this.getRotation() + 0.01);
+        
         //this.camera.projectionMatrix.matrixArray[4] = 100;
-       // this.camera.setRotation(this.camera.getRotation() + 0.01);
+        //this.camera.setRotation(this.camera.getRotation() + 0.01);
         //this.camera.setX(100);
         this.camera.updateWorldMatrix();
-
-        //console.log(this.camera.worldMatrix.matrixArray);
-
         this.updateWorldMatrix();
-        //console.log( this.worldMatrix.matrixArray);
         
-        var mvMatrix = [1,0,0,  0,1,0,  0,0,1];
-        var camera = [1,0,0, 0,1,0,   1,0,1];
+        window.camera = this.camera;
         
-        //this.worldMatrix.matrixArray;
-        gl.uniformMatrix3fv(this.material.params.modelMatrix, false, mvMatrix);
-        gl.uniformMatrix3fv(this.material.params.projectionMatrix, false, camera);//this.camera.projectionMatrix.matrixArray);
+        gl.uniformMatrix3fv(this.material.params.modelMatrix, false, this.worldMatrix.matrixArray);
+        gl.uniformMatrix3fv(this.material.params.projectionMatrix, false, this.camera.projectionMatrix.matrixArray);
+        gl.uniformMatrix3fv(this.material.params.viewMatrix, false, this.camera.worldMatrix.matrixArray);
 
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+        gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(0);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
 

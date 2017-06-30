@@ -109,9 +109,11 @@ var Object2D = (function(){
                 this.updateRotation();
                 this.updatePosition();
 
-               // this.worldMatrix.multiplyMatrix(this.scaleMatrix); 
-              //  this.worldMatrix.multiplyMatrix(this.rotationMatrix);
                 this.worldMatrix.multiplyMatrix(this.positionMatrix);
+                this.worldMatrix.multiplyMatrix(this.rotationMatrix);
+                this.worldMatrix.multiplyMatrix(this.scaleMatrix); 
+                
+                
 
             }
 

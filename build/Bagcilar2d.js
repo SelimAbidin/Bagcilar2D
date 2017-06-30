@@ -130,10 +130,8 @@
 	        var m = this.matrixArray;
 	        let c = Math.cos(radian);
 	        let s = Math.sin(radian);
-
 	        m[0] = c; m[1] = -s;
 	        m[3] = s; m[4] = c;
-
 	    }
 
 	    setScale  (x,y){
@@ -147,15 +145,13 @@
 	    translate (x,y) {
 	        let m = this.matrixArray;
 	        
-	        let m00 = m[0], m10 = m[1], m20 = m[0];
-	        let m01 = m[3], m11 = m[4], m21 = m[5];
-	        let m02 = m[6], m12 = m[7], m22 = m[8];
+	        let m00 = m[0], m10 = m[3], m20 = m[6];
+	        let m01 = m[1], m11 = m[4], m21 = m[7];
+	        let m02 = m[2], m12 = m[5], m22 = m[8];
 
 	        m[6] = x;
 	        m[7] = y;
-	        // m[2] = x * m00 + y * m10 + m20;
-			// m[5] = x * m01 + y * m11 + m21;
-	    	// m[8] = x * m02 + y * m12 + m22;
+	   
 	    }
 
 	    multiplyMatrix (matrix){
@@ -185,33 +181,23 @@
 	        
 	        return this;
 
-	        // var n0 = m1[0] * m2[0] + m1[1] * m2[3] + m1[2] * m2[6]; 
-	        // var n1 = m1[0] * m2[1] + m1[1] * m2[4] + m1[2] * m2[7]; 
-	        // var n2 = m1[0] * m2[2] + m1[1] * m2[5] + m1[2] * m2[8]; 
-	        
-	        // var n3 = m1[3] * m2[0] + m1[4] * m2[3] + m1[5] * m2[6]; 
-	        // var n4 = m1[3] * m2[1] + m1[4] * m2[4] + m1[5] * m2[7]; 
-	        // var n5 = m1[3] * m2[2] + m1[4] * m2[5] + m1[5] * m2[8]; 
-	        
-	        // var n6 = m1[6] * m2[0] + m1[7] * m2[3] + m1[8] * m2[6]; 
-	        // var n7 = m1[6] * m2[1] + m1[7] * m2[4] + m1[8] * m2[7]; 
-	        // var n8 = m1[6] * m2[2] + m1[7] * m2[5] + m1[8] * m2[8]; 
-	        
-	        
-	        // m1[0] = n0; m1[1] = n1; m1[2] = n2;
-	        // m1[3] = n3; m1[4] = n4; m1[5] = n5;
-	        // m1[6] = n6; m1[7] = n7; m1[8] = n8;
 	    }
 
 	    makeOrtho (left, right,  top, bottom){
 
 	        let m = this.matrixArray;
 
-	        m[0] = 2 / (right - left); 
-	        m[2] = -((right + left) / (right - left));
 
-	        m[4] = 2 / (top-bottom);
-	        m[5] = -((right + left) / (right - left));
+	        m[0] = 2 / (right - left); 
+	        m[4] = 2 / (top - bottom);
+
+	        m[6] = -((right + left) / (right - left));
+	        m[7] = -((top + bottom) / (top - bottom));
+
+	        // m[0] = 2 / (right - left); 
+	        // m[2] = -((right + left) / (right - left));
+	        // m[4] = 2 / (top-bottom);
+	        // m[5] = -((top + bottom) / (top - bottom));
 	        
 
 	    }
@@ -446,9 +432,11 @@
 	                this.updateRotation();
 	                this.updatePosition();
 
-	               // this.worldMatrix.multiplyMatrix(this.scaleMatrix); 
-	              //  this.worldMatrix.multiplyMatrix(this.rotationMatrix);
 	                this.worldMatrix.multiplyMatrix(this.positionMatrix);
+	                this.worldMatrix.multiplyMatrix(this.rotationMatrix);
+	                this.worldMatrix.multiplyMatrix(this.scaleMatrix); 
+	                
+	                
 
 	            }
 
@@ -485,25 +473,14 @@
 
 	    upload : function(gl){
 
-	        var vertexShaderSRC =   "uniform mat3 modelMatrix;"+
+	        var vertexShaderSRC =  "uniform mat3 modelMatrix;"+
 	                               "uniform mat3 projectionMatrix;"+
-	                                "attribute vec3 position;"+      
+	                               "uniform mat3 viewMatrix;"+
+	                                "attribute vec2 position;"+      
 	                                "void main() {"+
-	                                "   mat3 pmtx = projectionMatrix;"+
-	                                // "   pmtx[0][0] = 1.0;"+
-	                                // "   pmtx[1][0] = 0.0;"+
-	                                // "   pmtx[2][0] = 2.0;"+
-	                                
-	                                // "   pmtx[0][1] = 0.0;"+
-	                                // "   pmtx[1][1] = 1.0;"+
-	                                // "   pmtx[2][1] = 0.0;"+
-	                                
-	                                // "   pmtx[0][2] = 0.0;"+
-	                                // "   pmtx[1][2] = 0.0;"+
-	                                // "   pmtx[2][2] = 1.0;"+
-	                                "   vec3 p = vec3(position.x,position.y, -1.0);"+
-	                                "   mat3 m =  pmtx * modelMatrix;"+  
-	                                "   vec3 pm = m * p;"+     
+	                                "   vec3 pos = vec3(position.x,position.y, 1.0);"+
+	                                "   mat3 m =  projectionMatrix * (modelMatrix * viewMatrix);"+  
+	                                "   vec3 pm = m * pos;"+     
 	                                "   gl_Position = vec4(pm, 1.0);"+     
 	                                "   gl_PointSize = 10.0;"+     
 	                                "}";
@@ -540,6 +517,7 @@
 
 	        this.params.modelMatrix = gl.getUniformLocation(this.shaderProgram, "modelMatrix");
 	        this.params.projectionMatrix = gl.getUniformLocation(this.shaderProgram, "projectionMatrix");
+	        this.params.viewMatrix = gl.getUniformLocation(this.shaderProgram, "viewMatrix");
 
 	    },
 
@@ -580,12 +558,12 @@
 	        this.buffer = gl.createBuffer();
 	        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
 
-	        var f = 0.5;
+	        var f = 10;
 	        var vertices = [
-	            -f,  f,  0.0, // left - top
-	            -f, -f, 0.0, // left - bottom
-	            f,  f,  0.0, // right - top
-	            f, -f,  0.0, // right - bottom
+	            -f,  f, // left - top
+	            -f, -f, // left - bottom
+	            f,  f, // right - top
+	            f, -f, // right - bottom
 	        ];
 
 	        this.vertices = vertices;
@@ -615,35 +593,31 @@
 	            this.rad = 0;
 	        }
 
-	        this.rad += 0.01;
-	        // this.setScaleX(10);
-	        //  this.setScaleY(10);
-	        // this.setScaleX(Math.cos(this.rad) * 500);
+	        this.rad += 0.1;
+	        //this.setScaleX(10);
+	        //this.setScaleY(10);
+	        this.setScaleX(Math.cos(this.rad) * 5);
 	        // this.setScaleY(Math.sin(this.rad) * 500);
 
-	        this.setX(Math.cos(this.rad) * 2);
-
-	        //this.setRotation(this.getRotation() + 0.01);
+	        this.setX(Math.cos(this.rad) * 2); 
+	        this.setY(this.rad);
+	        this.setRotation(this.getRotation() + 0.01);
+	        
 	        //this.camera.projectionMatrix.matrixArray[4] = 100;
-	       // this.camera.setRotation(this.camera.getRotation() + 0.01);
+	        //this.camera.setRotation(this.camera.getRotation() + 0.01);
 	        //this.camera.setX(100);
 	        this.camera.updateWorldMatrix();
-
-	        //console.log(this.camera.worldMatrix.matrixArray);
-
 	        this.updateWorldMatrix();
-	        //console.log( this.worldMatrix.matrixArray);
 	        
-	        var mvMatrix = [1,0,0,  0,1,0,  0,0,1];
-	        var camera = [1,0,0, 0,1,0,   1,0,1];
+	        window.camera = this.camera;
 	        
-	        //this.worldMatrix.matrixArray;
-	        gl.uniformMatrix3fv(this.material.params.modelMatrix, false, mvMatrix);
-	        gl.uniformMatrix3fv(this.material.params.projectionMatrix, false, camera);//this.camera.projectionMatrix.matrixArray);
+	        gl.uniformMatrix3fv(this.material.params.modelMatrix, false, this.worldMatrix.matrixArray);
+	        gl.uniformMatrix3fv(this.material.params.projectionMatrix, false, this.camera.projectionMatrix.matrixArray);
+	        gl.uniformMatrix3fv(this.material.params.viewMatrix, false, this.camera.worldMatrix.matrixArray);
 
 
 	        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-	        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+	        gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
 	        gl.enableVertexAttribArray(0);
 	        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
 
@@ -664,7 +638,8 @@
 	    constructor (){
 	        super();
 	        this.projectionMatrix = new Matrix3();
-	        this.projectionMatrix.makeOrtho(-250, 250, -250, 250);
+	        //this.projectionMatrix.makeOrtho(-250, 250, -250, 250);
+	        this.projectionMatrix.makeOrtho(-250, 250, 250, -250);
 	        
 	    }
 
@@ -673,11 +648,6 @@
 	    updateWorldMatrix (){
 	        
 	        super.updateWorldMatrix();
-
-	        this.projectionMatrix.makeIdentity();
-	        this.projectionMatrix.makeOrtho(-250, 250, -250, 250);
-	        
-	        this.projectionMatrix.multiplyMatrix(this.worldMatrix);
 	    }
 
 	}

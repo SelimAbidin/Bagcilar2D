@@ -7,7 +7,8 @@ class Camera extends Object2D{
     constructor (){
         super();
         this.projectionMatrix = new Matrix3();
-        this.projectionMatrix.makeOrtho(-250, 250, -250, 250);
+        //this.projectionMatrix.makeOrtho(-250, 250, -250, 250);
+        this.projectionMatrix.makeOrtho(-250, 250, 250, -250);
         
     }
 
@@ -16,11 +17,6 @@ class Camera extends Object2D{
     updateWorldMatrix (){
         
         super.updateWorldMatrix();
-
-        this.projectionMatrix.makeIdentity();
-        this.projectionMatrix.makeOrtho(-250, 250, -250, 250);
-        
-        this.projectionMatrix.multiplyMatrix(this.worldMatrix);
     }
 
 }
