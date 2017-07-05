@@ -1,17 +1,17 @@
 
 
 
-function Default(){
+function DefaultEffect(){
 
 }
 
 
-Default.prototype = Object.assign(Default.prototype, {
+DefaultEffect.prototype = Object.assign(DefaultEffect.prototype, {
 
     params : {},
-
+    isUploaded : false,
     upload : function(gl){
-
+        
         var vertexShaderSRC =  "uniform mat3 modelMatrix;"+
                                "uniform mat3 projectionMatrix;"+
                                "uniform mat3 viewMatrix;"+
@@ -54,10 +54,21 @@ Default.prototype = Object.assign(Default.prototype, {
         
         gl.linkProgram(this.shaderProgram);
 
-        this.params.modelMatrix = gl.getUniformLocation(this.shaderProgram, "modelMatrix");
-        this.params.projectionMatrix = gl.getUniformLocation(this.shaderProgram, "projectionMatrix");
-        this.params.viewMatrix = gl.getUniformLocation(this.shaderProgram, "viewMatrix");
+        var params = {};
+        params["modelMatrix"] = {};
+        params["modelMatrix"].id = gl.getUniformLocation(this.shaderProgram, "modelMatrix");
+        //params["modelMatrix"].value = undefined;
 
+        params["projectionMatrix"] = {};
+        params["projectionMatrix"].id = gl.getUniformLocation(this.shaderProgram, "projectionMatrix");
+        //params["projectionMatrix"].value
+        
+        params["viewMatrix"] = {};
+        params["viewMatrix"].id = gl.getUniformLocation(this.shaderProgram, "viewMatrix");
+        //params["projectionMatrix"].value
+        this.uniforms = params;
+
+        this.isUploaded = true;
     },
 
     draw : function (gl){
@@ -67,11 +78,13 @@ Default.prototype = Object.assign(Default.prototype, {
         }
         gl.useProgram(this.shaderProgram);
 
-
-
+        for(var str in this.uniforms){
+            var uniform = this.uniforms[str];
+            gl.uniformMatrix3fv(uniform.id , false , uniform.value);
+        }
     }
 
 });
 
 
-export {Default};
+export {DefaultEffect};

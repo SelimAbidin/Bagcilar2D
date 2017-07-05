@@ -80,7 +80,7 @@
 
 	            for (var i = 0; i < a.length; i++) {
 	                element = a[i];
-	                element.listener.apply(element.context, {type:element.type, target:this, data:data});
+	                element.listener.apply(element.context, [{type:element.type, target:this, data:data}]);
 	            }
 	        }
 	    }
@@ -207,7 +207,94 @@
 
 	}
 
+	function DefaultEffect(){
+
+	}
+
+
+	DefaultEffect.prototype = Object.assign(DefaultEffect.prototype, {
+
+	    params : {},
+	    isUploaded : false,
+	    upload : function(gl){
+	        
+	        var vertexShaderSRC =  "uniform mat3 modelMatrix;"+
+	                               "uniform mat3 projectionMatrix;"+
+	                               "uniform mat3 viewMatrix;"+
+	                                "attribute vec2 position;"+      
+	                                "void main() {"+
+	                                "   vec3 pos = vec3(position.x,position.y, 1.0);"+
+	                                "   mat3 m =  projectionMatrix * (modelMatrix * viewMatrix);"+  
+	                                "   vec3 pm = m * pos;"+     
+	                                "   gl_Position = vec4(pm, 1.0);"+     
+	                                "   gl_PointSize = 10.0;"+     
+	                                "}";
+
+	        var fragmentShaderSRC = ""+
+	                                "void main() {"+        
+	                                "   gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);"+     
+	                                "}";
+
+	        this.fragmentShaderBuffer = gl.createShader(gl.FRAGMENT_SHADER);
+	        gl.shaderSource( this.fragmentShaderBuffer, fragmentShaderSRC );
+	        gl.compileShader( this.fragmentShaderBuffer );
+	        
+	        if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
+	            let finfo = gl.getShaderInfoLog( this.fragmentShaderBuffer );
+	            throw "Could not compile WebGL program. \n\n" + finfo;
+	        }
+
+	        this.vertexSahderBuffer = gl.createShader(gl.VERTEX_SHADER);
+	        gl.shaderSource( this.vertexSahderBuffer, vertexShaderSRC );
+	        gl.compileShader( this.vertexSahderBuffer );
+
+	        if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
+	            let info = gl.getShaderInfoLog( this.fragmentShaderBuffer );
+	            throw "Could not compile WebGL program. \n\n" + info;
+	        }
+
+
+	        this.shaderProgram = gl.createProgram();
+	        gl.attachShader(this.shaderProgram, this.vertexSahderBuffer);
+	        gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
+	        
+	        gl.linkProgram(this.shaderProgram);
+
+	        var params = {};
+	        params["modelMatrix"] = {};
+	        params["modelMatrix"].id = gl.getUniformLocation(this.shaderProgram, "modelMatrix");
+	        //params["modelMatrix"].value = undefined;
+
+	        params["projectionMatrix"] = {};
+	        params["projectionMatrix"].id = gl.getUniformLocation(this.shaderProgram, "projectionMatrix");
+	        //params["projectionMatrix"].value
+	        
+	        params["viewMatrix"] = {};
+	        params["viewMatrix"].id = gl.getUniformLocation(this.shaderProgram, "viewMatrix");
+	        //params["projectionMatrix"].value
+	        this.uniforms = params;
+
+	        this.isUploaded = true;
+	    },
+
+	    draw : function (gl){
+
+	        if(!this.shaderProgram){
+	            this.upload(gl);
+	        }
+	        gl.useProgram(this.shaderProgram);
+
+	        for(var str in this.uniforms){
+	            var uniform = this.uniforms[str];
+	            gl.uniformMatrix3fv(uniform.id , false , uniform.value);
+	        }
+	    }
+
+	});
+
 	var BagcilarMeydan = (function(){
+
+	    BagcilarMeydan.ENTER_FRAME = "enterFrame";
 
 	    function BagcilarMeydan(canvasID) {
 
@@ -294,7 +381,9 @@
 	        } ,
 
 	        update : function (){
-
+	            
+	            //console.log(this.dispacthEvent);
+	            this.dispacthEvent(BagcilarMeydan.ENTER_FRAME, undefined);
 	            var gl = this.context;
 	            
 	            //console.log(this.renderDom);
@@ -332,9 +421,6 @@
 	        EventableObject.apply(this, arguments);
 	    }
 
-
-
-
 	    Object2D.prototype = Object.assign(Object.create(EventableObject.prototype), {
 
 	        isRotationDirty : true,
@@ -345,7 +431,7 @@
 	        scaleY : 1,
 	        xPos : 0,
 	        yPos : 0,
-
+	        needsCalculation : true,
 	        constructer : Object2D,
 	        
 	        rotationMatrix : new Matrix3(),
@@ -423,23 +509,19 @@
 
 	        updateWorldMatrix : function (){
 	            
+	            this.worldMatrix.makeIdentity();
 	            
-	            if(this.isScaleDirty || this.isPositionDirty || this.isRotationDirty){
+	            this.updateScale();
+	            this.updateRotation();
+	            this.updatePosition();
 
-	                this.worldMatrix.makeIdentity();
-	                
-	                this.updateScale();
-	                this.updateRotation();
-	                this.updatePosition();
+	            this.worldMatrix.multiplyMatrix(this.positionMatrix);
+	            this.worldMatrix.multiplyMatrix(this.rotationMatrix);
+	            this.worldMatrix.multiplyMatrix(this.scaleMatrix); 
+	        },
 
-	                this.worldMatrix.multiplyMatrix(this.positionMatrix);
-	                this.worldMatrix.multiplyMatrix(this.rotationMatrix);
-	                this.worldMatrix.multiplyMatrix(this.scaleMatrix); 
-	                
-	                
-
-	            }
-
+	        update : function () {
+	            this.updateWorldMatrix();
 	        }
 
 
@@ -447,6 +529,30 @@
 
 	    return Object2D;
 	})();
+
+	class ObjectContainer2D extends Object2D {
+	    
+	    constructor (){
+	        this.children = [];
+	    }
+
+	    addChild (object2D) {
+	        if(object2D instanceof Object2D){
+	            this.children.push(object);
+	        } else {
+	            console.log("child should be Object2D instance");
+	        }
+	    }
+
+	    update (){
+	        
+	        super.update();
+	        for (var i = 0; i < this.children.length; i++) {
+	            this.children[i].update();
+	        }
+
+	    }
+	}
 
 	function Sprite2D (){
 	    Object2D.apply(this, []);
@@ -462,81 +568,13 @@
 	     
 	});
 
-	function Default(){
-
-	}
-
-
-	Default.prototype = Object.assign(Default.prototype, {
-
-	    params : {},
-
-	    upload : function(gl){
-
-	        var vertexShaderSRC =  "uniform mat3 modelMatrix;"+
-	                               "uniform mat3 projectionMatrix;"+
-	                               "uniform mat3 viewMatrix;"+
-	                                "attribute vec2 position;"+      
-	                                "void main() {"+
-	                                "   vec3 pos = vec3(position.x,position.y, 1.0);"+
-	                                "   mat3 m =  projectionMatrix * (modelMatrix * viewMatrix);"+  
-	                                "   vec3 pm = m * pos;"+     
-	                                "   gl_Position = vec4(pm, 1.0);"+     
-	                                "   gl_PointSize = 10.0;"+     
-	                                "}";
-
-	        var fragmentShaderSRC = ""+
-	                                "void main() {"+        
-	                                "   gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);"+     
-	                                "}";
-
-	        this.fragmentShaderBuffer = gl.createShader(gl.FRAGMENT_SHADER);
-	        gl.shaderSource( this.fragmentShaderBuffer, fragmentShaderSRC );
-	        gl.compileShader( this.fragmentShaderBuffer );
-	        
-	        if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
-	            let finfo = gl.getShaderInfoLog( this.fragmentShaderBuffer );
-	            throw "Could not compile WebGL program. \n\n" + finfo;
-	        }
-
-	        this.vertexSahderBuffer = gl.createShader(gl.VERTEX_SHADER);
-	        gl.shaderSource( this.vertexSahderBuffer, vertexShaderSRC );
-	        gl.compileShader( this.vertexSahderBuffer );
-
-	        if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
-	            let info = gl.getShaderInfoLog( this.fragmentShaderBuffer );
-	            throw "Could not compile WebGL program. \n\n" + info;
-	        }
-
-
-	        this.shaderProgram = gl.createProgram();
-	        gl.attachShader(this.shaderProgram, this.vertexSahderBuffer);
-	        gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
-	        
-	        gl.linkProgram(this.shaderProgram);
-
-	        this.params.modelMatrix = gl.getUniformLocation(this.shaderProgram, "modelMatrix");
-	        this.params.projectionMatrix = gl.getUniformLocation(this.shaderProgram, "projectionMatrix");
-	        this.params.viewMatrix = gl.getUniformLocation(this.shaderProgram, "viewMatrix");
-
-	    },
-
-	    draw : function (gl){
-
-	        if(!this.shaderProgram){
-	            this.upload(gl);
-	        }
-	        gl.useProgram(this.shaderProgram);
-
-
-
-	    }
-
-	});
-
-	function Quad() {
+	function Quad(params) {
 	    Object2D.apply(this, arguments);
-	    this.camera = undefined;
+
+	    for(var str in params){
+	        var param = str;
+	        this[param] = params[str];        
+	    }
 	}
 
 
@@ -545,12 +583,15 @@
 
 	    constructor : Quad,
 
-
 	    updateMaterial : function(gl){
 
-	        this.material = new Default();
-	        this.material.upload(gl);
-
+	        if(!this.material){
+	            this.material = new DefaultEffect();
+	        }
+	        
+	        if(!this.material.isUploaded){
+	            this.material.upload(gl);
+	        }
 	    },
 
 	    upload : function (gl){
@@ -573,7 +614,6 @@
 	         this.indexBuffer = gl.createBuffer();
 	         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
 	         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
-	        
 
 	    },
 
@@ -583,52 +623,24 @@
 	            this.upload(gl);
 	        }
 
-	        if(!this.material){
-	            this.updateMaterial(gl);
-	        }
+	        this.updateMaterial(gl);
 	        
+	        this.camera.update();
+	        this.update();
+
+	        this.material.uniforms["modelMatrix"].value = this.worldMatrix.matrixArray;
+	        this.material.uniforms["projectionMatrix"].value = this.camera.projectionMatrix.matrixArray;
+	        this.material.uniforms["viewMatrix"].value = this.camera.worldMatrix.matrixArray;
+
 	        this.material.draw(gl);
-
-	        if(this.rad === undefined){
-	            this.rad = 0;
-	        }
-
-	        this.rad += 0.1;
-	        //this.setScaleX(10);
-	        //this.setScaleY(10);
-	        this.setScaleX(Math.cos(this.rad) * 5);
-	        // this.setScaleY(Math.sin(this.rad) * 500);
-
-	        this.setX(Math.cos(this.rad) * 2); 
-	        this.setY(this.rad);
-	        this.setRotation(this.getRotation() + 0.01);
-	        
-	        //this.camera.projectionMatrix.matrixArray[4] = 100;
-	        //this.camera.setRotation(this.camera.getRotation() + 0.01);
-	        //this.camera.setX(100);
-	        this.camera.updateWorldMatrix();
-	        this.updateWorldMatrix();
-	        
-	        window.camera = this.camera;
-	        
-	        gl.uniformMatrix3fv(this.material.params.modelMatrix, false, this.worldMatrix.matrixArray);
-	        gl.uniformMatrix3fv(this.material.params.projectionMatrix, false, this.camera.projectionMatrix.matrixArray);
-	        gl.uniformMatrix3fv(this.material.params.viewMatrix, false, this.camera.worldMatrix.matrixArray);
 
 
 	        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
 	        gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
 	        gl.enableVertexAttribArray(0);
-	        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-
-	    
+	        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER , this.indexBuffer);
 	        let size = this.indices.length;
-	        gl.drawElements(gl.TRIANGLES ,size , gl.UNSIGNED_SHORT, 0);
-	         // gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vertices.length / 3);
-	        //gl.drawArrays(gl.POINTS, 0, this.vertices.length / 3);
-
-	        //this.setRotation(this.getRotation() + 0.01);
-	        // console.log(this.rotationMatrix.matrixArray);
+	        gl.drawElements(gl.TRIANGLES , size , gl.UNSIGNED_SHORT , 0);
 	    }
 
 	} );
@@ -656,8 +668,10 @@
 	exports.EventableObject = EventableObject;
 	exports.Vector2 = Vector2;
 	exports.Matrix3 = Matrix3;
+	exports.DefaultEffect = DefaultEffect;
 	exports.BagcilarMeydan = BagcilarMeydan;
 	exports.Object2D = Object2D;
+	exports.ObjectContainer2D = ObjectContainer2D;
 	exports.Sprite2D = Sprite2D;
 	exports.Quad = Quad;
 	exports.Camera = Camera;

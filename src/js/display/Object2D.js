@@ -9,9 +9,6 @@ var Object2D = (function(){
         EventableObject.apply(this, arguments);
     }
 
-
-
-
     Object2D.prototype = Object.assign(Object.create(EventableObject.prototype), {
 
         isRotationDirty : true,
@@ -22,7 +19,7 @@ var Object2D = (function(){
         scaleY : 1,
         xPos : 0,
         yPos : 0,
-
+        needsCalculation : true,
         constructer : Object2D,
         
         rotationMatrix : new Matrix3(),
@@ -100,23 +97,19 @@ var Object2D = (function(){
 
         updateWorldMatrix : function (){
             
+            this.worldMatrix.makeIdentity();
             
-            if(this.isScaleDirty || this.isPositionDirty || this.isRotationDirty){
+            this.updateScale();
+            this.updateRotation();
+            this.updatePosition();
 
-                this.worldMatrix.makeIdentity();
-                
-                this.updateScale();
-                this.updateRotation();
-                this.updatePosition();
+            this.worldMatrix.multiplyMatrix(this.positionMatrix);
+            this.worldMatrix.multiplyMatrix(this.rotationMatrix);
+            this.worldMatrix.multiplyMatrix(this.scaleMatrix); 
+        },
 
-                this.worldMatrix.multiplyMatrix(this.positionMatrix);
-                this.worldMatrix.multiplyMatrix(this.rotationMatrix);
-                this.worldMatrix.multiplyMatrix(this.scaleMatrix); 
-                
-                
-
-            }
-
+        update : function () {
+            this.updateWorldMatrix();
         }
 
 

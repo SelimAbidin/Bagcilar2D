@@ -1,12 +1,16 @@
 
 import {Object2D} from "./Object2D";
-import {Default} from "../effects/Default";
+import {DefaultEffect} from "../effects/DefaultEffect";
 import {Matrix3} from "../Math/Matrix3";
 
 
-function Quad() {
+function Quad(params) {
     Object2D.apply(this, arguments);
-    this.camera = undefined;
+
+    for(var str in params){
+        var param = str;
+        this[param] = params[str];        
+    }
 }
 
 
@@ -15,12 +19,15 @@ Quad.prototype = Object.assign(Object.create(Object2D.prototype), {
 
     constructor : Quad,
 
-
     updateMaterial : function(gl){
 
-        this.material = new Default();
-        this.material.upload(gl);
-
+        if(!this.material){
+            this.material = new DefaultEffect();
+        }
+        
+        if(!this.material.isUploaded){
+            this.material.upload(gl);
+        }
     },
 
     upload : function (gl){
@@ -43,7 +50,6 @@ Quad.prototype = Object.assign(Object.create(Object2D.prototype), {
          this.indexBuffer = gl.createBuffer();
          gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
          gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
-        
 
     },
 
@@ -53,52 +59,24 @@ Quad.prototype = Object.assign(Object.create(Object2D.prototype), {
             this.upload(gl);
         }
 
-        if(!this.material){
-            this.updateMaterial(gl);
-        }
+        this.updateMaterial(gl);
         
+        this.camera.update();
+        this.update();
+
+        this.material.uniforms["modelMatrix"].value = this.worldMatrix.matrixArray;
+        this.material.uniforms["projectionMatrix"].value = this.camera.projectionMatrix.matrixArray;
+        this.material.uniforms["viewMatrix"].value = this.camera.worldMatrix.matrixArray;
+
         this.material.draw(gl);
-
-        if(this.rad === undefined){
-            this.rad = 0;
-        }
-
-        this.rad += 0.1;
-        //this.setScaleX(10);
-        //this.setScaleY(10);
-        this.setScaleX(Math.cos(this.rad) * 5);
-        // this.setScaleY(Math.sin(this.rad) * 500);
-
-        this.setX(Math.cos(this.rad) * 2); 
-        this.setY(this.rad);
-        this.setRotation(this.getRotation() + 0.01);
-        
-        //this.camera.projectionMatrix.matrixArray[4] = 100;
-        //this.camera.setRotation(this.camera.getRotation() + 0.01);
-        //this.camera.setX(100);
-        this.camera.updateWorldMatrix();
-        this.updateWorldMatrix();
-        
-        window.camera = this.camera;
-        
-        gl.uniformMatrix3fv(this.material.params.modelMatrix, false, this.worldMatrix.matrixArray);
-        gl.uniformMatrix3fv(this.material.params.projectionMatrix, false, this.camera.projectionMatrix.matrixArray);
-        gl.uniformMatrix3fv(this.material.params.viewMatrix, false, this.camera.worldMatrix.matrixArray);
 
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
         gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(0);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-
-    
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER , this.indexBuffer);
         let size = this.indices.length;
-        gl.drawElements(gl.TRIANGLES ,size , gl.UNSIGNED_SHORT, 0);
-         // gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vertices.length / 3);
-        //gl.drawArrays(gl.POINTS, 0, this.vertices.length / 3);
-
-        //this.setRotation(this.getRotation() + 0.01);
-        // console.log(this.rotationMatrix.matrixArray);
+        gl.drawElements(gl.TRIANGLES , size , gl.UNSIGNED_SHORT , 0);
     }
 
 } );

@@ -3,6 +3,8 @@ import {EventableObject} from "../core/EventableObject";
 
 var BagcilarMeydan = (function(){
 
+    BagcilarMeydan.ENTER_FRAME = "enterFrame";
+
     function BagcilarMeydan(canvasID) {
 
         EventableObject.apply(this, arguments);
@@ -88,7 +90,9 @@ var BagcilarMeydan = (function(){
         } ,
 
         update : function (){
-
+            
+            //console.log(this.dispacthEvent);
+            this.dispacthEvent(BagcilarMeydan.ENTER_FRAME, undefined);
             var gl = this.context;
             
             //console.log(this.renderDom);

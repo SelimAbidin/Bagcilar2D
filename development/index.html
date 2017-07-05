@@ -12,25 +12,33 @@
 
         function f(){
 
-        }
+        }   
+
+        
 
         window.meydan = new Bagcilar.BagcilarMeydan("renderCanvas");
-       // window.meydan2 = new Bagcilar.BagcilarMeydan(renderCanvas);
+        // window.meydan2 = new Bagcilar.BagcilarMeydan(renderCanvas);
+        window.meydan.addEventListener(Bagcilar.BagcilarMeydan.ENTER_FRAME, this, enterFrame);
 
-
-        window.quad = new Bagcilar.Quad();
+        window.quad = new Bagcilar.Quad({material:new Bagcilar.DefaultEffect()});
         quad.camera = new Bagcilar.Camera();
         meydan.addQuadForTest(quad);
+
+        var rad = 0;
+        function enterFrame(event) {
+            rad += 0.1;  
+            quad.setScaleX(Math.cos(rad) * 5);
+            quad.setX(Math.cos(rad) * 2); 
+            quad.setY(rad);
+            quad.setRotation(quad.getRotation() + 0.01);
+        }
+
 
         window.b.addEventListener("test", this, f, 0);
         window.b.addEventListener("test", this, f, 2);
         window.b.addEventListener("test", this, f, 0);
         window.b.addEventListener("test", this, f, 4);
         window.b.addEventListener("test", this, f, 3);
-
-
-
-       
 
 
         window.m3x3 = new Bagcilar.Matrix3();

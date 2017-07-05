@@ -39,7 +39,7 @@ EventableObject.prototype = Object.assign(Object.create(CoreObject.prototype), {
 
             for (var i = 0; i < a.length; i++) {
                 element = a[i];
-                element.listener.apply(element.context, {type:element.type, target:this, data:data});
+                element.listener.apply(element.context, [{type:element.type, target:this, data:data}]);
             }
         }
     }
