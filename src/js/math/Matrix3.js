@@ -1,6 +1,5 @@
 
 
-
 class Matrix3 {
     constructor() {
         this.matrixArray = [

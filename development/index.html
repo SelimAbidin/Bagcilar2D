@@ -17,19 +17,24 @@
         
 
         window.meydan = new Bagcilar.BagcilarMeydan("renderCanvas");
+       // meydan.setAutoUpdate( false);
         // window.meydan2 = new Bagcilar.BagcilarMeydan(renderCanvas);
         window.meydan.addEventListener(Bagcilar.BagcilarMeydan.ENTER_FRAME, this, enterFrame);
-
+        meydan.camera = new Bagcilar.Camera();
         window.quad = new Bagcilar.Quad({material:new Bagcilar.DefaultEffect()});
-        quad.camera = new Bagcilar.Camera();
-        meydan.addQuadForTest(quad);
-
+        quad.name = "quad";
+        meydan.addChild(quad);
+        window.quad2 = new Bagcilar.Quad({material:new Bagcilar.DefaultEffect()});
+        meydan.addChild(quad2);
+        quad2.name = "quad2";
+        
+        
         var rad = 0;
         function enterFrame(event) {
             rad += 0.1;  
-            quad.setScaleX(Math.cos(rad) * 5);
-            quad.setX(Math.cos(rad) * 2); 
-            quad.setY(rad);
+            // quad.setScaleX(Math.cos(rad) * 5);
+            // quad.setX(Math.cos(rad) * 2); 
+            // quad.setY(rad);
             quad.setRotation(quad.getRotation() + 0.01);
         }
 

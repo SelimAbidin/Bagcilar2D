@@ -1,25 +1,22 @@
 
-import {Object2D} from "./Object2D";
+import {ObjectContainer2D} from "./ObjectContainer2D";
 import {DefaultEffect} from "../effects/DefaultEffect";
 import {Matrix3} from "../Math/Matrix3";
 
 
-function Quad(params) {
-    Object2D.apply(this, arguments);
 
-    for(var str in params){
-        var param = str;
-        this[param] = params[str];        
+class Quad extends ObjectContainer2D {
+
+    constructor (params) {
+        super();
+        
+        for(var str in params){
+            var param = str;
+            this[param] = params[str];        
+        }
     }
-}
 
-
-
-Quad.prototype = Object.assign(Object.create(Object2D.prototype), {
-
-    constructor : Quad,
-
-    updateMaterial : function(gl){
+    updateMaterial (gl) {
 
         if(!this.material){
             this.material = new DefaultEffect();
@@ -28,9 +25,9 @@ Quad.prototype = Object.assign(Object.create(Object2D.prototype), {
         if(!this.material.isUploaded){
             this.material.upload(gl);
         }
-    },
+    }
 
-    upload : function (gl){
+    upload (gl) {
         
         this.buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
@@ -46,31 +43,31 @@ Quad.prototype = Object.assign(Object.create(Object2D.prototype), {
         this.vertices = vertices;
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 
-         this.indices = [0,1,2,  1,3,2];
-         this.indexBuffer = gl.createBuffer();
-         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
+        this.indices = [0,1,2,  1,3,2];
+        this.indexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
 
-    },
+    }
 
-    draw : function (gl){
-        
+    update  () {
+        super.update();   
+    }
+
+
+    draw  (gl, camera){
+
         if(!this.buffer){
             this.upload(gl);
         }
-
+        
         this.updateMaterial(gl);
         
-        this.camera.update();
-        this.update();
-
         this.material.uniforms["modelMatrix"].value = this.worldMatrix.matrixArray;
-        this.material.uniforms["projectionMatrix"].value = this.camera.projectionMatrix.matrixArray;
-        this.material.uniforms["viewMatrix"].value = this.camera.worldMatrix.matrixArray;
-
+        this.material.uniforms["projectionMatrix"].value = camera.projectionMatrix.matrixArray;
+        this.material.uniforms["viewMatrix"].value = camera.worldMatrix.matrixArray;
         this.material.draw(gl);
-
-
+        
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
         gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(0);
@@ -78,9 +75,7 @@ Quad.prototype = Object.assign(Object.create(Object2D.prototype), {
         let size = this.indices.length;
         gl.drawElements(gl.TRIANGLES , size , gl.UNSIGNED_SHORT , 0);
     }
-
-} );
-
+}
 
 
 export {Quad};

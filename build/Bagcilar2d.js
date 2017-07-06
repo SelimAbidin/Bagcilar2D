@@ -292,139 +292,23 @@
 
 	});
 
-	var BagcilarMeydan = (function(){
-
-	    BagcilarMeydan.ENTER_FRAME = "enterFrame";
-
-	    function BagcilarMeydan(canvasID) {
-
-	        EventableObject.apply(this, arguments);
-	        
-	        if(canvasID !== undefined){
-	            
-	            var canvas =  document.getElementById(canvasID);
-	            var  gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-	            
-	            if(!gl){
-	             
-	                var error = "WebGL isn't supported on device";
-	                this.dispatchEvent(BagcilarMeydan.ERROR, {message:error});
-	            
-	            }
-	            
-
-	            this.renderDom = canvas;
-	            this.setWebGLContext(gl);
-	            this.init();
-	        }
-	    }
-
-	    var _autoUpdate;
-
-	    var _meydanInstances = [];
-	    function addMeydan(meydan){
-	        if(_meydanInstances.indexOf(meydan) == -1){
-	            _meydanInstances.push(meydan);
-	            requestAnimationFrame(updateMeydans);
-	        }
-	    }
-
-	    function removeMeydan(meydan){
-	        _meydanInstances.splice(_meydanInstances.indexOf(meydan), 1);
-	    }
-
-	    function updateMeydans(){
-
-	        for (var i = 0; i < _meydanInstances.length; i++) {
-	            _meydanInstances[i].update();
-	        }
-	        
-	        if(_meydanInstances.length > 0){
-	            requestAnimationFrame(updateMeydans);
-	        }
-	    }
-
-	    //Object.defineProperty(BagcilarMeydan, );
-	    
-	    BagcilarMeydan.prototype = Object.assign(Object.create(EventableObject.prototype), {
-
-	        constructor : BagcilarMeydan,
-	        
-	        init : function (){
-	            this.setAutoUpdate(true);
-	        },
-
-	        setWebGLContext : function (gl){
-	            this.context = gl; 
-	        },
-
-	        setAutoUpdate : function(b) {
-
-	            if(_autoUpdate !== b){
-	                _autoUpdate = b;
-
-	                if(b){
-	                    addMeydan(this);
-	                } else {
-	                    removeMeydan(this);
-	                }
-	            }
-	        },
-
-
-	        // TODO silinecek. Testing method 
-	        addQuadForTest : function (quad){
-	            if(!this.testChilderen) {
-	                this.testChilderen = [];
-	            }
-	            this.testChilderen.push(quad);
-	        } ,
-
-	        update : function (){
-	            
-	            //console.log(this.dispacthEvent);
-	            this.dispacthEvent(BagcilarMeydan.ENTER_FRAME, undefined);
-	            var gl = this.context;
-	            
-	            //console.log(this.renderDom);
-	            
-	            gl.viewport(0, 0, this.renderDom.width, this.renderDom.height);
-	            gl.clearColor(0.0, 0.0, 0.0, 1.0);
-	            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-	            // Enable depth testing
-	            //gl.enable(gl.DEPTH_TEST);
-	            // Near things obscure far things
-	            //gl.depthFunc(gl.LEQUAL);
-	            // Clear the color as well as the depth buffer.
-
-	            
-	            
-	            if(this.testChilderen){
-	                
-	                for (var i = 0; i < this.testChilderen.length; i++) {
-	                    this.testChilderen[i].draw(gl);
-	                }
-	            }
-
-
-
-	        }
-	    });
-
-	    return BagcilarMeydan;
-	})();
-
 	var Object2D = (function(){
 
 	    function Object2D(){
 	        EventableObject.apply(this, arguments);
+
+	        this.rotationMatrix = new Matrix3();
+	        this.scaleMatrix = new Matrix3();
+	        this.positionMatrix = new Matrix3();
+	        this.worldMatrix = new Matrix3();
 	    }
 
 	    Object2D.prototype = Object.assign(Object.create(EventableObject.prototype), {
 
 	        isRotationDirty : true,
 	        rotation : 0,
+	        stage : undefined,
+	        context : undefined,
 	        isScaleDirty : true,
 	        isPositionDirty : true,
 	        scaleX : 1, 
@@ -433,12 +317,6 @@
 	        yPos : 0,
 	        needsCalculation : true,
 	        constructer : Object2D,
-	        
-	        rotationMatrix : new Matrix3(),
-	        scaleMatrix : new Matrix3(),
-	        positionMatrix : new Matrix3(),
-	        worldMatrix : new Matrix3(),
-	        
 
 	        setRotation : function (v){
 	            this.rotation = v;
@@ -518,6 +396,7 @@
 	            this.worldMatrix.multiplyMatrix(this.positionMatrix);
 	            this.worldMatrix.multiplyMatrix(this.rotationMatrix);
 	            this.worldMatrix.multiplyMatrix(this.scaleMatrix); 
+	            
 	        },
 
 	        update : function () {
@@ -533,14 +412,23 @@
 	class ObjectContainer2D extends Object2D {
 	    
 	    constructor (){
+	        super();
 	        this.children = [];
+
 	    }
 
-	    addChild (object2D) {
-	        if(object2D instanceof Object2D){
-	            this.children.push(object);
+	    addChild (child) {
+
+	        if(child instanceof Object2D) {
+	        
+	            child.stage = this.stage;
+	            child.context = this.context;
+	            this.children.push(child);
+	        
 	        } else {
+	        
 	            console.log("child should be Object2D instance");
+	        
 	        }
 	    }
 
@@ -553,6 +441,136 @@
 
 	    }
 	}
+
+	class BagcilarMeydan extends ObjectContainer2D {
+	        
+	        static get ENTER_FRAME () { return "enterFrame"; }
+
+	        constructor (canvasID) {
+	            
+	            super(canvasID);
+	            this.stage = this;
+	            if(canvasID !== undefined){
+	                
+	                var canvas =  document.getElementById(canvasID);
+	                var  gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+	                
+	                if(!gl){
+	                
+	                    var error = "WebGL isn't supported on device";
+	                    this.dispatchEvent(BagcilarMeydan.ERROR , { message : error });
+
+	                } 
+
+	                this.renderDom = canvas;
+	                this.setWebGLContext(gl);
+	                this.init();
+	            }
+
+	        }
+
+	        init () {
+	         
+	            this.setAutoUpdate(true);
+	        
+	        }
+	        
+	        setWebGLContext (gl) {
+	            this.context = gl; 
+	        }
+
+	        setAutoUpdate (b) {
+
+	            if(_autoUpdate !== b) {
+	                _autoUpdate = b;
+
+	                if(b){
+	                    addMeydan(this);
+	                } else {
+	                    removeMeydan(this);
+	                }
+	            }
+	        }
+
+
+	        // TODO silinecek. Testing method 
+	        // addQuadForTest (quad) {
+	        //     if(!this.testChilderen) {
+	        //         this.testChilderen = [];
+	        //     }
+	        //     this.testChilderen.push(quad);
+	        // }
+
+	        update () {
+	            
+	            
+	            this.dispacthEvent(BagcilarMeydan.ENTER_FRAME, undefined);
+	            var gl = this.context;
+	            
+	            gl.viewport(0, 0, this.renderDom.width, this.renderDom.height);
+	            gl.clearColor(0.0, 0.0, 0.0, 1.0);
+	            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+	            // Enable depth testing
+	            //gl.enable(gl.DEPTH_TEST);
+	            // Near things obscure far things
+	            //gl.depthFunc(gl.LEQUAL);
+	            // Clear the color as well as the depth buffer.
+
+	            super.update();
+
+	            
+	            drawObjects(this.children, gl, this.camera);
+	            
+	            // if(this.testChilderen){
+
+	            //     for (var i = 0; i < this.testChilderen.length; i++) {
+	            //         this.testChilderen[i].draw(gl);
+	            //     }
+	            // }
+
+
+
+	        }
+
+	    }
+
+
+	    function drawObjects(objects, context, camera) {
+	        
+	        for (var i = 0; i < objects.length; i++) {
+	            var element = objects[i];
+	            element.draw(context, camera);
+	            drawObjects(element.children, context, camera);
+	        }
+
+	    }
+
+
+	    var _autoUpdate;
+
+	    var _meydanInstances = [];
+	    function addMeydan(meydan){
+	        if(_meydanInstances.indexOf(meydan) == -1){
+	            _meydanInstances.push(meydan);
+	            requestAnimationFrame(updateMeydans);
+	        }
+	    }
+
+	    function removeMeydan(meydan){
+	        _meydanInstances.splice(_meydanInstances.indexOf(meydan), 1);
+	    }
+
+	    function updateMeydans(){
+
+	        for (var i = 0; i < _meydanInstances.length; i++) {
+	            _meydanInstances[i].update();
+	        }
+	        
+	        if(_meydanInstances.length > 0){
+	            requestAnimationFrame(updateMeydans);
+	        }
+	    }
 
 	function Sprite2D (){
 	    Object2D.apply(this, []);
@@ -568,22 +586,18 @@
 	     
 	});
 
-	function Quad(params) {
-	    Object2D.apply(this, arguments);
+	class Quad extends ObjectContainer2D {
 
-	    for(var str in params){
-	        var param = str;
-	        this[param] = params[str];        
+	    constructor (params) {
+	        super();
+	        
+	        for(var str in params){
+	            var param = str;
+	            this[param] = params[str];        
+	        }
 	    }
-	}
 
-
-
-	Quad.prototype = Object.assign(Object.create(Object2D.prototype), {
-
-	    constructor : Quad,
-
-	    updateMaterial : function(gl){
+	    updateMaterial (gl) {
 
 	        if(!this.material){
 	            this.material = new DefaultEffect();
@@ -592,9 +606,9 @@
 	        if(!this.material.isUploaded){
 	            this.material.upload(gl);
 	        }
-	    },
+	    }
 
-	    upload : function (gl){
+	    upload (gl) {
 	        
 	        this.buffer = gl.createBuffer();
 	        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
@@ -610,31 +624,31 @@
 	        this.vertices = vertices;
 	        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 
-	         this.indices = [0,1,2,  1,3,2];
-	         this.indexBuffer = gl.createBuffer();
-	         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-	         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
+	        this.indices = [0,1,2,  1,3,2];
+	        this.indexBuffer = gl.createBuffer();
+	        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+	        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
 
-	    },
+	    }
 
-	    draw : function (gl){
-	        
+	    update  () {
+	        super.update();   
+	    }
+
+
+	    draw  (gl, camera){
+
 	        if(!this.buffer){
 	            this.upload(gl);
 	        }
-
+	        
 	        this.updateMaterial(gl);
 	        
-	        this.camera.update();
-	        this.update();
-
 	        this.material.uniforms["modelMatrix"].value = this.worldMatrix.matrixArray;
-	        this.material.uniforms["projectionMatrix"].value = this.camera.projectionMatrix.matrixArray;
-	        this.material.uniforms["viewMatrix"].value = this.camera.worldMatrix.matrixArray;
-
+	        this.material.uniforms["projectionMatrix"].value = camera.projectionMatrix.matrixArray;
+	        this.material.uniforms["viewMatrix"].value = camera.worldMatrix.matrixArray;
 	        this.material.draw(gl);
-
-
+	        
 	        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
 	        gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
 	        gl.enableVertexAttribArray(0);
@@ -642,8 +656,7 @@
 	        let size = this.indices.length;
 	        gl.drawElements(gl.TRIANGLES , size , gl.UNSIGNED_SHORT , 0);
 	    }
-
-	} );
+	}
 
 	class Camera extends Object2D{
 

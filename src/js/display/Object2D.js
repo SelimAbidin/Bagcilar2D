@@ -7,12 +7,19 @@ var Object2D = (function(){
 
     function Object2D(){
         EventableObject.apply(this, arguments);
+
+        this.rotationMatrix = new Matrix3();
+        this.scaleMatrix = new Matrix3();
+        this.positionMatrix = new Matrix3();
+        this.worldMatrix = new Matrix3();
     }
 
     Object2D.prototype = Object.assign(Object.create(EventableObject.prototype), {
 
         isRotationDirty : true,
         rotation : 0,
+        stage : undefined,
+        context : undefined,
         isScaleDirty : true,
         isPositionDirty : true,
         scaleX : 1, 
@@ -21,12 +28,6 @@ var Object2D = (function(){
         yPos : 0,
         needsCalculation : true,
         constructer : Object2D,
-        
-        rotationMatrix : new Matrix3(),
-        scaleMatrix : new Matrix3(),
-        positionMatrix : new Matrix3(),
-        worldMatrix : new Matrix3(),
-        
 
         setRotation : function (v){
             this.rotation = v;
@@ -106,6 +107,7 @@ var Object2D = (function(){
             this.worldMatrix.multiplyMatrix(this.positionMatrix);
             this.worldMatrix.multiplyMatrix(this.rotationMatrix);
             this.worldMatrix.multiplyMatrix(this.scaleMatrix); 
+            
         },
 
         update : function () {
