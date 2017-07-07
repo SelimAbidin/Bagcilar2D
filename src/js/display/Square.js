@@ -1,7 +1,7 @@
 
 import {ObjectContainer2D} from "../display/ObjectContainer2D";
     
-    class BagcilarMeydan extends ObjectContainer2D {
+    class Square extends ObjectContainer2D {
         
         static get ENTER_FRAME () { return "enterFrame"; }
 
@@ -17,7 +17,7 @@ import {ObjectContainer2D} from "../display/ObjectContainer2D";
                 if(!gl){
                 
                     var error = "WebGL isn't supported on device";
-                    this.dispatchEvent(BagcilarMeydan.ERROR , { message : error });
+                    this.dispatchEvent(Square.ERROR , { message : error });
 
                 } 
 
@@ -63,7 +63,7 @@ import {ObjectContainer2D} from "../display/ObjectContainer2D";
         update () {
             
             
-            this.dispacthEvent(BagcilarMeydan.ENTER_FRAME, undefined);
+            this.dispacthEvent(Square.ENTER_FRAME, undefined);
             var gl = this.context;
             
             gl.viewport(0, 0, this.renderDom.width, this.renderDom.height);
@@ -131,4 +131,4 @@ import {ObjectContainer2D} from "../display/ObjectContainer2D";
         }
     }
 
-export {BagcilarMeydan};
+export {Square};

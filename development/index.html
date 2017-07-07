@@ -10,16 +10,10 @@
     function init(){
         window.b = new Bagcilar.EventableObject();
 
-        function f(){
+      
 
-        }   
-
-        
-
-        window.meydan = new Bagcilar.BagcilarMeydan("renderCanvas");
-       // meydan.setAutoUpdate( false);
-        // window.meydan2 = new Bagcilar.BagcilarMeydan(renderCanvas);
-        window.meydan.addEventListener(Bagcilar.BagcilarMeydan.ENTER_FRAME, this, enterFrame);
+        window.meydan = new Bagcilar.Square("renderCanvas");
+        window.meydan.addEventListener(Bagcilar.Square.ENTER_FRAME, this, enterFrame);
         meydan.camera = new Bagcilar.Camera();
         window.quad = new Bagcilar.Quad({material:new Bagcilar.ColorEffect(new Bagcilar.Color(1,0,0,1))});
         quad.name = "quad";
@@ -40,19 +34,10 @@
             quad.setRotation(quad.getRotation() + 0.01);
             quad2.x =(Math.sin(rad) * 100);
         }
-
-
-        window.b.addEventListener("test", this, f, 0);
-        window.b.addEventListener("test", this, f, 2);
-        window.b.addEventListener("test", this, f, 0);
-        window.b.addEventListener("test", this, f, 4);
-        window.b.addEventListener("test", this, f, 3);
-
-
+        
         window.m3x3 = new Bagcilar.Matrix3();
     }
-
-
+    
 
 </script>
 <body onload="init()">

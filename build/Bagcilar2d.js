@@ -591,7 +591,7 @@
 	    }
 	}
 
-	class BagcilarMeydan extends ObjectContainer2D {
+	class Square extends ObjectContainer2D {
 	        
 	        static get ENTER_FRAME () { return "enterFrame"; }
 
@@ -607,7 +607,7 @@
 	                if(!gl){
 	                
 	                    var error = "WebGL isn't supported on device";
-	                    this.dispatchEvent(BagcilarMeydan.ERROR , { message : error });
+	                    this.dispatchEvent(Square.ERROR , { message : error });
 
 	                } 
 
@@ -653,7 +653,7 @@
 	        update () {
 	            
 	            
-	            this.dispacthEvent(BagcilarMeydan.ENTER_FRAME, undefined);
+	            this.dispacthEvent(Square.ENTER_FRAME, undefined);
 	            var gl = this.context;
 	            
 	            gl.viewport(0, 0, this.renderDom.width, this.renderDom.height);
@@ -838,7 +838,7 @@
 	exports.Color = Color;
 	exports.DefaultEffect = DefaultEffect;
 	exports.ColorEffect = ColorEffect;
-	exports.BagcilarMeydan = BagcilarMeydan;
+	exports.Square = Square;
 	exports.Object2D = Object2D;
 	exports.ObjectContainer2D = ObjectContainer2D;
 	exports.Sprite2D = Sprite2D;
