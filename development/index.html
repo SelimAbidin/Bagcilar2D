@@ -21,21 +21,24 @@
         // window.meydan2 = new Bagcilar.BagcilarMeydan(renderCanvas);
         window.meydan.addEventListener(Bagcilar.BagcilarMeydan.ENTER_FRAME, this, enterFrame);
         meydan.camera = new Bagcilar.Camera();
-        window.quad = new Bagcilar.Quad({material:new Bagcilar.DefaultEffect()});
+        window.quad = new Bagcilar.Quad({material:new Bagcilar.ColorEffect(new Bagcilar.Color(1,0,0,1))});
         quad.name = "quad";
         meydan.addChild(quad);
-        window.quad2 = new Bagcilar.Quad({material:new Bagcilar.DefaultEffect()});
+        var color2 = new Bagcilar.Color(0,1,0,1);
+        window.quad2 = new Bagcilar.Quad({material:new Bagcilar.ColorEffect(color2)});
         meydan.addChild(quad2);
+
         quad2.name = "quad2";
         
         
         var rad = 0;
         function enterFrame(event) {
             rad += 0.1;  
-            // quad.setScaleX(Math.cos(rad) * 5);
-            // quad.setX(Math.cos(rad) * 2); 
-            // quad.setY(rad);
+            quad.setScaleX(Math.cos(rad) * 5);
+            quad.x = Math.cos(rad) * 2; 
+            quad.y = rad;
             quad.setRotation(quad.getRotation() + 0.01);
+            quad2.x =(Math.sin(rad) * 100);
         }
 
 

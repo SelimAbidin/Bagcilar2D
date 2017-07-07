@@ -4,7 +4,7 @@ function Vector2 (x,y){
 }
 
 Vector2.prototype = Object.assign(Vector2.prototype, {
-
+    
 
 });
 

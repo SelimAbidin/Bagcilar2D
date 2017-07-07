@@ -1,15 +1,19 @@
+import {DefaultEffect} from "./DefaultEffect";
+import {Color} from "../math/Color";
 import {UniformObject} from "../core/UniformObject";
+var cccc = 0;
+class ColorEffect extends DefaultEffect {
 
-
-class DefaultEffect {
-
-    constructor () {
+    constructor (color) {
+        super();
+        this.id = "id_"+cccc++;
         this.isUploaded = false;
-        
+        this._color = color;
     }
 
-    upload (gl) {
-          var vertexShaderSRC =  "uniform mat3 modelMatrix;"+
+    upload (gl){
+        
+        var vertexShaderSRC =  "uniform mat3 modelMatrix;"+
                                "uniform mat3 projectionMatrix;"+
                                "uniform mat3 viewMatrix;"+
                                 "attribute vec2 position;"+      
@@ -21,10 +25,11 @@ class DefaultEffect {
                                 "   gl_PointSize = 10.0;"+     
                                 "}";
 
-        var fragmentShaderSRC = ""+
-                                "void main() {"+        
-                                "   gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);"+     
-                                "}";
+          var fragmentShaderSRC =   "precision mediump float;"+
+                                    "uniform vec4 color;"+
+                                    "void main() {"+        
+                                    "   gl_FragColor = color;"+     
+                                    "}";
 
         this.fragmentShaderBuffer = gl.createShader(gl.FRAGMENT_SHADER);
         gl.shaderSource( this.fragmentShaderBuffer, fragmentShaderSRC );
@@ -49,26 +54,35 @@ class DefaultEffect {
         gl.attachShader(this.shaderProgram, this.vertexSahderBuffer);
         gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
         gl.linkProgram(this.shaderProgram);
-
-
-        this.uniform = new UniformObject();
-        
-
         this.isUploaded = true;
+
+        this.uniform = new UniformObject(gl,this.shaderProgram);
+        this.color = this._color;
+        this.uniform.setValue("color", this.color.elements);
+    }
+    
+    set color (value){
+        
+        this._color = value;
+    }
+
+    get color (){
+
+        return this._color;
     }
 
 
-    draw  (gl){
+    draw (gl){
 
         if(!this.shaderProgram){
             this.upload(gl);
         }
+        
         gl.useProgram(this.shaderProgram);
         this.uniform.update(gl);
-       
     }
 
 }
 
 
-export {DefaultEffect};
+export {ColorEffect};

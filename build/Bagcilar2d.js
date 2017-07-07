@@ -87,13 +87,85 @@
 
 	});
 
+	function matrix3Fv(gl, uniObject){
+	     gl.uniformMatrix3fv(uniObject.location , false , uniObject.value);
+	}
+
+	function vector3Fv(gl, uniObject){
+	     gl.uniform4fv(uniObject.location , uniObject.value);
+	}
+
+
+	class UniformObject extends EventableObject {
+
+	    constructor (gl,program){
+	        super();
+	        this.uniMaps = {};
+	        this._program = program;
+
+	        var n = gl.getProgramParameter(this._program, gl.ACTIVE_UNIFORMS);
+	        
+	        for (var i = 0; i < n; i++) {
+	            var uniformInfo = gl.getActiveUniform(this._program, i);
+	            var location = gl.getUniformLocation(this._program, uniformInfo.name);
+	            this.addUniform(location,uniformInfo);
+	        }
+
+	    }
+
+	    getSetter (type) {
+	        
+	        switch (type) {
+	            case 35675: // matrix3
+	                return matrix3Fv;
+	            case 35666:
+	                return vector3Fv
+	        
+	            default:
+	                break;
+	        }
+	        return 
+	    }
+
+	    addUniform (location,uniformInfo) {
+	        this.uniMaps[uniformInfo.name] = {setter:this.getSetter(uniformInfo.type), location:location};
+	    }
+
+	    setValue (name, value) {
+	        if(this.uniMaps.hasOwnProperty(name)){
+	            this.uniMaps[name].value = value;
+	        }
+	    }
+
+	    getValue (name) {
+	        if(this.uniMaps.hasOwnProperty(name)){
+	            return this.uniMaps[name].value;
+	        }
+	    }
+
+	    update (gl) {
+
+	        for (var key in this.uniMaps) {
+	            if(key != "color2"){
+	                var element = this.uniMaps[key];
+	                  element.id = this.id;
+	                  element.effect = this.effect;
+	                element.setter(gl, element);
+	            } 
+
+	           
+	        }
+	    }
+
+	}
+
 	function Vector2 (x,y){
 	    this.x = x;
 	    this.y = y;
 	}
 
 	Vector2.prototype = Object.assign(Vector2.prototype, {
-
+	    
 
 	});
 
@@ -207,18 +279,32 @@
 
 	}
 
-	function DefaultEffect(){
+	class Color extends EventableObject{
+
+	    constructor (r,g,b,a){
+	        
+	        super();
+	        this.elements = [];
+	        this.elements[0] = r === undefined ? 1 : r;
+	        this.elements[1] = g === undefined ? 1 : g;
+	        this.elements[2] = b === undefined ? 1 : b;
+	        this.elements[3] = a === undefined ? 1 : a;
+
+	        
+	    }
+
 
 	}
 
+	class DefaultEffect {
 
-	DefaultEffect.prototype = Object.assign(DefaultEffect.prototype, {
-
-	    params : {},
-	    isUploaded : false,
-	    upload : function(gl){
+	    constructor () {
+	        this.isUploaded = false;
 	        
-	        var vertexShaderSRC =  "uniform mat3 modelMatrix;"+
+	    }
+
+	    upload (gl) {
+	          var vertexShaderSRC =  "uniform mat3 modelMatrix;"+
 	                               "uniform mat3 projectionMatrix;"+
 	                               "uniform mat3 viewMatrix;"+
 	                                "attribute vec2 position;"+      
@@ -257,135 +343,203 @@
 	        this.shaderProgram = gl.createProgram();
 	        gl.attachShader(this.shaderProgram, this.vertexSahderBuffer);
 	        gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
-	        
 	        gl.linkProgram(this.shaderProgram);
 
-	        var params = {};
-	        params["modelMatrix"] = {};
-	        params["modelMatrix"].id = gl.getUniformLocation(this.shaderProgram, "modelMatrix");
-	        //params["modelMatrix"].value = undefined;
 
-	        params["projectionMatrix"] = {};
-	        params["projectionMatrix"].id = gl.getUniformLocation(this.shaderProgram, "projectionMatrix");
-	        //params["projectionMatrix"].value
+	        this.uniform = new UniformObject();
 	        
-	        params["viewMatrix"] = {};
-	        params["viewMatrix"].id = gl.getUniformLocation(this.shaderProgram, "viewMatrix");
-	        //params["projectionMatrix"].value
-	        this.uniforms = params;
 
 	        this.isUploaded = true;
-	    },
+	    }
 
-	    draw : function (gl){
+
+	    draw  (gl){
 
 	        if(!this.shaderProgram){
 	            this.upload(gl);
 	        }
 	        gl.useProgram(this.shaderProgram);
-
-	        for(var str in this.uniforms){
-	            var uniform = this.uniforms[str];
-	            gl.uniformMatrix3fv(uniform.id , false , uniform.value);
-	        }
+	        this.uniform.update(gl);
+	       
 	    }
 
-	});
+	}
 
-	var Object2D = (function(){
+	var cccc = 0;
+	class ColorEffect extends DefaultEffect {
 
-	    function Object2D(){
-	        EventableObject.apply(this, arguments);
+	    constructor (color) {
+	        super();
+	        this.id = "id_"+cccc++;
+	        this.isUploaded = false;
+	        this._color = color;
+	    }
 
+	    upload (gl){
+	        
+	        var vertexShaderSRC =  "uniform mat3 modelMatrix;"+
+	                               "uniform mat3 projectionMatrix;"+
+	                               "uniform mat3 viewMatrix;"+
+	                                "attribute vec2 position;"+      
+	                                "void main() {"+
+	                                "   vec3 pos = vec3(position.x,position.y, 1.0);"+
+	                                "   mat3 m =  projectionMatrix * (modelMatrix * viewMatrix);"+  
+	                                "   vec3 pm = m * pos;"+     
+	                                "   gl_Position = vec4(pm, 1.0);"+     
+	                                "   gl_PointSize = 10.0;"+     
+	                                "}";
+
+	          var fragmentShaderSRC =   "precision mediump float;"+
+	                                    "uniform vec4 color;"+
+	                                    "void main() {"+        
+	                                    "   gl_FragColor = color;"+     
+	                                    "}";
+
+	        this.fragmentShaderBuffer = gl.createShader(gl.FRAGMENT_SHADER);
+	        gl.shaderSource( this.fragmentShaderBuffer, fragmentShaderSRC );
+	        gl.compileShader( this.fragmentShaderBuffer );
+	        
+	        if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
+	            let finfo = gl.getShaderInfoLog( this.fragmentShaderBuffer );
+	            throw "Could not compile WebGL program. \n\n" + finfo;
+	        }
+
+	        this.vertexSahderBuffer = gl.createShader(gl.VERTEX_SHADER);
+	        gl.shaderSource( this.vertexSahderBuffer, vertexShaderSRC );
+	        gl.compileShader( this.vertexSahderBuffer );
+
+	        if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
+	            let info = gl.getShaderInfoLog( this.fragmentShaderBuffer );
+	            throw "Could not compile WebGL program. \n\n" + info;
+	        }
+
+
+	        this.shaderProgram = gl.createProgram();
+	        gl.attachShader(this.shaderProgram, this.vertexSahderBuffer);
+	        gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
+	        gl.linkProgram(this.shaderProgram);
+	        this.isUploaded = true;
+
+	        this.uniform = new UniformObject(gl,this.shaderProgram);
+	        this.color = this._color;
+	        this.uniform.setValue("color", this.color.elements);
+	    }
+	    
+	    set color (value){
+	        
+	        this._color = value;
+	    }
+
+	    get color (){
+
+	        return this._color;
+	    }
+
+
+	    draw (gl){
+
+	        if(!this.shaderProgram){
+	            this.upload(gl);
+	        }
+	        
+	        gl.useProgram(this.shaderProgram);
+	        this.uniform.update(gl);
+	    }
+
+	}
+
+	class Object2D  extends EventableObject{
+
+	    constructor (){
+
+	        super();
+
+	        this.isRotationDirty = true;
+	        this.rotation = 0;
+	        this.stage = undefined;
+	        this.context = undefined;
+	        this.isScaleDirty = true;
+	        this.isPositionDirty = true;
+	        this.scaleX = 1; 
+	        this.scaleY = 1;
+	        this.xPos = 0;
+	        this.yPos = 0;
+	        this.needsCalculation = true;
 	        this.rotationMatrix = new Matrix3();
 	        this.scaleMatrix = new Matrix3();
 	        this.positionMatrix = new Matrix3();
 	        this.worldMatrix = new Matrix3();
+	    
 	    }
 
-	    Object2D.prototype = Object.assign(Object.create(EventableObject.prototype), {
-
-	        isRotationDirty : true,
-	        rotation : 0,
-	        stage : undefined,
-	        context : undefined,
-	        isScaleDirty : true,
-	        isPositionDirty : true,
-	        scaleX : 1, 
-	        scaleY : 1,
-	        xPos : 0,
-	        yPos : 0,
-	        needsCalculation : true,
-	        constructer : Object2D,
-
-	        setRotation : function (v){
+	        setRotation (v){
 	            this.rotation = v;
 	            this.isRotationDirty = true;
-	        },
+	        }
 
-	        getRotation : function(){
+	        getRotation (){
 	            return this.rotation;
-	        },
+	        }
 
-	        updateRotation : function(){
+	        updateRotation (){
 	            this.rotationMatrix.setRotationZ(this.rotation);
 	            this.isRotationDirty = false;
-	        },
+	        }
 
-	        updateScale : function(){
+	        updateScale (){
 	            this.scaleMatrix.setScale(this.scaleX, this.scaleY);
 	            this.isScaleDirty = false;
-	        },
+	        }
 
-	        updatePosition : function(){
+	        updatePosition (){
 	            this.positionMatrix.translate(this.xPos, this.yPos);
 	            this.isPositionDirty = false;
-	        },
+	        }
 
-	        setScale : function (scale) {
+	        setScale (scale) {
 	            this.scaleX = scale;
 	            this.scaley = scale;
 	            this.isScaleDirty = true;
-	        },
+	        }
 
-	        setScaleX : function (x) {
+	        setScaleX (x) {
 	            this.scaleX = x;
 	            this.isScaleDirty = true;
-	        },
+	        }
 
-	        setScaleY : function (y) {
+	        setScaleY (y) {
 	            this.scaleY = y;
 	            this.isScaleDirty = true;
-	        },
+	        }
 
-	        getScaleY : function(){
+	        getScaleY (){
 	            return this.scaleY;
-	        },
+	        }
 
-	        getScaleX : function(){
+	        getScaleX (){
 	            return this.scaleX;
-	        },
+	        }
 
-	        setX : function(x) {
+	        set x (x) {
 	            this.xPos = x;
 	            this.isPositionDirty = true;
-	        },
+	        }
 
-	        setY : function(y) {
+	        set y (y) {
 	            this.yPos = y;
 	            this.isPositionDirty = y;
-	        },
+	        }
 
-	        getX : function() {
+	        get x () {
 	            return this.xPos;
-	        },
+	        }
 
-	        getY : function() {
+	        get y () {
 	            return this.yPos;
-	        },
+	        }
 	        
 
-	        updateWorldMatrix : function (){
+	        updateWorldMatrix (){
 	            
 	            this.worldMatrix.makeIdentity();
 	            
@@ -397,17 +551,12 @@
 	            this.worldMatrix.multiplyMatrix(this.rotationMatrix);
 	            this.worldMatrix.multiplyMatrix(this.scaleMatrix); 
 	            
-	        },
-
-	        update : function () {
-	            this.updateWorldMatrix();
 	        }
 
-
-	    });
-
-	    return Object2D;
-	})();
+	        update  () {
+	            this.updateWorldMatrix();
+	        }
+	}
 
 	class ObjectContainer2D extends Object2D {
 	    
@@ -644,9 +793,13 @@
 	        
 	        this.updateMaterial(gl);
 	        
-	        this.material.uniforms["modelMatrix"].value = this.worldMatrix.matrixArray;
-	        this.material.uniforms["projectionMatrix"].value = camera.projectionMatrix.matrixArray;
-	        this.material.uniforms["viewMatrix"].value = camera.worldMatrix.matrixArray;
+	        // this.material.uniforms["modelMatrix"].value = this.worldMatrix.matrixArray;
+	        // this.material.uniforms["projectionMatrix"].value = camera.projectionMatrix.matrixArray;
+	        // this.material.uniforms["viewMatrix"].value = camera.worldMatrix.matrixArray;
+	        var uniform = this.material.uniform;
+	        uniform.setValue("modelMatrix", this.worldMatrix.matrixArray);
+	        uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
+	        uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
 	        this.material.draw(gl);
 	        
 	        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
@@ -679,9 +832,12 @@
 
 	exports.CoreObject = CoreObject;
 	exports.EventableObject = EventableObject;
+	exports.UniformObject = UniformObject;
 	exports.Vector2 = Vector2;
 	exports.Matrix3 = Matrix3;
+	exports.Color = Color;
 	exports.DefaultEffect = DefaultEffect;
+	exports.ColorEffect = ColorEffect;
 	exports.BagcilarMeydan = BagcilarMeydan;
 	exports.Object2D = Object2D;
 	exports.ObjectContainer2D = ObjectContainer2D;
