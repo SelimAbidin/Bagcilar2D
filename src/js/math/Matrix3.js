@@ -33,8 +33,11 @@ class Matrix3 {
         var m = this.matrixArray;
         let c = Math.cos(radian);
         let s = Math.sin(radian);
-        m[0] = c; m[1] = -s;
-        m[3] = s; m[4] = c;
+        // m[0] = c; m[1] = -s;
+        // m[3] = s; m[4] = c;
+
+        m[0] = c; m[1] = s;
+        m[3] = -s; m[4] = c;
     }
 
     setScale  (x,y){

@@ -61,11 +61,11 @@ class Quad extends ObjectContainer2D {
             this.upload(gl);
         }
         
+         gl.enable(gl.DEPTH_TEST);
+         
         this.updateMaterial(gl);
         
-        // this.material.uniforms["modelMatrix"].value = this.worldMatrix.matrixArray;
-        // this.material.uniforms["projectionMatrix"].value = camera.projectionMatrix.matrixArray;
-        // this.material.uniforms["viewMatrix"].value = camera.worldMatrix.matrixArray;
+        
         var uniform = this.material.uniform;
         uniform.setValue("modelMatrix", this.worldMatrix.matrixArray);
         uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);

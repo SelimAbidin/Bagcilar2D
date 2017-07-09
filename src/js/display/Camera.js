@@ -8,7 +8,7 @@ class Camera extends Object2D{
         super();
         this.projectionMatrix = new Matrix3();
         //this.projectionMatrix.makeOrtho(-250, 250, -250, 250);
-        this.projectionMatrix.makeOrtho(-250, 250, 250, -250);
+        this.projectionMatrix.makeOrtho(-300, 300, -300, 300);
         
     }
 

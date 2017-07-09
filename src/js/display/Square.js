@@ -65,9 +65,9 @@ import {ObjectContainer2D} from "../display/ObjectContainer2D";
             
             this.dispacthEvent(Square.ENTER_FRAME, undefined);
             var gl = this.context;
-            
+            gl.enable(gl.DEPTH_TEST);
             gl.viewport(0, 0, this.renderDom.width, this.renderDom.height);
-            gl.clearColor(0.0, 0.0, 0.0, 1.0);
+            gl.clearColor(0.6, 0.6, 0.6, 1.0);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
             // Enable depth testing

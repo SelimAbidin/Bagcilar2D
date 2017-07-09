@@ -60,14 +60,9 @@ class UniformObject extends EventableObject {
     update (gl) {
 
         for (var key in this.uniMaps) {
-            if(key != "color2"){
                 var element = this.uniMaps[key];
-                  element.id = this.id;
                   element.effect = this.effect;
                 element.setter(gl, element);
-            } 
-
-           
         }
     }
 

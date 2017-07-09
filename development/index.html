@@ -3,9 +3,85 @@
   <meta charset="utf-8">
   <title>Empty</title>
 </head>
+
+<script id="vertexShader" type="x-shader/x-vertex">
+
+    uniform mat3 modelMatrix;  
+    uniform mat3 projectionMatrix;  
+    uniform mat3 viewMatrix;  
+    uniform mat3 ppMatrix;  
+    attribute vec2 position;     
+    attribute vec2 offset;
+    attribute vec4 color;
+    attribute float rotation;
+    attribute float order;
+    varying vec4 colorVar;
+    varying mat3 testVar;
+    varying vec3 posVar;
+
+    mat3 getPositionMatrix (float posX, float posY){ 
+        
+        mat3 translateMat = mat3( 
+                                    1.0,  0.0,  0.0,
+                                    0.0,  1.0,  0.0, 
+                                    1.0,  0.0,  1.0 
+                                    ); 
+        return translateMat;
+    } 
+
+    mat3 getRotationMatrix(float r){
+
+        mat3 rotationM = mat3( 
+                            cos(r),   sin(r), 0.0, 
+                            -sin(r),   cos(r), 0.0, 
+                            0.0,         0.0,      1.0 
+                            );
+
+
+        return rotationM;   
+    }  
+
+
+    void main() {
+
+        vec3 pos3V = vec3(position.x ,position.y, 1.0);
+
+        mat3 positionMatrix = getPositionMatrix(100.0, 0.0);
+        mat3 rotationMatrix = getRotationMatrix((rotation - rotation) + 0.5);
+        float temp = offset.x;
+        mat3 modelMat3 =  positionMatrix;
+        mat3 m =  projectionMatrix * (modelMatrix * viewMatrix);
+        vec3 pm = m * pos3V;
+        colorVar = vec4(color.x , rotation, order, 1.0);
+        testVar = m;
+        posVar = pm;
+        gl_Position = vec4(pm.x, pm.y, 1.0, 1.0);
+
+    }
+    
+
+
+
+
+
+</script>
+
+
+
 <script src="../build/Bagcilar2d.js" ></script>
 
 <script>
+
+    // 0.00392156863      0                 0
+    // 0                  0.00392156863     0
+    // 0                  0                 1
+
+
+
+    // 0.00392156863      0                 0
+    // 0                  0.00392156863     0
+    // 0.00392156863      0                 1
+
 
     function init(){
         window.b = new Bagcilar.EventableObject();
@@ -15,24 +91,35 @@
         window.meydan = new Bagcilar.Square("renderCanvas");
         window.meydan.addEventListener(Bagcilar.Square.ENTER_FRAME, this, enterFrame);
         meydan.camera = new Bagcilar.Camera();
-        window.quad = new Bagcilar.Quad({material:new Bagcilar.ColorEffect(new Bagcilar.Color(1,0,0,1))});
-        quad.name = "quad";
-        meydan.addChild(quad);
-        var color2 = new Bagcilar.Color(0,1,0,1);
-        window.quad2 = new Bagcilar.Quad({material:new Bagcilar.ColorEffect(color2)});
-        meydan.addChild(quad2);
+        meydan.setAutoUpdate(false);
+        var a =  new Bagcilar.TestSprite();
+        meydan.addChild(a);
 
-        quad2.name = "quad2";
+
+        // var b =  new Bagcilar.TestSprite();
+        // b.g = 1;
+        // meydan.addChild(b);
+        // a.zv = 200;
+        // b.zv = 100;
+
+        window.quad = new Bagcilar.Quad({material:new Bagcilar.ColorEffect(new Bagcilar.Color(1,0,0,1))});
+        // quad.name = "quad";
+        // quad.x = 0;
+        // meydan.addChild(quad);
+        // var color2 = new Bagcilar.Color(0,1,0,1);
+        // window.quad2 = new Bagcilar.Quad({material:new Bagcilar.ColorEffect(color2)});
+        // meydan.addChild(quad2);
+        // quad2.name = "quad2";
         
         
         var rad = 0;
         function enterFrame(event) {
             rad += 0.1;  
-            quad.setScaleX(Math.cos(rad) * 5);
-            quad.x = Math.cos(rad) * 2; 
-            quad.y = rad;
-            quad.setRotation(quad.getRotation() + 0.01);
-            quad2.x =(Math.sin(rad) * 100);
+            // quad.setScaleX(Math.cos(rad) * 5);
+            // quad.x = Math.cos(rad) * 200; 
+            // quad.y = rad;
+            // quad.setRotation(quad.getRotation() + 0.01);
+            // quad2.x =(Math.sin(rad) * 100);
         }
         
         window.m3x3 = new Bagcilar.Matrix3();
@@ -42,7 +129,7 @@
 </script>
 <body onload="init()">
 
-<canvas id="renderCanvas" width="500" height="500" ></canvas>
+<canvas id="renderCanvas" width="600" height="600" ></canvas>
 
 </body>
 </html>

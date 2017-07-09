@@ -14,7 +14,7 @@ class DefaultEffect {
                                "uniform mat3 viewMatrix;"+
                                 "attribute vec2 position;"+      
                                 "void main() {"+
-                                "   vec3 pos = vec3(position.x,position.y, 1.0);"+
+                                "   vec3 pos = vec3(position.x,position.y, 0.0);"+
                                 "   mat3 m =  projectionMatrix * (modelMatrix * viewMatrix);"+  
                                 "   vec3 pm = m * pos;"+     
                                 "   gl_Position = vec4(pm, 1.0);"+     
@@ -51,7 +51,7 @@ class DefaultEffect {
         gl.linkProgram(this.shaderProgram);
 
 
-        this.uniform = new UniformObject();
+        this.uniform = new UniformObject(gl, this.shaderProgram);
         
 
         this.isUploaded = true;

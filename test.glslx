@@ -1,0 +1,29 @@
+uniform mat3 modelMatrix;
+uniform mat3 projectionMatrix;
+uniform mat3 viewMatrix;
+attribute vec2 position;
+attribute vec2 offset;
+attribute vec4 colori;
+attribute float rotationi;
+varying vec4 colorVar;
+varying float testi;
+
+vec3 rotate(float r, vec3 v)
+{
+     mat3 rotZ = mat3(
+         cos(r),    sin(r), 0,
+         -sin(r),   cos(r), 0,
+         0,         0,      1); 
+    
+    return v * rotZ; 
+}
+
+void main() 
+{  
+    vec3 pos = vec3(position.x + offset.x + 110.0,position.y+ offset.y, 1.0);  
+    mat3 m =  projectionMatrix * (modelMatrix * viewMatrix);
+    vec3 pm = m * pos;   
+    testi = rotationi;   
+    colorVar = colori;
+    gl_Position = vec4(pm.x, pm.y, 0, 1.0);
+}

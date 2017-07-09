@@ -21,7 +21,7 @@ class ColorEffect extends DefaultEffect {
                                 "   vec3 pos = vec3(position.x,position.y, 1.0);"+
                                 "   mat3 m =  projectionMatrix * (modelMatrix * viewMatrix);"+  
                                 "   vec3 pm = m * pos;"+     
-                                "   gl_Position = vec4(pm, 1.0);"+     
+                                "   gl_Position = vec4(pm.x,pm.y, 0, 1.0);"+     
                                 "   gl_PointSize = 10.0;"+     
                                 "}";
 
