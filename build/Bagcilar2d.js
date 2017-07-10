@@ -884,14 +884,15 @@
 	            f, -f, // right - bottom
 	        ];
 
-	        var count = 1;//27;
+	        var count = 27 * 27;
 	        this.vs = [];
 	        for (var i = 0; i < count; i++) {
 	            
 	            var speedX = Math.random() * 4; 
 	            var speedY = Math.random() * 4; 
-	            this.vs[i] = {x:speedX - 2, y:speedY - 2, rot:(Math.random() * 4) * -2};
-	            
+	            this.vs[i] = {x:speedX - 2, y:speedY - 2, rot:(Math.random() * .4) * -.2};
+	            this.vs[i].x = 0;
+	            this.vs[i].y = 0;
 	        }
 
 
@@ -912,9 +913,16 @@
 	            offset[i] = 0;//(Math.random() * 400) - 300;
 	        } 
 
+	            var index = 0;
 	         for (var i = 0; i < offset.length; i+=2) {
-	            offset[i] = (i * 11) - 290;
-	            offset[i+1] = 0;
+
+	            var column = index % 27;
+	            var row = Math.floor(index / 27);
+	            
+	            offset[i] = (column * 22) - 290;
+	            offset[i+1] = (row * 27) - 290;
+
+	            index++;
 	        }
 
 	        var colorArray = new Float32Array( 4 * count );
@@ -978,7 +986,6 @@
 	    }
 
 	    update  () {
-	        this.x = 111;
 	        super.update();   
 	    }
 
@@ -1001,25 +1008,20 @@
 
 
 
-	        // for(var i = 0; i < this.vs.length ; i++){
+	        for(var i = 0; i < this.vs.length ; i++){
 
-	        //     let index = i * 2;
-	        //     this.offsetArray[index]     += this.vs[i].x * .1;
-	        //     this.offsetArray[index+1]   += this.vs[i].y * .1;
+	            let index = i * 2;
+	            this.offsetArray[index]     += this.vs[i].x * .1;
+	            this.offsetArray[index+1]   += this.vs[i].y * .1;
 
-	        //     this.rotateArray[i] = this.vs[i].rot;
-	        // }
+	            this.rotateArray[i] += this.vs[i].rot;
+	        }
 	 
 	        var uniform = this.uniform;
 	        uniform.setValue("modelMatrix", this.worldMatrix.matrixArray);
 	        uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
 	        uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
 	        
-	        console.log("_____________________");
-	        console.log(camera.projectionMatrix.matrixArray);
-	        console.log(camera.worldMatrix.matrixArray);
-	        console.log(this.worldMatrix.matrixArray);
-
 
 	        var mm = new Matrix3();
 	        mm.makeIdentity();
@@ -1028,11 +1030,6 @@
 	        mm.multiplyMatrix(camera.worldMatrix);
 	        mm.multiplyMatrix(camera.projectionMatrix);
 
-	        console.log("Last ",mm.matrixArray);
-	        // console.log(camera.projectionMatrix.matrixArray);
-	        // console.log(mm.matrixArray);
-	        //  mm.multiplyMatrix(camera.projectionMatrix);
-	        // console.log(mm.matrixArray);
 	        uniform.setValue("ppMatrix", mm.matrixArray);
 	        
 
@@ -1052,7 +1049,7 @@
 
 	        l = this.orderBuffer.location;
 	        gl.bindBuffer(gl.ARRAY_BUFFER, this.orderBuffer);
-	        gl.bufferData(gl.ARRAY_BUFFER, this.orderArray, gl.STATIC_DRAW);
+	        //gl.bufferData(gl.ARRAY_BUFFER, this.orderArray, gl.STATIC_DRAW);
 	        gl.enableVertexAttribArray(l);
 	        gl.vertexAttribPointer(l, 1, gl.FLOAT, false, 0, 0);
 	        this.instanced.vertexAttribDivisorANGLE(l , 1);
@@ -1065,7 +1062,7 @@
 	        
 
 	        gl.bindBuffer(gl.ARRAY_BUFFER, this.offsetBuffer);
-	        gl.bufferData(gl.ARRAY_BUFFER, this.offsetArray, gl.STATIC_DRAW);
+	       //gl.bufferData(gl.ARRAY_BUFFER, this.offsetArray, gl.STATIC_DRAW);
 	        l = this.offsetBuffer.location;
 	        gl.enableVertexAttribArray(l);
 	        gl.vertexAttribPointer(l, 2, gl.FLOAT, false, 0, 0);
@@ -1074,7 +1071,7 @@
 
 	        l = this.colorBuffer.location;
 	        gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
-	        gl.bufferData(gl.ARRAY_BUFFER, this.colorArray, gl.STATIC_DRAW);
+	        //gl.bufferData(gl.ARRAY_BUFFER, this.colorArray, gl.STATIC_DRAW);
 	        gl.enableVertexAttribArray(l);
 	        gl.vertexAttribPointer(l, 4, gl.FLOAT, false, 0, 0);
 	        this.instanced.vertexAttribDivisorANGLE(l ,1);

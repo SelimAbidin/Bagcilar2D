@@ -24,7 +24,7 @@
         mat3 translateMat = mat3( 
                                     1.0,  0.0,  0.0,
                                     0.0,  1.0,  0.0, 
-                                    1.0,  0.0,  1.0 
+                                    posX,  posY,  1.0 
                                     ); 
         return translateMat;
     } 
@@ -46,16 +46,16 @@
 
         vec3 pos3V = vec3(position.x ,position.y, 1.0);
 
-        mat3 positionMatrix = getPositionMatrix(100.0, 0.0);
-        mat3 rotationMatrix = getRotationMatrix((rotation - rotation) + 0.5);
+        mat3 positionMatrix = getPositionMatrix(offset.x, offset.y);
+        mat3 rotationMatrix = getRotationMatrix(rotation);
         float temp = offset.x;
-        mat3 modelMat3 =  positionMatrix;
-        mat3 m =  projectionMatrix * (modelMatrix * viewMatrix);
+        mat3 modelMat3 =  positionMatrix * rotationMatrix;
+        mat3 m =  projectionMatrix * (modelMat3 * viewMatrix);
         vec3 pm = m * pos3V;
         colorVar = vec4(color.x , rotation, order, 1.0);
         testVar = m;
-        posVar = pm;
-        gl_Position = vec4(pm.x, pm.y, 1.0, 1.0);
+        posVar = vec3(abs(cos(rotation)), abs(cos(rotation + 0.1)), abs(cos(rotation + 0.7))) ;
+        gl_Position = vec4(pm.x, pm.y, order, 1.0);
 
     }
     
@@ -91,7 +91,7 @@
         window.meydan = new Bagcilar.Square("renderCanvas");
         window.meydan.addEventListener(Bagcilar.Square.ENTER_FRAME, this, enterFrame);
         meydan.camera = new Bagcilar.Camera();
-        meydan.setAutoUpdate(false);
+       // meydan.setAutoUpdate(false);
         var a =  new Bagcilar.TestSprite();
         meydan.addChild(a);
 
