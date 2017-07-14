@@ -40,7 +40,7 @@ class InstancedMaterial extends DefaultEffect {
     }
     
     reset () {
-        this.count = 0;
+        this.count = -1;
     }
     
     addPosition (x, y) {
@@ -56,6 +56,10 @@ class InstancedMaterial extends DefaultEffect {
 
     next () {
         this.count++;
+    }
+
+    getLenght () {
+        return this.count + 1;
     }
 
     upload (gl, angExt){

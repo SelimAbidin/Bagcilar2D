@@ -76,14 +76,15 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
         //     this.testChilderen.push(quad);
         // }
 
-        update () {
+        update2 () {
             
-            
-            var up = performance.now();
+            // this.update();
             this.dispacthEvent(Square.ENTER_FRAME, undefined);
             var gl = this.context;
             
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+
 
             // Enable depth testing
             //gl.enable(gl.DEPTH_TEST);
@@ -91,63 +92,72 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
             //gl.depthFunc(gl.LEQUAL);
             // Clear the color as well as the depth buffer.
 
-            super.update();
+           
 
-            this._renObjects = undefined;
-            this._spriteRenderObjects = undefined;
+            /*
+            this._spriteRenderObjects = [];
+            this._renObjects = {};
             this.collectObjects(this.children);
             
-            this.renderer.renderObjects(this._spriteRenderObjects, this.camera);
+            this.renderSprites();
+         
+           this.renderOtherObjects();
+           */
 
-            for (var str in this._renObjects) {
+           this.renderer.prepareForRender();
+
+            this.renderChild();
+           //this.renderRecursively(this);
+           this.renderer.present();
+
+        }
+
+        renderChild () {
+
+            for (var i = 0; i < this.children.length; i++) {
+                
+                this.renderer.renderSingleObject(this.children[i]);
+                
+            }
+
+        }
+
+
+        renderRecursively (o) {
+
+            if(o instanceof Sprite) {
+
+                this.renderer.renderSingleObject(o);
+            }
+
+            if(o.children.length > 0) {
+            
+                for (var i = 0; i < o.children.length; i++) {
+                
+                    this.renderRecursively(o.children[i]);
+                
+                }
+            }
+
+          
+
+        }
+
+
+        renderOtherObjects () {
+             for (var str in this._renObjects) {
                 
                 if (this._renObjects.hasOwnProperty(str)){
                     this.renderer.renderObjects(this._renObjects[str], this.camera);
                 }
-
             }
+        }
 
-            if(this.inf === undefined){
-                this.inf = 0;
-            }
-
-            up = performance.now() - up;
-            this.inf += 0.1;
-            if(up < this.min && this.inf > 1){
-                this.min = up;
-                this.inf = 0;
-                console.log("updated");
-                document.getElementById("framef").innerHTML = up;
-            }
-            
-            if(this.isFirst && up > this.max){
-                this.max = up;
-                document.getElementById("frameMax").innerHTML = up;
-            }
-
-            this.isFirst = true;
-            
-            
-            //console.log(this._renObjects);
-            //drawObjects(this.renderer, this.children, gl, this.camera);
-            // if(this.testChilderen){
-
-            //     for (var i = 0; i < this.testChilderen.length; i++) {
-            //         this.testChilderen[i].draw(gl);
-            //     }
-            // }
-
+        renderSprites () {
+              this.renderer.renderObjects(this._spriteRenderObjects, this.camera);
         }
         
         collectObjects (children) {
-
-            if(!this._renObjects){
-                this._renObjects = {};
-            }
-
-            if(!this._spriteRenderObjects){
-                this._spriteRenderObjects = [];
-            }
 
             
             for (var i = 0; i < children.length; i++) {
@@ -168,9 +178,6 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
                     ar.push(a);
 
                 }
-
-
-                
 
             }
 
@@ -207,13 +214,17 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
 
     function updateMeydans(){
 
+        window.stats.begin();
+
         for (var i = 0; i < _meydanInstances.length; i++) {
-            _meydanInstances[i].update();
+            _meydanInstances[i].update2();
         }
         
         if(_meydanInstances.length > 0){
             requestAnimationFrame(updateMeydans);
         }
+
+        window.stats.end();
     }
 
 export {Square};

@@ -5,6 +5,7 @@ import {Event} from "../events/Event.js";
 
 function EventableObject() {
     CoreObject.apply(this, arguments);
+    this._listeners = {};
 }
 
 function orderPriority (a, b){

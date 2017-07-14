@@ -33,7 +33,7 @@ class Sprite extends ObjectContainer2D {
         }
     }
 
-    upload (gl) {
+    upload (gl, material) {
         
         if(!Sprite._indexBuffer){
             this.buffer = gl.createBuffer();
@@ -41,13 +41,20 @@ class Sprite extends ObjectContainer2D {
             gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
 
+             var positionLocation = material.positionLocation;
+            
+            gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
             this.indices = [0,1,2,  1,3,2];
             this.indexBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
 
+            
             Sprite._indexBuffer = this.indexBuffer;
             Sprite._vertexBuffer = this.buffer;
+
+           
            
         } else {
 
@@ -58,7 +65,7 @@ class Sprite extends ObjectContainer2D {
     }
 
     update  () {
-        super.update();   
+        //super.update();   
     }
 
     draw  (gl, camera){

@@ -15,6 +15,7 @@ class ObjectContainer2D extends Object2D {
         if(child instanceof Object2D) {
         
             child.stage = this.stage;
+            
             child.context = this.context;
             this.children.push(child);
         

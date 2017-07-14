@@ -6,12 +6,121 @@ class WebGLRenderer extends EventableObject
 {
     constructor (square, gl) {
         super();
+        this.infoID = 0;
         this.gl = gl;
+        this._materials = [];
         this.square = square;
         this.exAngleInstance = gl.getExtension('ANGLE_instanced_arrays');
     }
 
+    prepareForRender () {
+        this._materials.length = 0;
+        this.infoID++;
+    }
+
+    renderSingleObject (object) {
+
+        var gl = this.gl;
+        var material = object.material || InstancedMaterial.getInstance();
+        var camera = object.stage.camera;
+
+        
+        if(!material.isUploaded) {
+            var ext = this.exAngleInstance;
+            material.upload(gl, ext);
+        }
+
+        if(material.id != this.lastMaterialID) {
+
+            gl.useProgram(material.shaderProgram);
+        this.lastMaterialID = material.id;
+        }
+        
+
+        var uniform = material.uniform;
+        var positionLocation = material.positionLocation;
+        var offsetLocation = material.offsetLocation;
+        var rotationLocation = material.rotationLocation;
+        var colorLocation = material.colorLocation;
+
+        if(material.renderNumber !== this.infoID){
+            
+            material.reset();
+            this._materials.push(material);
+
+            uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
+            uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
+            uniform.update(gl);
+
+            
+        }
+        
+        object.upload(gl , material);
+
+        material.next();
+        material.addRotation(object.rotation);
+        material.addPosition(object.xPos, object.yPos);
+        material.renderNumber = this.infoID;
+
+    }
+
+    present () {
+
+        var gl = this.gl;
+        for (var i = 0; i < this._materials.length; i++) {
+
+                var material = this._materials[i];
+                
+                gl.enableVertexAttribArray(material.positionLocation);
+
+
+                gl.enableVertexAttribArray(material.rotationLocation);
+                gl.bindBuffer(gl.ARRAY_BUFFER, material.rotateBuffer);
+                gl.bufferData(gl.ARRAY_BUFFER, material.rotateArray, gl.STATIC_DRAW);
+                // ROTATION
+
+                gl.enableVertexAttribArray(material.offsetLocation);
+                gl.bindBuffer(gl.ARRAY_BUFFER, material.offsetBuffer);
+                gl.bufferData(gl.ARRAY_BUFFER, material.offset, gl.STATIC_DRAW);
+                // OFFSET
+
+                gl.enableVertexAttribArray(material.colorLocation);
+
+                var size = 6;
+                this.exAngleInstance.drawElementsInstancedANGLE(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, 0, material.getLenght());
+
+        }
+
+this._materials
+    }
+
     renderObject (object, camera) {
+
+
+         l = positionLocation;
+                gl.enableVertexAttribArray(l);
+                
+                // POSITION
+
+
+                l = rotationLocation;
+                gl.enableVertexAttribArray(l);
+                gl.bindBuffer(gl.ARRAY_BUFFER, material.rotateBuffer);
+                gl.bufferData(gl.ARRAY_BUFFER, material.rotateArray, gl.STATIC_DRAW);
+                // ROTATION
+                
+
+                l = offsetLocation;
+                gl.enableVertexAttribArray(l);
+                gl.bindBuffer(gl.ARRAY_BUFFER, material.offsetBuffer);
+                gl.bufferData(gl.ARRAY_BUFFER, material.offset, gl.STATIC_DRAW);
+                // OFFSET
+
+                gl.enableVertexAttribArray(colorLocation);
+
+                var size = 6;
+                this.exAngleInstance.drawElementsInstancedANGLE(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, 0, objectList.length);
+
 
 
     }
@@ -23,11 +132,7 @@ class WebGLRenderer extends EventableObject
 
             var o = objectList[0];
 
-            
-            
-            
             if(o instanceof Sprite){
-
 
                 var material = InstancedMaterial.getInstance();
 
@@ -50,8 +155,6 @@ class WebGLRenderer extends EventableObject
                 if(this._lastUUID !== material.shaderProgram.__uuid){
 
                     this._lastUUID = material.shaderProgram.__uuid;
-
-                    
                 }
                 
                 
@@ -82,8 +185,7 @@ class WebGLRenderer extends EventableObject
 
                 l = positionLocation;
                 gl.enableVertexAttribArray(l);
-                gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-                gl.vertexAttribPointer(l, 2, gl.FLOAT, false, 0, 0);
+                
                 // POSITION
 
 
@@ -112,10 +214,6 @@ class WebGLRenderer extends EventableObject
                     objectList[i].draw(this.gl, camera);
                 }
             }
-            
-            
-            
-           
             
         }
 
