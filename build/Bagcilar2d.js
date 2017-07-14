@@ -364,63 +364,129 @@
 	}
 
 	var cccc = 0;
-	class ColorEffect extends DefaultEffect {
+	var MAX_INSTANCE = 1000000;
 
+	var _materialInstance;
+	class InstancedMaterial extends DefaultEffect {
+	    
 	    constructor (color) {
 	        super();
+	        this.count = 0;
 	        this.id = "id_"+cccc++;
 	        this.isUploaded = false;
 	        this._color = color;
+	        
+	        this.offset = new Float32Array( 2 * MAX_INSTANCE);
+	        this.colorArray = new Float32Array( 3 * MAX_INSTANCE);
+	        this.rotateArray = new Float32Array(MAX_INSTANCE);
+	        
+
+	        for (var i = 0; i < this.colorArray.length; i+=3) {
+	            
+	            this.colorArray[i] = Math.random();
+	            this.colorArray[i+1] = Math.random();
+	            this.colorArray[i+2] = Math.random();
+	            
+	        }
+
 	    }
 
-	    upload (gl){
-	        
-	        var vertexShaderSRC =  "uniform mat3 modelMatrix;"+
-	                               "uniform mat3 projectionMatrix;"+
-	                               "uniform mat3 viewMatrix;"+
-	                                "attribute vec2 position;"+      
-	                                "void main() {"+
-	                                "   vec3 pos = vec3(position.x,position.y, 1.0);"+
-	                                "   mat3 m =  projectionMatrix * (modelMatrix * viewMatrix);"+  
-	                                "   vec3 pm = m * pos;"+     
-	                                "   gl_Position = vec4(pm.x,pm.y, 0, 1.0);"+     
-	                                "   gl_PointSize = 10.0;"+     
-	                                "}";
+	    
+	    static getInstance() {
 
-	          var fragmentShaderSRC =   "precision mediump float;"+
-	                                    "uniform vec4 color;"+
-	                                    "void main() {"+        
-	                                    "   gl_FragColor = color;"+     
-	                                    "}";
-
-	        this.fragmentShaderBuffer = gl.createShader(gl.FRAGMENT_SHADER);
-	        gl.shaderSource( this.fragmentShaderBuffer, fragmentShaderSRC );
-	        gl.compileShader( this.fragmentShaderBuffer );
-	        
-	        if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
-	            let finfo = gl.getShaderInfoLog( this.fragmentShaderBuffer );
-	            throw "Could not compile WebGL program. \n\n" + finfo;
+	        if(!_materialInstance){
+	            _materialInstance = new InstancedMaterial();
 	        }
 
-	        this.vertexSahderBuffer = gl.createShader(gl.VERTEX_SHADER);
-	        gl.shaderSource( this.vertexSahderBuffer, vertexShaderSRC );
-	        gl.compileShader( this.vertexSahderBuffer );
+	        return _materialInstance;
+	    }
+	    
+	    reset () {
+	        this.count = 0;
+	    }
+	    
+	    addPosition (x, y) {
 
-	        if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
-	            let info = gl.getShaderInfoLog( this.fragmentShaderBuffer );
-	            throw "Could not compile WebGL program. \n\n" + info;
+	        var index = this.count * 2;
+	        this.offset[index] = x;
+	        this.offset[index + 1] = y;
+	    }
+
+	    addRotation (radian) {
+	        this.rotateArray[this.count] = radian;
+	    }
+
+	    next () {
+	        this.count++;
+	    }
+
+	    upload (gl, angExt){
+	        
+
+	        if(!this.isUploaded)
+	        {
+	             var vertexShaderSRC =  document.getElementById( 'vertexShaderInstanced' ).textContent;
+
+	            var fragmentShaderSRC = document.getElementById( 'fragmentShaderInstanced' ).textContent;
+	            
+	            this.fragmentShaderBuffer = gl.createShader(gl.FRAGMENT_SHADER);
+	            gl.shaderSource( this.fragmentShaderBuffer, fragmentShaderSRC );
+	            gl.compileShader( this.fragmentShaderBuffer );
+	            
+	            if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
+	                let finfo = gl.getShaderInfoLog( this.fragmentShaderBuffer );
+	                throw "Could not compile WebGL program. \n\n" + finfo;
+	            }
+
+	            this.vertexSahderBuffer = gl.createShader(gl.VERTEX_SHADER);
+	            gl.shaderSource( this.vertexSahderBuffer, vertexShaderSRC );
+	            gl.compileShader( this.vertexSahderBuffer );
+
+	            if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
+	                let info = gl.getShaderInfoLog( this.fragmentShaderBuffer );
+	                throw "Could not compile WebGL program. \n\n" + info;
+	            }
+
+	            this.shaderProgram = gl.createProgram();
+	            gl.attachShader(this.shaderProgram, this.vertexSahderBuffer);
+	            gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
+	            gl.linkProgram(this.shaderProgram);
+	            
+	            
+	            this.uniform = new UniformObject(gl,this.shaderProgram);
+
+
+	            var rotationLoc = gl.getAttribLocation(this.shaderProgram,"rotation");
+	            this.rotateBuffer = gl.createBuffer();
+	            gl.bindBuffer(gl.ARRAY_BUFFER, this.rotateBuffer);
+	            gl.bufferData(gl.ARRAY_BUFFER, this.rotateArray, gl.STATIC_DRAW);
+	            gl.vertexAttribPointer(rotationLoc, 1, gl.FLOAT, false, 0, 0);
+	            angExt.vertexAttribDivisorANGLE(rotationLoc , 1);
+
+	            var offsetLoc = gl.getAttribLocation(this.shaderProgram,"offset");
+	            this.offsetBuffer = gl.createBuffer();
+	            gl.bindBuffer(gl.ARRAY_BUFFER, this.offsetBuffer);
+	            gl.bufferData(gl.ARRAY_BUFFER, this.offset, gl.STATIC_DRAW);
+	            gl.vertexAttribPointer(offsetLoc, 2, gl.FLOAT, false, 0, 0);
+	            angExt.vertexAttribDivisorANGLE(offsetLoc , 1);
+
+
+	            var colorLoc = gl.getAttribLocation(this.shaderProgram,"color");
+	            this.colorBuffer = gl.createBuffer();
+	            gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
+	            gl.bufferData(gl.ARRAY_BUFFER, this.colorArray, gl.STATIC_DRAW);
+	            gl.vertexAttribPointer(colorLoc, 3, gl.FLOAT, false, 0, 0);
+	            angExt.vertexAttribDivisorANGLE(colorLoc , 1);
+	            
+	            this.offsetLocation = gl.getAttribLocation(this.shaderProgram,"offset");
+	            this.rotationLocation = gl.getAttribLocation(this.shaderProgram,"rotation");
+	            this.colorLocation = gl.getAttribLocation(this.shaderProgram,"color");
+	            this.positionLocation =  gl.getAttribLocation(this.shaderProgram,"position");
+
+
+	            this.isUploaded = true;
 	        }
-
-
-	        this.shaderProgram = gl.createProgram();
-	        gl.attachShader(this.shaderProgram, this.vertexSahderBuffer);
-	        gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
-	        gl.linkProgram(this.shaderProgram);
-	        this.isUploaded = true;
-
-	        this.uniform = new UniformObject(gl,this.shaderProgram);
-	        this.color = this._color;
-	        this.uniform.setValue("color", this.color.elements);
+	       
 	    }
 	    
 	    set color (value){
@@ -436,12 +502,13 @@
 
 	    draw (gl){
 
-	        if(!this.shaderProgram){
-	            this.upload(gl);
-	        }
-	        
-	        gl.useProgram(this.shaderProgram);
-	        this.uniform.update(gl);
+
+	        // if(!this.shaderProgram){
+	        //     this.upload(gl);
+	        // }
+	        // console.log("use program");
+	        // gl.useProgram(this.shaderProgram);
+	        // this.uniform.update(gl);
 	    }
 
 	}
@@ -559,6 +626,7 @@
 	class ObjectContainer2D extends Object2D {
 	    
 	    constructor (){
+
 	        super();
 	        this.children = [];
 
@@ -589,6 +657,270 @@
 	    }
 	}
 
+	class Sprite extends ObjectContainer2D {
+
+	    constructor () {
+	        super();
+	        
+	        var f = 10;
+	        this.vertices = [
+	            -f,  f, // left - top
+	            -f, -f, // left - bottom
+	            f,  f, // right - top
+	            f, -f, // right - bottom
+	        ];
+
+	        this.color = [Math.random(), Math.random(), Math.random(),1];
+	    }
+
+	    updateMaterial (gl) {
+	        
+	        if(!this.material){
+	            this.material = new InstancedMaterial();
+	        }
+	        
+	        if(!this.material.isUploaded){
+	            this.material.upload(gl);
+	        }
+	    }
+
+	    upload (gl) {
+	        
+	        if(!Sprite._indexBuffer){
+	            this.buffer = gl.createBuffer();
+	            console.log("Sprite > Create Buffer");
+	            gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+	            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
+
+	            this.indices = [0,1,2,  1,3,2];
+	            this.indexBuffer = gl.createBuffer();
+	            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+	            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
+
+	            Sprite._indexBuffer = this.indexBuffer;
+	            Sprite._vertexBuffer = this.buffer;
+	           
+	        } else {
+
+	            this.buffer = Sprite._vertexBuffer;
+	            this.indexBuffer = Sprite._indexBuffer;
+	        }
+	        
+	    }
+
+	    update  () {
+	        super.update();   
+	    }
+
+	    draw  (gl, camera){
+
+	        
+	    }
+	}
+
+	class WebGLRenderer extends EventableObject
+	{
+	    constructor (square, gl) {
+	        super();
+	        this.gl = gl;
+	        this.square = square;
+	        this.exAngleInstance = gl.getExtension('ANGLE_instanced_arrays');
+	    }
+
+	    renderObject (object, camera) {
+
+
+	    }
+
+	    renderObjects (objectList, camera) {
+
+	        var gl = this.gl;
+	        if(objectList.length > 0) {
+
+	            var o = objectList[0];
+
+	            
+	            
+	            
+	            if(o instanceof Sprite){
+
+
+	                var material = InstancedMaterial.getInstance();
+
+	                if(!material.isUploaded) {
+	                    var ext = this.exAngleInstance;
+	                    material.upload(gl, ext);
+	                }
+	                
+	                
+	                
+	                var camera = o.stage.camera;
+	                var uniform = material.uniform;
+
+	                 var positionLocation = material.positionLocation;
+	                var offsetLocation = material.offsetLocation;
+	                var rotationLocation = material.rotationLocation;
+	                var colorLocation = material.colorLocation;
+
+	                
+	                if(this._lastUUID !== material.shaderProgram.__uuid){
+
+	                    this._lastUUID = material.shaderProgram.__uuid;
+
+	                    
+	                }
+	                
+	                
+	               
+	                material.reset();
+	                for(var i = 0; i < objectList.length; i++) {
+	                    
+	                    o = objectList[i];
+
+	                    o.upload(gl , material);
+	                    
+	                    material.addRotation(o.rotation);
+	                    material.addPosition(o.x, o.y);
+
+	                    material.next();
+	                    
+	                }
+	                
+	                var positionBuffer = o.buffer;
+	                
+	                gl.useProgram(material.shaderProgram);
+	                
+	                uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
+	                uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
+	                uniform.update(gl);
+	                
+	                var l;
+
+	                l = positionLocation;
+	                gl.enableVertexAttribArray(l);
+	                gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+	                gl.vertexAttribPointer(l, 2, gl.FLOAT, false, 0, 0);
+	                // POSITION
+
+
+	                l = rotationLocation;
+	                gl.enableVertexAttribArray(l);
+	                gl.bindBuffer(gl.ARRAY_BUFFER, material.rotateBuffer);
+	                gl.bufferData(gl.ARRAY_BUFFER, material.rotateArray, gl.STATIC_DRAW);
+	                // ROTATION
+	                
+
+	                l = offsetLocation;
+	                gl.enableVertexAttribArray(l);
+	                gl.bindBuffer(gl.ARRAY_BUFFER, material.offsetBuffer);
+	                gl.bufferData(gl.ARRAY_BUFFER, material.offset, gl.STATIC_DRAW);
+	                // OFFSET
+
+	                gl.enableVertexAttribArray(colorLocation);
+
+	                var size = 6;
+	                this.exAngleInstance.drawElementsInstancedANGLE(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, 0, objectList.length);
+
+	            } else {
+
+	                for(var i = 0; i < objectList.length; i++) {
+	                    o = objectList[i];
+	                    objectList[i].draw(this.gl, camera);
+	                }
+	            }
+	            
+	            
+	            
+	           
+	            
+	        }
+
+	    }
+	}
+
+	var cccc$1 = 0;
+	class ColorEffect extends DefaultEffect {
+
+	    constructor (color) {
+	        super();
+	        this.id = "id_"+cccc$1++;
+	        this.isUploaded = false;
+	        this._color = color;
+	    }
+
+	    upload (gl){
+	        
+	        var vertexShaderSRC =  "uniform mat3 modelMatrix;"+
+	                               "uniform mat3 projectionMatrix;"+
+	                               "uniform mat3 viewMatrix;"+
+	                                "attribute vec2 position;"+      
+	                                "void main() {"+
+	                                "   vec3 pos = vec3(position.x,position.y, 1.0);"+
+	                                "   mat3 m =  projectionMatrix * (modelMatrix * viewMatrix);"+  
+	                                "   vec3 pm = m * pos;"+     
+	                                "   gl_Position = vec4(pm.x,pm.y, 0, 1.0);"+     
+	                                "   gl_PointSize = 10.0;"+     
+	                                "}";
+
+	          var fragmentShaderSRC =   "precision mediump float;"+
+	                                    "uniform vec4 color;"+
+	                                    "void main() {"+        
+	                                    "   gl_FragColor = color;"+     
+	                                    "}";
+
+	        this.fragmentShaderBuffer = gl.createShader(gl.FRAGMENT_SHADER);
+	        gl.shaderSource( this.fragmentShaderBuffer, fragmentShaderSRC );
+	        gl.compileShader( this.fragmentShaderBuffer );
+	        
+	        if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
+	            let finfo = gl.getShaderInfoLog( this.fragmentShaderBuffer );
+	            throw "Could not compile WebGL program. \n\n" + finfo;
+	        }
+
+	        this.vertexSahderBuffer = gl.createShader(gl.VERTEX_SHADER);
+	        gl.shaderSource( this.vertexSahderBuffer, vertexShaderSRC );
+	        gl.compileShader( this.vertexSahderBuffer );
+
+	        if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
+	            let info = gl.getShaderInfoLog( this.fragmentShaderBuffer );
+	            throw "Could not compile WebGL program. \n\n" + info;
+	        }
+
+
+	        this.shaderProgram = gl.createProgram();
+	        gl.attachShader(this.shaderProgram, this.vertexSahderBuffer);
+	        gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
+	        gl.linkProgram(this.shaderProgram);
+	        this.isUploaded = true;
+
+	        this.uniform = new UniformObject(gl,this.shaderProgram);
+	        this.color = this._color;
+	        this.uniform.setValue("color", this.color.elements);
+	    }
+	    
+	    set color (value){
+	        
+	        this._color = value;
+	    }
+
+	    get color (){
+
+	        return this._color;
+	    }
+
+
+	    draw (gl){
+
+	        if(!this.shaderProgram){
+	            this.upload(gl);
+	        }
+	        
+	        gl.useProgram(this.shaderProgram);
+	        this.uniform.update(gl);
+	    }
+
+	}
+
 	class Square extends ObjectContainer2D {
 	        
 	        static get ENTER_FRAME () { return "enterFrame"; }
@@ -596,12 +928,15 @@
 	        constructor (canvasID) {
 	            
 	            super(canvasID);
+	            this.min = 500000;
+	            this.max = -500000;
 	            this.stage = this;
 	            if(canvasID !== undefined){
 	                
 	                var canvas =  document.getElementById(canvasID);
-	                var  gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-	                
+	                //var  gl = canvas.getContext("webgl2") || canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+	                var  gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");  // webgl2 disabled for now
+	               
 	                if(!gl){
 	                
 	                    var error = "WebGL isn't supported on device";
@@ -610,6 +945,9 @@
 	                } 
 
 	                this.renderDom = canvas;
+	                if(gl.hasOwnProperty("rawgl")){
+	                    gl = gl.rawgl;
+	                }
 	                this.setWebGLContext(gl);
 	                this.init();
 	            }
@@ -623,7 +961,15 @@
 	        }
 	        
 	        setWebGLContext (gl) {
-	            this.context = gl; 
+	            this.context = gl;
+
+	             if(gl instanceof WebGLRenderingContext) {
+	                this.renderer = new WebGLRenderer(this,gl);
+
+	                gl.enable(gl.DEPTH_TEST);
+	                gl.viewport(0, 0, this.renderDom.width, this.renderDom.height);
+	                gl.clearColor(0.6, 0.6, 0.6, 1.0);
+	             }
 	        }
 
 	        setAutoUpdate (b) {
@@ -651,11 +997,10 @@
 	        update () {
 	            
 	            
+	            var up = performance.now();
 	            this.dispacthEvent(Square.ENTER_FRAME, undefined);
 	            var gl = this.context;
-	            gl.enable(gl.DEPTH_TEST);
-	            gl.viewport(0, 0, this.renderDom.width, this.renderDom.height);
-	            gl.clearColor(0.6, 0.6, 0.6, 1.0);
+	            
 	            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 	            // Enable depth testing
@@ -666,9 +1011,43 @@
 
 	            super.update();
 
+	            this._renObjects = undefined;
+	            this._spriteRenderObjects = undefined;
+	            this.collectObjects(this.children);
 	            
-	            drawObjects(this.children, gl, this.camera);
+	            this.renderer.renderObjects(this._spriteRenderObjects, this.camera);
+
+	            for (var str in this._renObjects) {
+	                
+	                if (this._renObjects.hasOwnProperty(str)){
+	                    this.renderer.renderObjects(this._renObjects[str], this.camera);
+	                }
+
+	            }
+
+	            if(this.inf === undefined){
+	                this.inf = 0;
+	            }
+
+	            up = performance.now() - up;
+	            this.inf += 0.1;
+	            if(up < this.min && this.inf > 1){
+	                this.min = up;
+	                this.inf = 0;
+	                console.log("updated");
+	                document.getElementById("framef").innerHTML = up;
+	            }
 	            
+	            if(this.isFirst && up > this.max){
+	                this.max = up;
+	                document.getElementById("frameMax").innerHTML = up;
+	            }
+
+	            this.isFirst = true;
+	            
+	            
+	            //console.log(this._renObjects);
+	            //drawObjects(this.renderer, this.children, gl, this.camera);
 	            // if(this.testChilderen){
 
 	            //     for (var i = 0; i < this.testChilderen.length; i++) {
@@ -676,19 +1055,43 @@
 	            //     }
 	            // }
 
-
-
 	        }
-
-	    }
-
-
-	    function drawObjects(objects, context, camera) {
 	        
-	        for (var i = 0; i < objects.length; i++) {
-	            var element = objects[i];
-	            element.draw(context, camera);
-	            drawObjects(element.children, context, camera);
+	        collectObjects (children) {
+
+	            if(!this._renObjects){
+	                this._renObjects = {};
+	            }
+
+	            if(!this._spriteRenderObjects){
+	                this._spriteRenderObjects = [];
+	            }
+
+	            
+	            for (var i = 0; i < children.length; i++) {
+	                
+	                var a = children[i];
+	                
+	                if(a instanceof Sprite){
+	                    
+	                    this._spriteRenderObjects.push(a);
+
+	                } else {
+
+	                    if(!this._renObjects.hasOwnProperty(a.material.id)){
+	                        this._renObjects[a.material.id] = [];
+	                    }
+
+	                    var ar = this._renObjects[a.material.id];
+	                    ar.push(a);
+
+	                }
+
+
+	                
+
+	            }
+
 	        }
 
 	    }
@@ -1122,14 +1525,17 @@
 	exports.Vector2 = Vector2;
 	exports.Matrix3 = Matrix3;
 	exports.Color = Color;
+	exports.WebGLRenderer = WebGLRenderer;
 	exports.DefaultEffect = DefaultEffect;
 	exports.ColorEffect = ColorEffect;
+	exports.InstancedMaterial = InstancedMaterial;
 	exports.Square = Square;
 	exports.Object2D = Object2D;
 	exports.ObjectContainer2D = ObjectContainer2D;
 	exports.Sprite2D = Sprite2D;
 	exports.Quad = Quad;
 	exports.TestSprite = TestSprite;
+	exports.Sprite = Sprite;
 	exports.Camera = Camera;
 
 	Object.defineProperty(exports, '__esModule', { value: true });
