@@ -108,7 +108,7 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
 
             this.renderChild();
            //this.renderRecursively(this);
-           this.renderer.present();
+          this.renderer.present();
 
         }
 
@@ -116,7 +116,7 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
 
             for (var i = 0; i < this.children.length; i++) {
                 
-                this.renderer.renderSingleObject(this.children[i]);
+                this.renderer.renderSingleObject(this.children[i], this.camera);
                 
             }
 

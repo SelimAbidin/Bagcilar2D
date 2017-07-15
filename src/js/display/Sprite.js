@@ -20,13 +20,12 @@ class Sprite extends ObjectContainer2D {
         ];
 
         this.color = [Math.random(), Math.random(), Math.random(),1];
+         this.material = InstancedMaterial.getInstance();
     }
 
     updateMaterial (gl) {
         
-        if(!this.material){
-            this.material = new InstancedMaterial();
-        }
+       
         
         if(!this.material.isUploaded){
             this.material.upload(gl);

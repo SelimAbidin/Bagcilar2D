@@ -138,6 +138,31 @@
     // 0.00392156863      0                 1
     
 
+    //var tar = new Float32Array(300000);
+    var tar = [];
+
+    // for (var i = 0; i < 300000; i++) {
+    //     tar[i] = 0;
+        
+    // }
+
+    // function typedArrayTest() {
+
+
+    //     for (var i = 0; i < tar.length; i++) {
+            
+    //         //tar.set([12], i);
+    //         tar[i] = 12;
+    //     }
+
+    //     var test =  new Float32Array(tar)
+    //     requestAnimationFrame(typedArrayTest);
+
+    // }
+
+
+    // typedArrayTest();
+
     function init(){
 
 
@@ -152,9 +177,9 @@
       
 
         window.meydan = new Bagcilar.Square("renderCanvas");
-        window.meydan.addEventListener(Bagcilar.Square.ENTER_FRAME, this, enterFrame);
+        //window.meydan.addEventListener(Bagcilar.Square.ENTER_FRAME, this, enterFrame);
         meydan.camera = new Bagcilar.Camera();
-        //meydan.setAutoUpdate(false);
+       // meydan.setAutoUpdate(false);
         //var a =  new Bagcilar.TestSprite();
         //meydan.addChild(a);
         
@@ -297,13 +322,22 @@
 
     function dataEkle(){
 
-        for (var i = 0; i < 60000; i++) {
+        for (var i = 0; i < 300000; i++) {
             ekle();            
         }
 
         document.getElementById('btn').innerHTML = "Kare Ekle (" + sprites.length + ")";
 
     }
+
+
+
+
+
+
+
+
+    
 
 </script>
 <body onload="init()">

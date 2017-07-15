@@ -18,50 +18,50 @@ class WebGLRenderer extends EventableObject
         this.infoID++;
     }
 
-    renderSingleObject (object) {
+    renderSingleObject (object, camera) {
 
         var gl = this.gl;
-        var material = object.material || InstancedMaterial.getInstance();
-        var camera = object.stage.camera;
+        var material = object.material;
+
+        this.useMaterial(material, camera);
+        
+        object.upload(gl , material);
 
         
+        material.next();
+        //material.addRotation(object.rotation);
+        //material.addPosition(object.xPos, object.yPos);
+        /*
+        */
+
+        material.renderNumber = this.infoID;
+    }
+
+    useMaterial (material, camera) {
+
         if(!material.isUploaded) {
             var ext = this.exAngleInstance;
-            material.upload(gl, ext);
+            material.upload(this.gl, ext);
         }
 
         if(material.id != this.lastMaterialID) {
 
-            gl.useProgram(material.shaderProgram);
-        this.lastMaterialID = material.id;
+            this.gl.useProgram(material.shaderProgram);
+            this.lastMaterialID = material.id;
         }
-        
+
 
         var uniform = material.uniform;
-        var positionLocation = material.positionLocation;
-        var offsetLocation = material.offsetLocation;
-        var rotationLocation = material.rotationLocation;
-        var colorLocation = material.colorLocation;
-
+       
         if(material.renderNumber !== this.infoID){
             
-            material.reset();
+            material.reset();  
             this._materials.push(material);
-
             uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
             uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
-            uniform.update(gl);
+            uniform.update(this.gl);
 
-            
         }
-        
-        object.upload(gl , material);
-
-        material.next();
-        material.addRotation(object.rotation);
-        material.addPosition(object.xPos, object.yPos);
-        material.renderNumber = this.infoID;
-
     }
 
     present () {
@@ -76,12 +76,14 @@ class WebGLRenderer extends EventableObject
 
                 gl.enableVertexAttribArray(material.rotationLocation);
                 gl.bindBuffer(gl.ARRAY_BUFFER, material.rotateBuffer);
-                gl.bufferData(gl.ARRAY_BUFFER, material.rotateArray, gl.STATIC_DRAW);
+                gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.rotateArray);
+                //gl.bufferData(gl.ARRAY_BUFFER, material.rotateArray, gl.DYNAMIC_DRAW);
                 // ROTATION
 
                 gl.enableVertexAttribArray(material.offsetLocation);
                 gl.bindBuffer(gl.ARRAY_BUFFER, material.offsetBuffer);
-                gl.bufferData(gl.ARRAY_BUFFER, material.offset, gl.STATIC_DRAW);
+                gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.offset);
+                //gl.bufferData(gl.ARRAY_BUFFER, material.offset, gl.DYNAMIC_DRAW);
                 // OFFSET
 
                 gl.enableVertexAttribArray(material.colorLocation);

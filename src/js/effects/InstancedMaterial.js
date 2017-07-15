@@ -2,7 +2,7 @@ import {DefaultEffect} from "./DefaultEffect";
 import {Color} from "../math/Color";
 import {UniformObject} from "../core/UniformObject";
 var cccc = 0;
-var MAX_INSTANCE = 1000000;
+var MAX_INSTANCE = 350000;
 
 var _materialInstance;
 class InstancedMaterial extends DefaultEffect {
@@ -15,6 +15,14 @@ class InstancedMaterial extends DefaultEffect {
         this._color = color;
         
         this.offset = new Float32Array( 2 * MAX_INSTANCE);
+
+        // var osize = 2 * MAX_INSTANCE;
+        // this.offset = [];
+        // for (var i = 0; i < osize; i++) {
+        //     this.offset[i] = (Math.random() * 300) - 150
+            
+        // }
+        
         this.colorArray = new Float32Array( 3 * MAX_INSTANCE);
         this.rotateArray = new Float32Array(MAX_INSTANCE);
         
@@ -101,14 +109,14 @@ class InstancedMaterial extends DefaultEffect {
             var rotationLoc = gl.getAttribLocation(this.shaderProgram,"rotation");
             this.rotateBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, this.rotateBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, this.rotateArray, gl.STATIC_DRAW);
+            gl.bufferData(gl.ARRAY_BUFFER, this.rotateArray, gl.DYNAMIC_DRAW);
             gl.vertexAttribPointer(rotationLoc, 1, gl.FLOAT, false, 0, 0);
             angExt.vertexAttribDivisorANGLE(rotationLoc , 1);
 
             var offsetLoc = gl.getAttribLocation(this.shaderProgram,"offset");
             this.offsetBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, this.offsetBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, this.offset, gl.STATIC_DRAW);
+            gl.bufferData(gl.ARRAY_BUFFER, this.offset, gl.DYNAMIC_DRAW);
             gl.vertexAttribPointer(offsetLoc, 2, gl.FLOAT, false, 0, 0);
             angExt.vertexAttribDivisorANGLE(offsetLoc , 1);
 
