@@ -25,6 +25,15 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
                     this.dispatchEvent(Square.ERROR , { message : error });
 
                 } 
+                
+                var instanced = gl.getExtension('ANGLE_instanced_arrays');
+                
+
+                if(!instanced) {
+                    alert("Instanced doesn't work");
+                }
+
+
 
                 this.renderDom = canvas;
                 if(gl.hasOwnProperty("rawgl")){
@@ -214,7 +223,6 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
 
     function updateMeydans(){
 
-        window.stats.begin();
 
         for (var i = 0; i < _meydanInstances.length; i++) {
             _meydanInstances[i].update2();
@@ -224,7 +232,6 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
             requestAnimationFrame(updateMeydans);
         }
 
-        window.stats.end();
     }
 
 export {Square};

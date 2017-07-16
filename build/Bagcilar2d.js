@@ -184,7 +184,7 @@
 	    setMatrix  (    
 	                n00, n10, n20, 
 	                n01, n11, n21,
-	                n02, n12, n22,
+	                n02, n12, n22 
 	                ){
 
 	        var m = this.matrixArray;
@@ -378,7 +378,7 @@
 	        this._color = color;
 	        
 	        this.offset = new Float32Array( 2 * MAX_INSTANCE);
-
+	       
 	        
 	        this.colorArray = new Float32Array( 3 * MAX_INSTANCE);
 	        this.rotateArray = new Float32Array(MAX_INSTANCE);
@@ -389,7 +389,6 @@
 	            this.colorArray[i] = Math.random();
 	            this.colorArray[i+1] = Math.random();
 	            this.colorArray[i+2] = Math.random();
-	            
 	        }
 
 	    }
@@ -1056,6 +1055,15 @@
 	                    this.dispatchEvent(Square.ERROR , { message : error });
 
 	                } 
+	                
+	                var instanced = gl.getExtension('ANGLE_instanced_arrays');
+	                
+
+	                if(!instanced) {
+	                    alert("Instanced doesn't work");
+	                }
+
+
 
 	                this.renderDom = canvas;
 	                if(gl.hasOwnProperty("rawgl")){
@@ -1233,7 +1241,6 @@
 
 	    function updateMeydans(){
 
-	        window.stats.begin();
 
 	        for (var i = 0; i < _meydanInstances.length; i++) {
 	            _meydanInstances[i].update2();
@@ -1243,7 +1250,6 @@
 	            requestAnimationFrame(updateMeydans);
 	        }
 
-	        window.stats.end();
 	    }
 
 	function Sprite2D (){
