@@ -16,12 +16,6 @@ class InstancedMaterial extends DefaultEffect {
         
         this.offset = new Float32Array( 2 * MAX_INSTANCE);
 
-        // var osize = 2 * MAX_INSTANCE;
-        // this.offset = [];
-        // for (var i = 0; i < osize; i++) {
-        //     this.offset[i] = (Math.random() * 300) - 150
-            
-        // }
         
         this.colorArray = new Float32Array( 3 * MAX_INSTANCE);
         this.rotateArray = new Float32Array(MAX_INSTANCE);

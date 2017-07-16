@@ -379,12 +379,6 @@
 	        
 	        this.offset = new Float32Array( 2 * MAX_INSTANCE);
 
-	        // var osize = 2 * MAX_INSTANCE;
-	        // this.offset = [];
-	        // for (var i = 0; i < osize; i++) {
-	        //     this.offset[i] = (Math.random() * 300) - 150
-	            
-	        // }
 	        
 	        this.colorArray = new Float32Array( 3 * MAX_INSTANCE);
 	        this.rotateArray = new Float32Array(MAX_INSTANCE);
@@ -765,8 +759,8 @@
 
 	        
 	        material.next();
-	        //material.addRotation(object.rotation);
-	        //material.addPosition(object.xPos, object.yPos);
+	        material.addRotation(object.rotation);
+	        material.addPosition(object.xPos, object.yPos);
 	        /*
 	        */
 
@@ -819,7 +813,6 @@
 	                gl.enableVertexAttribArray(material.offsetLocation);
 	                gl.bindBuffer(gl.ARRAY_BUFFER, material.offsetBuffer);
 	                gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.offset);
-	                //gl.bufferData(gl.ARRAY_BUFFER, material.offset, gl.DYNAMIC_DRAW);
 	                // OFFSET
 
 	                gl.enableVertexAttribArray(material.colorLocation);

@@ -29,8 +29,8 @@ class WebGLRenderer extends EventableObject
 
         
         material.next();
-        //material.addRotation(object.rotation);
-        //material.addPosition(object.xPos, object.yPos);
+        material.addRotation(object.rotation);
+        material.addPosition(object.xPos, object.yPos);
         /*
         */
 
@@ -83,7 +83,6 @@ class WebGLRenderer extends EventableObject
                 gl.enableVertexAttribArray(material.offsetLocation);
                 gl.bindBuffer(gl.ARRAY_BUFFER, material.offsetBuffer);
                 gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.offset);
-                //gl.bufferData(gl.ARRAY_BUFFER, material.offset, gl.DYNAMIC_DRAW);
                 // OFFSET
 
                 gl.enableVertexAttribArray(material.colorLocation);

@@ -177,7 +177,7 @@
       
 
         window.meydan = new Bagcilar.Square("renderCanvas");
-        //window.meydan.addEventListener(Bagcilar.Square.ENTER_FRAME, this, enterFrame);
+        window.meydan.addEventListener(Bagcilar.Square.ENTER_FRAME, this, enterFrame);
         meydan.camera = new Bagcilar.Camera();
        // meydan.setAutoUpdate(false);
         //var a =  new Bagcilar.TestSprite();
@@ -305,7 +305,7 @@
 
          var start = new Date().getTime();
 
-         for (var i = 0; i < 120000; i++) {
+         for (var i = 0; i < 151000; i++) {
              
              var a = {};
              a.x = Math.random() * 100;
