@@ -46,7 +46,10 @@ class WebGLRenderer extends EventableObject
 
         if(material.id != this.lastMaterialID) {
 
-            this.gl.useProgram(material.shaderProgram);
+            var gl = this.gl;
+            gl.useProgram(material.shaderProgram);
+            gl.activeTexture(gl.TEXTURE0);
+
             this.lastMaterialID = material.id;
         }
 
@@ -59,6 +62,7 @@ class WebGLRenderer extends EventableObject
             this._materials.push(material);
             uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
             uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
+            uniform.setValue("uSampler", 0);
             uniform.update(this.gl);
 
         }
@@ -72,7 +76,7 @@ class WebGLRenderer extends EventableObject
                 var material = this._materials[i];
                 
                 gl.enableVertexAttribArray(material.positionLocation);
-
+                gl.enableVertexAttribArray(material.uvLocation);
 
                 gl.enableVertexAttribArray(material.rotationLocation);
                 gl.bindBuffer(gl.ARRAY_BUFFER, material.rotateBuffer);
@@ -95,10 +99,11 @@ class WebGLRenderer extends EventableObject
 this._materials
     }
 
+    /*
     renderObject (object, camera) {
 
 
-         l = positionLocation;
+                  l = positionLocation;
                 gl.enableVertexAttribArray(l);
                 
                 // POSITION
@@ -125,6 +130,9 @@ this._materials
 
 
     }
+
+*/
+    /*
 
     renderObjects (objectList, camera) {
 
@@ -219,6 +227,7 @@ this._materials
         }
 
     }
+    */
 }
 
 export {WebGLRenderer}

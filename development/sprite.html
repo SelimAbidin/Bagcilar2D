@@ -16,6 +16,7 @@
     attribute float rotation;
     attribute vec3 color;
     varying vec3 colorVar;
+    varying vec2 uvVar;
 
     mat3 getRotationMatrix(float r){
         mat3 rotationM = mat3(
@@ -52,6 +53,7 @@
             0,0,1
         );
         
+        uvVar = uv;
         float xx = offset.x + rotation;
         vec3 worlPosition = modeViewProjection * pos3V;
         gl_Position = vec4(worlPosition.x, worlPosition.y, -0.1, 1.0);
@@ -62,8 +64,11 @@
 <script id="fragmentShaderInstanced" type="x-shader/x-fragment">
     precision mediump float;
     varying vec3 colorVar;
+    varying vec2 uvVar;
+    uniform sampler2D uSampler;
+
     void main() {        
-        gl_FragColor = vec4(colorVar,1.0);
+        gl_FragColor = texture2D(uSampler, uvVar);
     }
 </script>
 
@@ -95,7 +100,7 @@
 
     function baslat() {
         
-           window.stats = new Stats();
+        window.stats = new Stats();
         document.body.appendChild( stats.domElement );
         stats.domElement.style.position = "absolute";
         stats.domElement.style.top = "0px";
@@ -105,8 +110,9 @@
         meydan.camera = new Bagcilar.Camera();
         meydan.setAutoUpdate(false);
         window.sprites = [];
-        
-      
+
+        dataEkle();
+
         var sp;
         function enterFrame(event) {
            
@@ -129,11 +135,11 @@
                 } else if(sp.yPos >= 300){
                     sp.yPos = 300;
                     sp.vy *= -1;
-                    sp.rv = sp.vy * .2;
+                    sp.rv = sp.vy * .01;
                 } else if(sp.yPos <= -300) {
                     sp.yPos = -300;
                     sp.vy *= -1;
-                    sp.rv = sp.vy * .2;
+                    sp.rv = sp.vy * .01;
                 }
             }
 
@@ -148,17 +154,16 @@
 
 
 
-    function dataEkle(){
-
-        for (var i = 0; i < 60000; i++) {
-            ekle();            
-        }
-
-        document.getElementById('btn').innerHTML = "Kare Ekle (" + sprites.length + ")";
+    function dataEkle() {
+        
+        var sp = new Bagcilar.Sprite();
+        meydan.addChild(sp);
+        sp.vx = 1 + Math.random() * 2;
+        sp.vy = 1 + Math.random() * 2;
+        sp.rv = Math.random() * 0.1;
+        sprites.push(sp);
 
     }
-
-
 
 
     function updateScreen() {
@@ -166,7 +171,6 @@
         stats.begin();
         meydan.update2();
         requestAnimationFrame(updateScreen);
-
         stats.end();
     }
 

@@ -15,12 +15,11 @@ class InstancedMaterial extends DefaultEffect {
         this._color = color;
         
         this.offset = new Float32Array( 2 * MAX_INSTANCE);
-       
         
         this.colorArray = new Float32Array( 3 * MAX_INSTANCE);
         this.rotateArray = new Float32Array(MAX_INSTANCE);
         
-
+        
         for (var i = 0; i < this.colorArray.length; i+=3) {
             
             this.colorArray[i] = Math.random();
@@ -125,7 +124,18 @@ class InstancedMaterial extends DefaultEffect {
             this.rotationLocation = gl.getAttribLocation(this.shaderProgram,"rotation");
             this.colorLocation = gl.getAttribLocation(this.shaderProgram,"color");
             this.positionLocation =  gl.getAttribLocation(this.shaderProgram,"position");
+            this.uvLocation =  gl.getAttribLocation(this.shaderProgram,"uv");
+            this.texture0Location =  gl.getUniformLocation(this.shaderProgram,"uSampler");
 
+
+            var texture = gl.createTexture();
+            var image = window.flame;
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+            gl.generateMipmap(gl.TEXTURE_2D);
+            gl.bindTexture(gl.TEXTURE_2D, texture);
 
             this.isUploaded = true;
         }

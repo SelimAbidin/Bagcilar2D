@@ -96,6 +96,10 @@
 	     gl.uniform4fv(uniObject.location , uniObject.value);
 	}
 
+	function uniform1i(gl, uniObject){
+	     gl.uniform1i(uniObject.location , uniObject.value);
+	}
+
 
 	class UniformObject extends EventableObject {
 
@@ -120,9 +124,11 @@
 	            case 35675: // matrix3
 	                return matrix3Fv;
 	            case 35666:
-	                return vector3Fv
-	        
+	                return vector3Fv;
+	            case 35678: 
+	                return uniform1i;
 	            default:
+	                console.log("yoktipi");
 	                break;
 	        }
 	        return 
@@ -378,12 +384,11 @@
 	        this._color = color;
 	        
 	        this.offset = new Float32Array( 2 * MAX_INSTANCE);
-	       
 	        
 	        this.colorArray = new Float32Array( 3 * MAX_INSTANCE);
 	        this.rotateArray = new Float32Array(MAX_INSTANCE);
 	        
-
+	        
 	        for (var i = 0; i < this.colorArray.length; i+=3) {
 	            
 	            this.colorArray[i] = Math.random();
@@ -488,7 +493,18 @@
 	            this.rotationLocation = gl.getAttribLocation(this.shaderProgram,"rotation");
 	            this.colorLocation = gl.getAttribLocation(this.shaderProgram,"color");
 	            this.positionLocation =  gl.getAttribLocation(this.shaderProgram,"position");
+	            this.uvLocation =  gl.getAttribLocation(this.shaderProgram,"uv");
+	            this.texture0Location =  gl.getUniformLocation(this.shaderProgram,"uSampler");
 
+
+	            var texture = gl.createTexture();
+	            var image = window.flame;
+	            gl.bindTexture(gl.TEXTURE_2D, texture);
+	            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+	            gl.generateMipmap(gl.TEXTURE_2D);
+	            gl.bindTexture(gl.TEXTURE_2D, texture);
 
 	            this.isUploaded = true;
 	        }
@@ -677,6 +693,14 @@
 	            f, -f, // right - bottom
 	        ];
 
+	        this.uv = [
+	            0,1,
+	            0,0,
+	            1,1,
+	            1,0
+	        ];
+	        
+
 	        this.color = [Math.random(), Math.random(), Math.random(),1];
 	         this.material = InstancedMaterial.getInstance();
 	    }
@@ -698,8 +722,7 @@
 	            gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
 	            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
 
-	             var positionLocation = material.positionLocation;
-	            
+	            var positionLocation = material.positionLocation;
 	            gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
 	            this.indices = [0,1,2,  1,3,2];
@@ -707,15 +730,20 @@
 	            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
 	            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
 
-	            
+	            this.uvBuffer = gl.createBuffer();
+	            gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
+	            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.uv), gl.STATIC_DRAW);
+	            gl.vertexAttribPointer(material.uvLocation, 2, gl.FLOAT, false, 0, 0);
+
+	        
 	            Sprite._indexBuffer = this.indexBuffer;
 	            Sprite._vertexBuffer = this.buffer;
-
-	           
+	            Sprite._uvBuffer = this.uvBuffer;
 	           
 	        } else {
 
 	            this.buffer = Sprite._vertexBuffer;
+	            this.uvBuffer = Sprite._uvBuffer;
 	            this.indexBuffer = Sprite._indexBuffer;
 	        }
 	        
@@ -775,7 +803,10 @@
 
 	        if(material.id != this.lastMaterialID) {
 
-	            this.gl.useProgram(material.shaderProgram);
+	            var gl = this.gl;
+	            gl.useProgram(material.shaderProgram);
+	            gl.activeTexture(gl.TEXTURE0);
+
 	            this.lastMaterialID = material.id;
 	        }
 
@@ -788,6 +819,7 @@
 	            this._materials.push(material);
 	            uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
 	            uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
+	            uniform.setValue("uSampler", 0);
 	            uniform.update(this.gl);
 
 	        }
@@ -801,7 +833,7 @@
 	                var material = this._materials[i];
 	                
 	                gl.enableVertexAttribArray(material.positionLocation);
-
+	                gl.enableVertexAttribArray(material.uvLocation);
 
 	                gl.enableVertexAttribArray(material.rotationLocation);
 	                gl.bindBuffer(gl.ARRAY_BUFFER, material.rotateBuffer);
@@ -824,10 +856,11 @@
 	this._materials;
 	    }
 
+	    /*
 	    renderObject (object, camera) {
 
 
-	         l = positionLocation;
+	                  l = positionLocation;
 	                gl.enableVertexAttribArray(l);
 	                
 	                // POSITION
@@ -854,6 +887,9 @@
 
 
 	    }
+
+	*/
+	    /*
 
 	    renderObjects (objectList, camera) {
 
@@ -948,6 +984,7 @@
 	        }
 
 	    }
+	    */
 	}
 
 	var cccc$1 = 0;
