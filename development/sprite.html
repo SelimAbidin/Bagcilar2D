@@ -84,16 +84,13 @@
 
     function init(){
 
-
         window.flame = new Image();
         window.flame.onload = function() {
-
             
             baslat();
         }
 
-        flame.src = "flame.png"; 
-        
+        flame.src = "face.png"; 
     }
     
 
@@ -165,10 +162,21 @@
 
     }
 
+    function cokDataEkle() {
+        
+        for (var i = 0; i < 10000; i++) {
+            dataEkle();
+            
+        }
+
+
+        document.getElementById("btn").innerHTML =  "Kare Ekle ("+sprites.length+")"
+    }
+
 
     function updateScreen() {
 
-        stats.begin();
+       stats.begin();
         meydan.update2();
         requestAnimationFrame(updateScreen);
         stats.end();
@@ -183,6 +191,6 @@
 
 <div id="framef"></div>
 <div id="frameMax"></div>
-<button id="btn" onclick="dataEkle()"> Kare Ekle </button>
+<button id="btn" onclick="cokDataEkle()"> Kare Ekle </button>
 </body>
 </html>

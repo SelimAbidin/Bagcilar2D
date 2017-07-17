@@ -1157,15 +1157,19 @@
 	            // this.update();
 	            this.dispacthEvent(Square.ENTER_FRAME, undefined);
 	            var gl = this.context;
+
+	            //gl.DEPTH_BUFFER_BIT
+	            gl.clear(gl.COLOR_BUFFER_BIT);
+	            //gl.disable(gl.STENCIL_TEST);
+	           // gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+
+
 	            
-	            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-
-
-	            // Enable depth testing
-	            //gl.enable(gl.DEPTH_TEST);
-	            // Near things obscure far things
-	            //gl.depthFunc(gl.LEQUAL);
+	                // Enable depth testing
+	            gl.enable(gl.DEPTH_TEST);
+	            gl.depthFunc(gl.LEQUAL);
+	            // // Near things obscure far things
+	           // gl.depthFunc(gl.LEQUAL);
 	            // Clear the color as well as the depth buffer.
 
 	           
