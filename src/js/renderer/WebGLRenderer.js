@@ -25,7 +25,7 @@ class WebGLRenderer extends EventableObject
 
         this.useMaterial(material, camera);
         
-        object.upload(gl , material);
+       // object.upload(gl , material);
 
         
         material.next();
@@ -47,8 +47,8 @@ class WebGLRenderer extends EventableObject
         if(material.id != this.lastMaterialID) {
 
             var gl = this.gl;
-            gl.useProgram(material.shaderProgram);
-            gl.activeTexture(gl.TEXTURE0);
+            //gl.useProgram(material.shaderProgram);
+            //gl.activeTexture(gl.TEXTURE0);
 
             this.lastMaterialID = material.id;
         }
@@ -60,174 +60,57 @@ class WebGLRenderer extends EventableObject
             
             material.reset();  
             this._materials.push(material);
-            uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
-            uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
-            uniform.setValue("uSampler", 0);
-            uniform.update(this.gl);
+            
 
         }
     }
 
-    present () {
+    present (camera) {
 
         var gl = this.gl;
         for (var i = 0; i < this._materials.length; i++) {
 
                 var material = this._materials[i];
-                
-                gl.enableVertexAttribArray(material.positionLocation);
-                gl.enableVertexAttribArray(material.uvLocation);
+                var gl = this.gl;
 
-                gl.enableVertexAttribArray(material.rotationLocation);
-                gl.bindBuffer(gl.ARRAY_BUFFER, material.rotateBuffer);
-                gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.rotateArray);
-                //gl.bufferData(gl.ARRAY_BUFFER, material.rotateArray, gl.DYNAMIC_DRAW);
+
+                //gl.bindBuffer(gl.ARRAY_BUFFER, material.rotateBuffer);
+                //gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.rotateArray);
                 // ROTATION
 
-                gl.enableVertexAttribArray(material.offsetLocation);
-                gl.bindBuffer(gl.ARRAY_BUFFER, material.offsetBuffer);
-                gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.offset);
+
+                //gl.bindBuffer(gl.ARRAY_BUFFER, material.offsetBuffer);
+                //gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.offset);
                 // OFFSET
-
-                gl.enableVertexAttribArray(material.colorLocation);
-
-                var size = 6;
-                this.exAngleInstance.drawElementsInstancedANGLE(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, 0, material.getLenght());
-
-        }
-
-this._materials
-    }
-
-    /*
-    renderObject (object, camera) {
-
-
-                  l = positionLocation;
-                gl.enableVertexAttribArray(l);
                 
-                // POSITION
-
-
-                l = rotationLocation;
-                gl.enableVertexAttribArray(l);
-                gl.bindBuffer(gl.ARRAY_BUFFER, material.rotateBuffer);
-                gl.bufferData(gl.ARRAY_BUFFER, material.rotateArray, gl.STATIC_DRAW);
-                // ROTATION
-                
-
-                l = offsetLocation;
-                gl.enableVertexAttribArray(l);
-                gl.bindBuffer(gl.ARRAY_BUFFER, material.offsetBuffer);
-                gl.bufferData(gl.ARRAY_BUFFER, material.offset, gl.STATIC_DRAW);
-                // OFFSET
-
-                gl.enableVertexAttribArray(colorLocation);
-
-                var size = 6;
-                this.exAngleInstance.drawElementsInstancedANGLE(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, 0, objectList.length);
-
-
-
-    }
-
-*/
-    /*
-
-    renderObjects (objectList, camera) {
-
-        var gl = this.gl;
-        if(objectList.length > 0) {
-
-            var o = objectList[0];
-
-            if(o instanceof Sprite){
-
-                var material = InstancedMaterial.getInstance();
-
-                if(!material.isUploaded) {
-                    var ext = this.exAngleInstance;
-                    material.upload(gl, ext);
-                }
-                
-                
-                
-                var camera = o.stage.camera;
-                var uniform = material.uniform;
-
-                 var positionLocation = material.positionLocation;
-                var offsetLocation = material.offsetLocation;
-                var rotationLocation = material.rotationLocation;
-                var colorLocation = material.colorLocation;
-
-                
-                if(this._lastUUID !== material.shaderProgram.__uuid){
-
-                    this._lastUUID = material.shaderProgram.__uuid;
-                }
-                
-                
-               
-                material.reset();
-                for(var i = 0; i < objectList.length; i++) {
-                    
-                    o = objectList[i];
-
-                    o.upload(gl , material);
-                    
-                    material.addRotation(o.rotation);
-                    material.addPosition(o.x, o.y);
-
-                    material.next();
-                    
-                }
-                
-                var positionBuffer = o.buffer;
                 
                 gl.useProgram(material.shaderProgram);
                 
+                var uniform = material.uniform;
                 uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
                 uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
-                uniform.update(gl);
+                uniform.setValue("uSampler", 0);
+                uniform.update(this.gl);
+
+                                gl.activeTexture(gl.TEXTURE0);
+
                 
-                var l;
-
-                l = positionLocation;
-                gl.enableVertexAttribArray(l);
+                gl.enableVertexAttribArray(material.rotationLocation);
+                gl.enableVertexAttribArray(material.positionLocation);
+                gl.enableVertexAttribArray(material.colorLocation);
+                gl.enableVertexAttribArray(material.uvLocation);
+                gl.enableVertexAttribArray(material.offsetLocation);
                 
-                // POSITION
-
-
-                l = rotationLocation;
-                gl.enableVertexAttribArray(l);
-                gl.bindBuffer(gl.ARRAY_BUFFER, material.rotateBuffer);
-                gl.bufferData(gl.ARRAY_BUFFER, material.rotateArray, gl.STATIC_DRAW);
-                // ROTATION
-                
-
-                l = offsetLocation;
-                gl.enableVertexAttribArray(l);
-                gl.bindBuffer(gl.ARRAY_BUFFER, material.offsetBuffer);
-                gl.bufferData(gl.ARRAY_BUFFER, material.offset, gl.STATIC_DRAW);
-                // OFFSET
-
-                gl.enableVertexAttribArray(colorLocation);
-
                 var size = 6;
-                this.exAngleInstance.drawElementsInstancedANGLE(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, 0, objectList.length);
+                this.exAngleInstance.drawElementsInstancedANGLE(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, 0, material.getLenght());
 
-            } else {
 
-                for(var i = 0; i < objectList.length; i++) {
-                    o = objectList[i];
-                    objectList[i].draw(this.gl, camera);
-                }
-            }
-            
+             
         }
+        
 
     }
-    */
+
 }
 
 export {WebGLRenderer}

@@ -15,10 +15,29 @@ class InstancedMaterial extends DefaultEffect {
         this._color = color;
         
         this.offset = new Float32Array( 2 * MAX_INSTANCE);
+        this.offset[0] = Math.random() * 300;
         
         this.colorArray = new Float32Array( 3 * MAX_INSTANCE);
         this.rotateArray = new Float32Array(MAX_INSTANCE);
         
+
+        var f = 10;
+        this.vertices = [
+            -f,  f, // left - top
+            -f, -f, // left - bottom
+            f,  f, // right - top
+            f, -f, // right - bottom
+        ];
+
+        this.uv = [
+            0,1,
+            0,0,
+            1,1,
+            1,0
+        ];
+        
+        this.indices = [0,1,2,  1,3,2];
+        this.color = [Math.random(), Math.random(), Math.random(),1];
         
         for (var i = 0; i < this.colorArray.length; i+=3) {
             
@@ -33,7 +52,7 @@ class InstancedMaterial extends DefaultEffect {
     static getInstance() {
 
         if(!_materialInstance){
-            _materialInstance = new InstancedMaterial();
+            //_materialInstance = new InstancedMaterial();
         }
 
         return _materialInstance;
@@ -94,16 +113,22 @@ class InstancedMaterial extends DefaultEffect {
             gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
             gl.linkProgram(this.shaderProgram);
             
-            
+            gl.useProgram(this.shaderProgram);
+
             this.uniform = new UniformObject(gl,this.shaderProgram);
 
+            this.offsetLocation = gl.getAttribLocation(this.shaderProgram,"offset");
+            this.rotationLocation = gl.getAttribLocation(this.shaderProgram,"rotation");
+            this.colorLocation = gl.getAttribLocation(this.shaderProgram,"color");
+            this.positionLocation =  gl.getAttribLocation(this.shaderProgram,"position");
+            this.uvLocation =  gl.getAttribLocation(this.shaderProgram,"uv");
+          //  this.texture0Location =  gl.getUniformLocation(this.shaderProgram,"uSampler");
 
-            var rotationLoc = gl.getAttribLocation(this.shaderProgram,"rotation");
             this.rotateBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, this.rotateBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, this.rotateArray, gl.DYNAMIC_DRAW);
-            gl.vertexAttribPointer(rotationLoc, 1, gl.FLOAT, false, 0, 0);
-            angExt.vertexAttribDivisorANGLE(rotationLoc , 1);
+            gl.vertexAttribPointer(this.rotationLocation, 1, gl.FLOAT, false, 0, 0);
+            angExt.vertexAttribDivisorANGLE(this.rotationLocation , 1);
 
             var offsetLoc = gl.getAttribLocation(this.shaderProgram,"offset");
             this.offsetBuffer = gl.createBuffer();
@@ -120,22 +145,37 @@ class InstancedMaterial extends DefaultEffect {
             gl.vertexAttribPointer(colorLoc, 3, gl.FLOAT, false, 0, 0);
             angExt.vertexAttribDivisorANGLE(colorLoc , 1);
             
-            this.offsetLocation = gl.getAttribLocation(this.shaderProgram,"offset");
-            this.rotationLocation = gl.getAttribLocation(this.shaderProgram,"rotation");
-            this.colorLocation = gl.getAttribLocation(this.shaderProgram,"color");
-            this.positionLocation =  gl.getAttribLocation(this.shaderProgram,"position");
-            this.uvLocation =  gl.getAttribLocation(this.shaderProgram,"uv");
-            this.texture0Location =  gl.getUniformLocation(this.shaderProgram,"uSampler");
+            
 
 
-            var texture = gl.createTexture();
-            var image = window.flame;
-            gl.bindTexture(gl.TEXTURE_2D, texture);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
-            gl.generateMipmap(gl.TEXTURE_2D);
-            gl.bindTexture(gl.TEXTURE_2D, texture);
+
+            this.buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
+
+            var positionLocation = this.positionLocation;
+            gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+            
+            this.indexBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
+
+            this.uvBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.uv), gl.STATIC_DRAW);
+            gl.vertexAttribPointer(this.uvLocation, 2, gl.FLOAT, false, 0, 0);
+
+
+
+            // var texture = gl.createTexture();
+            // var image = window.flame;
+            // gl.bindTexture(gl.TEXTURE_2D, texture);
+            // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+            // gl.generateMipmap(gl.TEXTURE_2D);
+            // gl.bindTexture(gl.TEXTURE_2D, texture);
 
             this.isUploaded = true;
         }

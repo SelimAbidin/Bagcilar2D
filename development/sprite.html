@@ -65,10 +65,9 @@
     precision mediump float;
     varying vec3 colorVar;
     varying vec2 uvVar;
-    uniform sampler2D uSampler;
 
     void main() {        
-        gl_FragColor = texture2D(uSampler, uvVar);
+        gl_FragColor = vec4(colorVar.x,colorVar.y, uvVar.x, 1.0);
     }
 </script>
 
@@ -151,9 +150,15 @@
 
 
 
-    function dataEkle() {
+    function dataEkle(m) {
         
-        var sp = new Bagcilar.Sprite();
+        var sp;
+        if(m === undefined) {
+            sp = new Bagcilar.Sprite();
+        } else {
+            sp = new Bagcilar.Sprite({material:m});
+        }
+        
         meydan.addChild(sp);
         sp.vx = 1 + Math.random() * 2;
         sp.vy = 1 + Math.random() * 2;
@@ -162,11 +167,14 @@
 
     }
 
+
+
+    var say = 1;
     function cokDataEkle() {
-        
-        for (var i = 0; i < 10000; i++) {
-            dataEkle();
-            
+        say +=1;
+        var instanced = new Bagcilar.InstancedMaterial();
+        for (var i = 0; i < say; i++) {
+            dataEkle(instanced);
         }
 
 
