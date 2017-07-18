@@ -92,14 +92,13 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
             var gl = this.context;
 
             //gl.DEPTH_BUFFER_BIT
-            //gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.clear(gl.COLOR_BUFFER_BIT);
 
             // gl.enable(gl.CULL_FACE);
             // gl.cullFace(gl.FRONT);
 
             //gl.disable(gl.STENCIL_TEST);
            // gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-
 
             //gl.enable(gl.CULL_FACE);
             //gl.cullFace(gl.FRONT_AND_BACK);

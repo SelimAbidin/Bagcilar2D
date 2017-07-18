@@ -4,6 +4,7 @@ import {UniformObject} from "../core/UniformObject";
 var cccc = 0;
 var MAX_INSTANCE = 350000;
 
+
 var _materialInstance;
 class InstancedMaterial extends DefaultEffect {
     
@@ -15,7 +16,6 @@ class InstancedMaterial extends DefaultEffect {
         this._color = color;
         
         this.offset = new Float32Array( 2 * MAX_INSTANCE);
-        this.offset[0] = Math.random() * 300;
         
         this.colorArray = new Float32Array( 3 * MAX_INSTANCE);
         this.rotateArray = new Float32Array(MAX_INSTANCE);
@@ -52,7 +52,7 @@ class InstancedMaterial extends DefaultEffect {
     static getInstance() {
 
         if(!_materialInstance){
-            //_materialInstance = new InstancedMaterial();
+            _materialInstance = new InstancedMaterial();
         }
 
         return _materialInstance;
@@ -168,14 +168,14 @@ class InstancedMaterial extends DefaultEffect {
 
 
 
-            // var texture = gl.createTexture();
-            // var image = window.flame;
-            // gl.bindTexture(gl.TEXTURE_2D, texture);
-            // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
-            // gl.generateMipmap(gl.TEXTURE_2D);
-            // gl.bindTexture(gl.TEXTURE_2D, texture);
+            var texture = gl.createTexture();
+            var image = window.flame;
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+            gl.generateMipmap(gl.TEXTURE_2D);
+            gl.bindTexture(gl.TEXTURE_2D, texture);
 
             this.isUploaded = true;
         }

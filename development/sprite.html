@@ -42,7 +42,6 @@
     void main() {
         
         colorVar = color;
-        colorVar = vec3(uv.x, uv.y, colorVar.z);
         vec3 pos3V = vec3(position.x, position.y, 1.0);
         mat3 modelMatrix = getPositionMatrix(offset.x, offset.y) * getRotationMatrix(rotation);
         mat3 modeViewProjection =  projectionMatrix * viewMatrix * modelMatrix;
@@ -65,9 +64,10 @@
     precision mediump float;
     varying vec3 colorVar;
     varying vec2 uvVar;
-
+    uniform sampler2D uSampler;
+    
     void main() {        
-        gl_FragColor = vec4(colorVar.x,colorVar.y, uvVar.x, 1.0);
+        gl_FragColor = texture2D( uSampler, uvVar) * vec4(colorVar, 1.0);
     }
 </script>
 
@@ -172,9 +172,9 @@
     var say = 1;
     function cokDataEkle() {
         say +=1;
-        var instanced = new Bagcilar.InstancedMaterial();
+        //var instanced = new Bagcilar.InstancedMaterial();
         for (var i = 0; i < say; i++) {
-            dataEkle(instanced);
+            dataEkle();
         }
 
 

@@ -29,7 +29,6 @@ class Sprite extends ObjectContainer2D {
         this.indices = [0,1,2,  1,3,2];
         this.color = [Math.random(), Math.random(), Math.random(),1];
         
-        console.log(params);
         for(var str in params){
             var param = str;
             this[param] = params[str];        
@@ -37,7 +36,7 @@ class Sprite extends ObjectContainer2D {
         
 
         if(!this.material){
-            this.material = new InstancedMaterial();//InstancedMaterial.getInstance();
+            this.material = InstancedMaterial.getInstance();
         }
         
     }

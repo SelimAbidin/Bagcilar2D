@@ -31,8 +31,6 @@ class WebGLRenderer extends EventableObject
         material.next();
         material.addRotation(object.rotation);
         material.addPosition(object.xPos, object.yPos);
-        /*
-        */
 
         material.renderNumber = this.infoID;
     }
@@ -73,18 +71,38 @@ class WebGLRenderer extends EventableObject
                 var material = this._materials[i];
                 var gl = this.gl;
 
+                gl.useProgram(material.shaderProgram);
 
-                //gl.bindBuffer(gl.ARRAY_BUFFER, material.rotateBuffer);
-                //gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.rotateArray);
+                gl.enableVertexAttribArray(material.rotationLocation);
+                gl.enableVertexAttribArray(material.positionLocation);
+                gl.enableVertexAttribArray(material.colorLocation);
+                gl.enableVertexAttribArray(material.uvLocation);
+                gl.enableVertexAttribArray(material.offsetLocation);
+
+
+                gl.bindBuffer(gl.ARRAY_BUFFER, material.buffer);
+                gl.vertexAttribPointer(material.positionLocation, 2, gl.FLOAT, false, 0, 0);
+                
+
+                gl.bindBuffer(gl.ARRAY_BUFFER, material.rotateBuffer);
+                gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.rotateArray);
+                gl.vertexAttribPointer(material.rotationLocation, 1, gl.FLOAT, false, 0, 0);
+                
                 // ROTATION
 
 
-                //gl.bindBuffer(gl.ARRAY_BUFFER, material.offsetBuffer);
-                //gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.offset);
+                gl.bindBuffer(gl.ARRAY_BUFFER, material.offsetBuffer);
+                gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.offset);
+                gl.vertexAttribPointer(material.offsetLocation, 2, gl.FLOAT, false, 0, 0);
+                
                 // OFFSET
                 
+                gl.bindBuffer(gl.ARRAY_BUFFER, material.colorBuffer);
+                gl.vertexAttribPointer(material.colorLocation, 3, gl.FLOAT, false, 0, 0);
                 
-                gl.useProgram(material.shaderProgram);
+
+                gl.bindBuffer(gl.ARRAY_BUFFER, material.uvBuffer);
+                gl.vertexAttribPointer(material.uvLocation, 2, gl.FLOAT, false, 0, 0);
                 
                 var uniform = material.uniform;
                 uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
@@ -92,20 +110,15 @@ class WebGLRenderer extends EventableObject
                 uniform.setValue("uSampler", 0);
                 uniform.update(this.gl);
 
-                                gl.activeTexture(gl.TEXTURE0);
+                //gl.activeTexture(gl.TEXTURE0);
 
                 
-                gl.enableVertexAttribArray(material.rotationLocation);
-                gl.enableVertexAttribArray(material.positionLocation);
-                gl.enableVertexAttribArray(material.colorLocation);
-                gl.enableVertexAttribArray(material.uvLocation);
-                gl.enableVertexAttribArray(material.offsetLocation);
+                
                 
                 var size = 6;
                 this.exAngleInstance.drawElementsInstancedANGLE(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, 0, material.getLenght());
 
 
-             
         }
         
 

@@ -373,6 +373,7 @@
 	var cccc = 0;
 	var MAX_INSTANCE = 350000;
 
+
 	var _materialInstance;
 	class InstancedMaterial extends DefaultEffect {
 	    
@@ -384,7 +385,6 @@
 	        this._color = color;
 	        
 	        this.offset = new Float32Array( 2 * MAX_INSTANCE);
-	        this.offset[0] = Math.random() * 300;
 	        
 	        this.colorArray = new Float32Array( 3 * MAX_INSTANCE);
 	        this.rotateArray = new Float32Array(MAX_INSTANCE);
@@ -421,7 +421,7 @@
 	    static getInstance() {
 
 	        if(!_materialInstance){
-	            //_materialInstance = new InstancedMaterial();
+	            _materialInstance = new InstancedMaterial();
 	        }
 
 	        return _materialInstance;
@@ -537,14 +537,14 @@
 
 
 
-	            // var texture = gl.createTexture();
-	            // var image = window.flame;
-	            // gl.bindTexture(gl.TEXTURE_2D, texture);
-	            // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
-	            // gl.generateMipmap(gl.TEXTURE_2D);
-	            // gl.bindTexture(gl.TEXTURE_2D, texture);
+	            var texture = gl.createTexture();
+	            var image = window.flame;
+	            gl.bindTexture(gl.TEXTURE_2D, texture);
+	            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+	            gl.generateMipmap(gl.TEXTURE_2D);
+	            gl.bindTexture(gl.TEXTURE_2D, texture);
 
 	            this.isUploaded = true;
 	        }
@@ -743,7 +743,6 @@
 	        this.indices = [0,1,2,  1,3,2];
 	        this.color = [Math.random(), Math.random(), Math.random(),1];
 	        
-	        console.log(params);
 	        for(var str in params){
 	            var param = str;
 	            this[param] = params[str];        
@@ -751,7 +750,7 @@
 	        
 
 	        if(!this.material){
-	            this.material = new InstancedMaterial();//InstancedMaterial.getInstance();
+	            this.material = InstancedMaterial.getInstance();
 	        }
 	        
 	    }
@@ -827,8 +826,6 @@
 	        material.next();
 	        material.addRotation(object.rotation);
 	        material.addPosition(object.xPos, object.yPos);
-	        /*
-	        */
 
 	        material.renderNumber = this.infoID;
 	    }
@@ -869,18 +866,38 @@
 	                var material = this._materials[i];
 	                var gl = this.gl;
 
+	                gl.useProgram(material.shaderProgram);
 
-	                //gl.bindBuffer(gl.ARRAY_BUFFER, material.rotateBuffer);
-	                //gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.rotateArray);
+	                gl.enableVertexAttribArray(material.rotationLocation);
+	                gl.enableVertexAttribArray(material.positionLocation);
+	                gl.enableVertexAttribArray(material.colorLocation);
+	                gl.enableVertexAttribArray(material.uvLocation);
+	                gl.enableVertexAttribArray(material.offsetLocation);
+
+
+	                gl.bindBuffer(gl.ARRAY_BUFFER, material.buffer);
+	                gl.vertexAttribPointer(material.positionLocation, 2, gl.FLOAT, false, 0, 0);
+	                
+
+	                gl.bindBuffer(gl.ARRAY_BUFFER, material.rotateBuffer);
+	                gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.rotateArray);
+	                gl.vertexAttribPointer(material.rotationLocation, 1, gl.FLOAT, false, 0, 0);
+	                
 	                // ROTATION
 
 
-	                //gl.bindBuffer(gl.ARRAY_BUFFER, material.offsetBuffer);
-	                //gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.offset);
+	                gl.bindBuffer(gl.ARRAY_BUFFER, material.offsetBuffer);
+	                gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.offset);
+	                gl.vertexAttribPointer(material.offsetLocation, 2, gl.FLOAT, false, 0, 0);
+	                
 	                // OFFSET
 	                
+	                gl.bindBuffer(gl.ARRAY_BUFFER, material.colorBuffer);
+	                gl.vertexAttribPointer(material.colorLocation, 3, gl.FLOAT, false, 0, 0);
 	                
-	                gl.useProgram(material.shaderProgram);
+
+	                gl.bindBuffer(gl.ARRAY_BUFFER, material.uvBuffer);
+	                gl.vertexAttribPointer(material.uvLocation, 2, gl.FLOAT, false, 0, 0);
 	                
 	                var uniform = material.uniform;
 	                uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
@@ -888,20 +905,15 @@
 	                uniform.setValue("uSampler", 0);
 	                uniform.update(this.gl);
 
-	                                gl.activeTexture(gl.TEXTURE0);
+	                //gl.activeTexture(gl.TEXTURE0);
 
 	                
-	                gl.enableVertexAttribArray(material.rotationLocation);
-	                gl.enableVertexAttribArray(material.positionLocation);
-	                gl.enableVertexAttribArray(material.colorLocation);
-	                gl.enableVertexAttribArray(material.uvLocation);
-	                gl.enableVertexAttribArray(material.offsetLocation);
+	                
 	                
 	                var size = 6;
 	                this.exAngleInstance.drawElementsInstancedANGLE(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, 0, material.getLenght());
 
 
-	             
 	        }
 	        
 
@@ -1081,14 +1093,13 @@
 	            var gl = this.context;
 
 	            //gl.DEPTH_BUFFER_BIT
-	            //gl.clear(gl.COLOR_BUFFER_BIT);
+	            gl.clear(gl.COLOR_BUFFER_BIT);
 
 	            // gl.enable(gl.CULL_FACE);
 	            // gl.cullFace(gl.FRONT);
 
 	            //gl.disable(gl.STENCIL_TEST);
 	           // gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-
 
 	            //gl.enable(gl.CULL_FACE);
 	            //gl.cullFace(gl.FRONT_AND_BACK);
