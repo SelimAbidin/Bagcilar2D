@@ -405,14 +405,16 @@
 	            1,0
 	        ];
 	        
-	        this.indices = [0,1,2,  1,3,2];
+	        this.indices = [2,1,0,  1,3,2];
 	        this.color = [Math.random(), Math.random(), Math.random(),1];
-	        
+	        var r = Math.random();
+	        var g = Math.random();
+	        var b = Math.random();
 	        for (var i = 0; i < this.colorArray.length; i+=3) {
 	            
-	            this.colorArray[i] = Math.random();
-	            this.colorArray[i+1] = Math.random();
-	            this.colorArray[i+2] = Math.random();
+	            this.colorArray[i] = r;
+	            this.colorArray[i+1] = g;
+	            this.colorArray[i+2] = b;
 	        }
 
 	    }
@@ -725,7 +727,7 @@
 	    constructor (params) {
 	        super();
 	        
-	        var f = 10;
+	        var f = 20;
 	        this.vertices = [
 	            -f,  f, // left - top
 	            -f, -f, // left - bottom
@@ -806,6 +808,15 @@
 	        this._materials = [];
 	        this.square = square;
 	        this.exAngleInstance = gl.getExtension('ANGLE_instanced_arrays');
+
+
+	        // gl.disable(gl.STENCIL_TEST);
+
+	            gl.enable(gl.BLEND);
+	            gl.blendColor(0, 0, 0, 0);
+	            gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+	            gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+	            gl.blendEquationSeparate(gl.FUNC_ADD, gl.FUNC_ADD);
 	    }
 
 	    prepareForRender () {
@@ -868,6 +879,8 @@
 
 	                gl.useProgram(material.shaderProgram);
 
+	                this.updateUniforms(material.uniform, camera);
+
 	                gl.enableVertexAttribArray(material.rotationLocation);
 	                gl.enableVertexAttribArray(material.positionLocation);
 	                gl.enableVertexAttribArray(material.colorLocation);
@@ -899,11 +912,7 @@
 	                gl.bindBuffer(gl.ARRAY_BUFFER, material.uvBuffer);
 	                gl.vertexAttribPointer(material.uvLocation, 2, gl.FLOAT, false, 0, 0);
 	                
-	                var uniform = material.uniform;
-	                uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
-	                uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
-	                uniform.setValue("uSampler", 0);
-	                uniform.update(this.gl);
+	               
 
 	                //gl.activeTexture(gl.TEXTURE0);
 
@@ -917,6 +926,15 @@
 	        }
 	        
 
+	    }
+
+
+
+	    updateUniforms (uniform, camera) {
+	        uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
+	        uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
+	        uniform.setValue("uSampler", 0);
+	        uniform.update(this.gl);
 	    }
 
 	}
@@ -1018,7 +1036,7 @@
 	                
 	                var canvas =  document.getElementById(canvasID);
 	                //var  gl = canvas.getContext("webgl2") || canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-	                var  gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");  // webgl2 disabled for now
+	                var  gl = canvas.getContext("webgl", {stencil:true}) || canvas.getContext("experimental-webgl", {stencil:true});  // webgl2 disabled for now
 	               
 	                if(!gl){
 	                
@@ -1097,12 +1115,16 @@
 
 	            // gl.enable(gl.CULL_FACE);
 	            // gl.cullFace(gl.FRONT);
+	           
 
-	            //gl.disable(gl.STENCIL_TEST);
+	            // gl.enable(gl.DEPTH_TEST);
+	            // gl.depthFunc(gl.ALWAYS);
+
 	           // gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
-	            //gl.enable(gl.CULL_FACE);
-	            //gl.cullFace(gl.FRONT_AND_BACK);
+	          // console.log(gl.getParameter(gl.CULL_FACE_MODE) == gl.BACK);
+	            // gl.enable(gl.CULL_FACE);
+	            // gl.cullFace(gl.BACK);
 	                // Enable depth testing
 	            //gl.enable(gl.DEPTH_TEST);
 	            //gl.depthFunc(gl.LEQUAL);
@@ -1130,7 +1152,7 @@
 
 	        }
 
-	        renderChild () {
+	        renderChild () {    
 
 	            for (var i = 0; i < this.children.length; i++) {
 	                

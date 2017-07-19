@@ -11,6 +11,15 @@ class WebGLRenderer extends EventableObject
         this._materials = [];
         this.square = square;
         this.exAngleInstance = gl.getExtension('ANGLE_instanced_arrays');
+
+
+        // gl.disable(gl.STENCIL_TEST);
+
+            gl.enable(gl.BLEND);
+            gl.blendColor(0, 0, 0, 0);
+            gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+            gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+            gl.blendEquationSeparate(gl.FUNC_ADD, gl.FUNC_ADD);
     }
 
     prepareForRender () {
@@ -73,6 +82,8 @@ class WebGLRenderer extends EventableObject
 
                 gl.useProgram(material.shaderProgram);
 
+                this.updateUniforms(material.uniform, camera);
+
                 gl.enableVertexAttribArray(material.rotationLocation);
                 gl.enableVertexAttribArray(material.positionLocation);
                 gl.enableVertexAttribArray(material.colorLocation);
@@ -104,11 +115,7 @@ class WebGLRenderer extends EventableObject
                 gl.bindBuffer(gl.ARRAY_BUFFER, material.uvBuffer);
                 gl.vertexAttribPointer(material.uvLocation, 2, gl.FLOAT, false, 0, 0);
                 
-                var uniform = material.uniform;
-                uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
-                uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
-                uniform.setValue("uSampler", 0);
-                uniform.update(this.gl);
+               
 
                 //gl.activeTexture(gl.TEXTURE0);
 
@@ -122,6 +129,15 @@ class WebGLRenderer extends EventableObject
         }
         
 
+    }
+
+
+
+    updateUniforms (uniform, camera) {
+        uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
+        uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
+        uniform.setValue("uSampler", 0);
+        uniform.update(this.gl);
     }
 
 }

@@ -36,14 +36,16 @@ class InstancedMaterial extends DefaultEffect {
             1,0
         ];
         
-        this.indices = [0,1,2,  1,3,2];
+        this.indices = [2,1,0,  1,3,2];
         this.color = [Math.random(), Math.random(), Math.random(),1];
-        
+        var r = Math.random();
+        var g = Math.random();
+        var b = Math.random();
         for (var i = 0; i < this.colorArray.length; i+=3) {
             
-            this.colorArray[i] = Math.random();
-            this.colorArray[i+1] = Math.random();
-            this.colorArray[i+2] = Math.random();
+            this.colorArray[i] = r;
+            this.colorArray[i+1] = g;
+            this.colorArray[i+2] = b;
         }
 
     }

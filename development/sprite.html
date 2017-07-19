@@ -55,7 +55,7 @@
         uvVar = uv;
         float xx = offset.x + rotation;
         vec3 worlPosition = modeViewProjection * pos3V;
-        gl_Position = vec4(worlPosition.x, worlPosition.y, -0.1, 1.0);
+        gl_Position = vec4(worlPosition.x, worlPosition.y, 0, 1.0);
 
     }
 </script>
@@ -66,8 +66,13 @@
     varying vec2 uvVar;
     uniform sampler2D uSampler;
     
-    void main() {        
-        gl_FragColor = texture2D( uSampler, uvVar) * vec4(colorVar, 1.0);
+    void main() { 
+
+        vec4 c = texture2D( uSampler, uvVar) * vec4(colorVar, 1.0);
+
+     
+
+        gl_FragColor = c;
     }
 </script>
 
@@ -159,6 +164,7 @@
             sp = new Bagcilar.Sprite({material:m});
         }
         
+        sp.id = "id_" + sprites.length;
         meydan.addChild(sp);
         sp.vx = 1 + Math.random() * 2;
         sp.vy = 1 + Math.random() * 2;
@@ -172,9 +178,9 @@
     var say = 1;
     function cokDataEkle() {
         say +=1;
-        //var instanced = new Bagcilar.InstancedMaterial();
-        for (var i = 0; i < say; i++) {
-            dataEkle();
+        var instanced;// = new Bagcilar.InstancedMaterial();
+        for (var i = 0; i < 60000; i++) {
+            dataEkle(instanced);
         }
 
 

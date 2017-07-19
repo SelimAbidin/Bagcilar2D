@@ -17,7 +17,7 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
                 
                 var canvas =  document.getElementById(canvasID);
                 //var  gl = canvas.getContext("webgl2") || canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-                var  gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");  // webgl2 disabled for now
+                var  gl = canvas.getContext("webgl", {stencil:true}) || canvas.getContext("experimental-webgl", {stencil:true});  // webgl2 disabled for now
                
                 if(!gl){
                 
@@ -96,12 +96,16 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
 
             // gl.enable(gl.CULL_FACE);
             // gl.cullFace(gl.FRONT);
+           
 
-            //gl.disable(gl.STENCIL_TEST);
+            // gl.enable(gl.DEPTH_TEST);
+            // gl.depthFunc(gl.ALWAYS);
+
            // gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
-            //gl.enable(gl.CULL_FACE);
-            //gl.cullFace(gl.FRONT_AND_BACK);
+          // console.log(gl.getParameter(gl.CULL_FACE_MODE) == gl.BACK);
+            // gl.enable(gl.CULL_FACE);
+            // gl.cullFace(gl.BACK);
                 // Enable depth testing
             //gl.enable(gl.DEPTH_TEST);
             //gl.depthFunc(gl.LEQUAL);
@@ -129,7 +133,7 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
 
         }
 
-        renderChild () {
+        renderChild () {    
 
             for (var i = 0; i < this.children.length; i++) {
                 

@@ -11,7 +11,7 @@ class Sprite extends ObjectContainer2D {
     constructor (params) {
         super();
         
-        var f = 10;
+        var f = 20;
         this.vertices = [
             -f,  f, // left - top
             -f, -f, // left - bottom
