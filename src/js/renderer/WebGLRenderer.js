@@ -1,5 +1,6 @@
 import {EventableObject} from "../core/EventableObject";
 import {InstancedMaterial} from "../effects/InstancedMaterial";
+import {RegularEffect} from "../effects/RegularEffect";
 import {Sprite} from "../display/Sprite";
 
 class WebGLRenderer extends EventableObject
@@ -10,8 +11,8 @@ class WebGLRenderer extends EventableObject
         this.gl = gl;
         this._materials = [];
         this.square = square;
-        this.exAngleInstance = gl.getExtension('ANGLE_instanced_arrays');
 
+        this.material = new RegularEffect();
 
         gl.disable(gl.STENCIL_TEST);
         gl.enable(gl.BLEND);
@@ -25,6 +26,51 @@ class WebGLRenderer extends EventableObject
         this._materials.length = 0;
         this.infoID++;
     }
+
+    renderSprite (sprite) {
+
+        if(!sprite.material){
+            sprite.material = this.material;
+        }
+
+        sprite.material.upload(this.gl);
+
+
+
+    }
+
+
+    present2 (camera) {
+
+        var gl = this.gl;
+        var material =  this.material;
+        var uniform = material.uniform;
+
+        gl.useProgram(material.shaderProgram);
+
+
+           var projLocation = gl.getUniformLocation(material.shaderProgram, "projectionMatrix");
+        gl.uniformMatrix3fv(projLocation , false , camera.projectionMatrix.matrixArray);
+
+        var worlLoca = gl.getUniformLocation(material.shaderProgram, "viewMatrix");
+        gl.uniformMatrix3fv(worlLoca , false , camera.worldMatrix.matrixArray);
+
+
+        uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
+        uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
+        uniform.update(this.gl);
+
+        gl.enableVertexAttribArray(this.positionLocation);
+           
+        gl.bindBuffer(gl.ARRAY_BUFFER, material.vertexBuffer);
+        gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.vertices);
+        gl.vertexAttribPointer(material.positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+        gl.drawElements(gl.TRIANGLES, material.indices.length, gl.UNSIGNED_SHORT, 0);
+    }
+
+
+
 
     renderSingleObject (object, camera) {
 

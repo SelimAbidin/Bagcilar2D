@@ -124,9 +124,16 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
            this.renderOtherObjects();
            */
 
-          // this.renderer.prepareForRender();
+            this.renderer.prepareForRender();
 
-            this.renderChild();
+            for (var i = 0; i < this.children.length; i++) {
+                
+                this.renderer.renderSprite(this.children[i]);
+                
+            }
+
+            this.renderer.present2(this.camera);
+          //  this.renderChild();
            //this.renderRecursively(this);
           //this.renderer.present(this.camera);
 

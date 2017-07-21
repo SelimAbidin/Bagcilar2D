@@ -169,7 +169,6 @@ class InstancedMaterial extends DefaultEffect {
             gl.vertexAttribPointer(this.uvLocation, 2, gl.FLOAT, false, 0, 0);
 
 
-
             var texture = gl.createTexture();
             var image = window.flame;
             gl.bindTexture(gl.TEXTURE_2D, texture);

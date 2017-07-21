@@ -22,6 +22,7 @@ export {ObjectContainer2D} from "./display/ObjectContainer2D";
 export {Sprite2D} from "./display/Sprite2D";
 export {Quad} from "./display/Quad";
 export {TestSprite} from "./display/TestSprite";
+export {NormalSprite} from "./display/NormalSprite";
 export {DenemeSprite} from "./display/DenemeSprite";
 export {Sprite} from "./display/Sprite";
 export {Camera} from "./display/Camera";
