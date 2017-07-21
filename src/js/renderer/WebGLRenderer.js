@@ -13,13 +13,12 @@ class WebGLRenderer extends EventableObject
         this.exAngleInstance = gl.getExtension('ANGLE_instanced_arrays');
 
 
-        // gl.disable(gl.STENCIL_TEST);
-
-            gl.enable(gl.BLEND);
-            gl.blendColor(0, 0, 0, 0);
-            gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-            gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-            gl.blendEquationSeparate(gl.FUNC_ADD, gl.FUNC_ADD);
+        gl.disable(gl.STENCIL_TEST);
+        gl.enable(gl.BLEND);
+        gl.blendColor(0, 0, 0, 0);
+        gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+        gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+        gl.blendEquationSeparate(gl.FUNC_ADD, gl.FUNC_ADD);
     }
 
     prepareForRender () {
@@ -84,46 +83,16 @@ class WebGLRenderer extends EventableObject
 
                 this.updateUniforms(material.uniform, camera);
 
-                gl.enableVertexAttribArray(material.rotationLocation);
-                gl.enableVertexAttribArray(material.positionLocation);
-                gl.enableVertexAttribArray(material.colorLocation);
-                gl.enableVertexAttribArray(material.uvLocation);
-                gl.enableVertexAttribArray(material.offsetLocation);
+                this.enableAttributes(material);
 
+                this.updatePosition(material);
 
-                gl.bindBuffer(gl.ARRAY_BUFFER, material.buffer);
-                gl.vertexAttribPointer(material.positionLocation, 2, gl.FLOAT, false, 0, 0);
-                
+                this.updateOtherAttributes(material);
 
-                gl.bindBuffer(gl.ARRAY_BUFFER, material.rotateBuffer);
-                gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.rotateArray);
-                gl.vertexAttribPointer(material.rotationLocation, 1, gl.FLOAT, false, 0, 0);
-                
-                // ROTATION
-
-
-                gl.bindBuffer(gl.ARRAY_BUFFER, material.offsetBuffer);
-                gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.offset);
-                gl.vertexAttribPointer(material.offsetLocation, 2, gl.FLOAT, false, 0, 0);
-                
-                // OFFSET
-                
-                gl.bindBuffer(gl.ARRAY_BUFFER, material.colorBuffer);
-                gl.vertexAttribPointer(material.colorLocation, 3, gl.FLOAT, false, 0, 0);
-                
-
-                gl.bindBuffer(gl.ARRAY_BUFFER, material.uvBuffer);
-                gl.vertexAttribPointer(material.uvLocation, 2, gl.FLOAT, false, 0, 0);
-                
-               
-
-                //gl.activeTexture(gl.TEXTURE0);
+                gl.activeTexture(gl.TEXTURE0);
 
                 
-                
-                
-                var size = 6;
-                this.exAngleInstance.drawElementsInstancedANGLE(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, 0, material.getLenght());
+                this.drawVertices(material);
 
 
         }
@@ -131,6 +100,48 @@ class WebGLRenderer extends EventableObject
 
     }
 
+
+    updateOtherAttributes (material) {
+
+        var gl = this.gl;
+        // gl.bindBuffer(gl.ARRAY_BUFFER, material.rotateBuffer);
+        // gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.rotateArray);
+        // gl.vertexAttribPointer(material.rotationLocation, 1, gl.FLOAT, false, 0, 0);
+
+        // gl.bindBuffer(gl.ARRAY_BUFFER, material.offsetBuffer);
+        // gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.offset);
+        // gl.vertexAttribPointer(material.offsetLocation, 2, gl.FLOAT, false, 0, 0);
+
+        // gl.bindBuffer(gl.ARRAY_BUFFER, material.colorBuffer);
+        // gl.vertexAttribPointer(material.colorLocation, 3, gl.FLOAT, false, 0, 0);
+
+        // gl.bindBuffer(gl.ARRAY_BUFFER, material.uvBuffer);
+        // gl.vertexAttribPointer(material.uvLocation, 2, gl.FLOAT, false, 0, 0);
+
+    }
+
+    updatePosition (material) {
+
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, material.buffer);
+        this.gl.vertexAttribPointer(material.positionLocation, 2, this.gl.FLOAT, false, 0, 0);
+
+    }
+
+    drawVertices (material) {
+        
+        var size = 6;
+        this.exAngleInstance.drawElementsInstancedANGLE(this.gl.TRIANGLES, size, this.gl.UNSIGNED_SHORT, 0, material.getLenght());
+    }
+
+
+    enableAttributes (material) {
+
+        this.gl.enableVertexAttribArray(material.rotationLocation);
+        this.gl.enableVertexAttribArray(material.positionLocation);
+        this.gl.enableVertexAttribArray(material.colorLocation);
+        this.gl.enableVertexAttribArray(material.uvLocation);
+        this.gl.enableVertexAttribArray(material.offsetLocation);
+    }
 
 
     updateUniforms (uniform, camera) {

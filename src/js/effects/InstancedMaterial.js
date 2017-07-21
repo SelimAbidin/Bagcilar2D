@@ -179,6 +179,8 @@ class InstancedMaterial extends DefaultEffect {
             gl.generateMipmap(gl.TEXTURE_2D);
             gl.bindTexture(gl.TEXTURE_2D, texture);
 
+
+            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
             this.isUploaded = true;
         }
        

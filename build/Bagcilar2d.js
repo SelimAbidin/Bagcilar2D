@@ -363,9 +363,9 @@
 	        if(!this.shaderProgram){
 	            this.upload(gl);
 	        }
+
 	        gl.useProgram(this.shaderProgram);
 	        this.uniform.update(gl);
-	       
 	    }
 
 	}
@@ -548,6 +548,8 @@
 	            gl.generateMipmap(gl.TEXTURE_2D);
 	            gl.bindTexture(gl.TEXTURE_2D, texture);
 
+
+	            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
 	            this.isUploaded = true;
 	        }
 	       
@@ -722,7 +724,7 @@
 	    }
 	}
 
-	class Sprite extends ObjectContainer2D {
+	class Sprite$1 extends ObjectContainer2D {
 
 	    constructor (params) {
 	        super();
@@ -770,21 +772,21 @@
 	        
 
 	        return;
-	        if(!Sprite._indexBuffer){
+	        if(!Sprite$1._indexBuffer){
 	            
 	            console.log("Sprite > Create Buffer");
 	           
 
 	        
-	            Sprite._indexBuffer = this.indexBuffer;
-	            Sprite._vertexBuffer = this.buffer;
-	            Sprite._uvBuffer = this.uvBuffer;
+	            Sprite$1._indexBuffer = this.indexBuffer;
+	            Sprite$1._vertexBuffer = this.buffer;
+	            Sprite$1._uvBuffer = this.uvBuffer;
 	           
 	        } else {
 
-	            this.buffer = Sprite._vertexBuffer;
-	            this.uvBuffer = Sprite._uvBuffer;
-	            this.indexBuffer = Sprite._indexBuffer;
+	            this.buffer = Sprite$1._vertexBuffer;
+	            this.uvBuffer = Sprite$1._uvBuffer;
+	            this.indexBuffer = Sprite$1._indexBuffer;
 	        }
 	        
 	    }
@@ -810,13 +812,12 @@
 	        this.exAngleInstance = gl.getExtension('ANGLE_instanced_arrays');
 
 
-	        // gl.disable(gl.STENCIL_TEST);
-
-	            gl.enable(gl.BLEND);
-	            gl.blendColor(0, 0, 0, 0);
-	            gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-	            gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-	            gl.blendEquationSeparate(gl.FUNC_ADD, gl.FUNC_ADD);
+	        gl.disable(gl.STENCIL_TEST);
+	        gl.enable(gl.BLEND);
+	        gl.blendColor(0, 0, 0, 0);
+	        gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+	        gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+	        gl.blendEquationSeparate(gl.FUNC_ADD, gl.FUNC_ADD);
 	    }
 
 	    prepareForRender () {
@@ -881,46 +882,16 @@
 
 	                this.updateUniforms(material.uniform, camera);
 
-	                gl.enableVertexAttribArray(material.rotationLocation);
-	                gl.enableVertexAttribArray(material.positionLocation);
-	                gl.enableVertexAttribArray(material.colorLocation);
-	                gl.enableVertexAttribArray(material.uvLocation);
-	                gl.enableVertexAttribArray(material.offsetLocation);
+	                this.enableAttributes(material);
 
+	                this.updatePosition(material);
 
-	                gl.bindBuffer(gl.ARRAY_BUFFER, material.buffer);
-	                gl.vertexAttribPointer(material.positionLocation, 2, gl.FLOAT, false, 0, 0);
-	                
+	                this.updateOtherAttributes(material);
 
-	                gl.bindBuffer(gl.ARRAY_BUFFER, material.rotateBuffer);
-	                gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.rotateArray);
-	                gl.vertexAttribPointer(material.rotationLocation, 1, gl.FLOAT, false, 0, 0);
-	                
-	                // ROTATION
-
-
-	                gl.bindBuffer(gl.ARRAY_BUFFER, material.offsetBuffer);
-	                gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.offset);
-	                gl.vertexAttribPointer(material.offsetLocation, 2, gl.FLOAT, false, 0, 0);
-	                
-	                // OFFSET
-	                
-	                gl.bindBuffer(gl.ARRAY_BUFFER, material.colorBuffer);
-	                gl.vertexAttribPointer(material.colorLocation, 3, gl.FLOAT, false, 0, 0);
-	                
-
-	                gl.bindBuffer(gl.ARRAY_BUFFER, material.uvBuffer);
-	                gl.vertexAttribPointer(material.uvLocation, 2, gl.FLOAT, false, 0, 0);
-	                
-	               
-
-	                //gl.activeTexture(gl.TEXTURE0);
+	                gl.activeTexture(gl.TEXTURE0);
 
 	                
-	                
-	                
-	                var size = 6;
-	                this.exAngleInstance.drawElementsInstancedANGLE(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, 0, material.getLenght());
+	                this.drawVertices(material);
 
 
 	        }
@@ -928,6 +899,48 @@
 
 	    }
 
+
+	    updateOtherAttributes (material) {
+
+	        var gl = this.gl;
+	        // gl.bindBuffer(gl.ARRAY_BUFFER, material.rotateBuffer);
+	        // gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.rotateArray);
+	        // gl.vertexAttribPointer(material.rotationLocation, 1, gl.FLOAT, false, 0, 0);
+
+	        // gl.bindBuffer(gl.ARRAY_BUFFER, material.offsetBuffer);
+	        // gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.offset);
+	        // gl.vertexAttribPointer(material.offsetLocation, 2, gl.FLOAT, false, 0, 0);
+
+	        // gl.bindBuffer(gl.ARRAY_BUFFER, material.colorBuffer);
+	        // gl.vertexAttribPointer(material.colorLocation, 3, gl.FLOAT, false, 0, 0);
+
+	        // gl.bindBuffer(gl.ARRAY_BUFFER, material.uvBuffer);
+	        // gl.vertexAttribPointer(material.uvLocation, 2, gl.FLOAT, false, 0, 0);
+
+	    }
+
+	    updatePosition (material) {
+
+	        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, material.buffer);
+	        this.gl.vertexAttribPointer(material.positionLocation, 2, this.gl.FLOAT, false, 0, 0);
+
+	    }
+
+	    drawVertices (material) {
+	        
+	        var size = 6;
+	        this.exAngleInstance.drawElementsInstancedANGLE(this.gl.TRIANGLES, size, this.gl.UNSIGNED_SHORT, 0, material.getLenght());
+	    }
+
+
+	    enableAttributes (material) {
+
+	        this.gl.enableVertexAttribArray(material.rotationLocation);
+	        this.gl.enableVertexAttribArray(material.positionLocation);
+	        this.gl.enableVertexAttribArray(material.colorLocation);
+	        this.gl.enableVertexAttribArray(material.uvLocation);
+	        this.gl.enableVertexAttribArray(material.offsetLocation);
+	    }
 
 
 	    updateUniforms (uniform, camera) {
@@ -1076,7 +1089,7 @@
 	             if(gl instanceof WebGLRenderingContext) {
 	                this.renderer = new WebGLRenderer(this,gl);
 
-	                gl.enable(gl.DEPTH_TEST);
+	               // gl.enable(gl.DEPTH_TEST);
 	                gl.viewport(0, 0, this.renderDom.width, this.renderDom.height);
 	                gl.clearColor(0.6, 0.6, 0.6, 1.0);
 	             }
@@ -1112,7 +1125,6 @@
 
 	            //gl.DEPTH_BUFFER_BIT
 	            gl.clear(gl.COLOR_BUFFER_BIT);
-
 	            // gl.enable(gl.CULL_FACE);
 	            // gl.cullFace(gl.FRONT);
 	           
@@ -1144,11 +1156,11 @@
 	           this.renderOtherObjects();
 	           */
 
-	           this.renderer.prepareForRender();
+	          // this.renderer.prepareForRender();
 
 	            this.renderChild();
 	           //this.renderRecursively(this);
-	          this.renderer.present(this.camera);
+	          //this.renderer.present(this.camera);
 
 	        }
 
@@ -1156,7 +1168,8 @@
 
 	            for (var i = 0; i < this.children.length; i++) {
 	                
-	                this.renderer.renderSingleObject(this.children[i], this.camera);
+	                this.children[i].drawTest(this.context);
+	               // this.renderer.renderSingleObject(this.children[i], this.camera);
 	                
 	            }
 
@@ -1165,7 +1178,7 @@
 
 	        renderRecursively (o) {
 
-	            if(o instanceof Sprite) {
+	            if(o instanceof Sprite$1) {
 
 	                this.renderer.renderSingleObject(o);
 	            }
@@ -1204,7 +1217,7 @@
 	                
 	                var a = children[i];
 	                
-	                if(a instanceof Sprite){
+	                if(a instanceof Sprite$1){
 	                    
 	                    this._spriteRenderObjects.push(a);
 
@@ -1631,6 +1644,219 @@
 	    }
 	}
 
+	class DenemeSprite extends ObjectContainer2D {
+
+	    constructor (params) {
+	        super();
+	        
+	        var f = 1;
+	        
+
+	        this.uv = []; 
+	        this.vertices = [];
+	        this.indices = [];
+
+	        var size = 10000;
+	        var vSize = 30 * 8;
+	        var trans;
+	        var transX;
+	        var indexCounter = 0;
+	        for (var i = 0; i < size; i++) 
+	        {
+	            trans = (Math.random() * 600) - 300;
+	            transX = (Math.random() * 600) - 300;
+
+	            this.vertices.push(-f + transX);
+	            this.vertices.push(f + trans);
+	            this.vertices.push(-f + transX);
+	            this.vertices.push(-f + trans);
+
+	            this.vertices.push(f + transX);
+	            this.vertices.push(f + trans);
+	            this.vertices.push(f + transX);
+	            this.vertices.push(-f + trans);
+
+	            this.uv.push(0);
+	            this.uv.push(1);
+
+	            this.uv.push(0);
+	            this.uv.push(0);
+
+	            this.uv.push(1);
+	            this.uv.push(1);
+
+	            this.uv.push(1);
+	            this.uv.push(0);
+
+
+	            this.indices.push(indexCounter);
+	            this.indices.push(indexCounter + 1);
+	            this.indices.push(indexCounter + 2);
+
+	            this.indices.push(indexCounter + 1);
+	            this.indices.push(indexCounter + 3);
+	            this.indices.push(indexCounter + 2);
+	            indexCounter += 4;
+	        }
+
+
+
+	        this.color = [Math.random(), Math.random(), Math.random(),1];
+	        
+	        for(var str in params){
+	            var param = str;
+	            this[param] = params[str];        
+	        }
+	        
+
+	        // var vv = [
+	        //     -f,  f, // left - top
+	        //     -f, -f, // left - bottom
+	        //     f,  f, // right - top
+	        //     f, -f, // right - bottom
+	        // ];
+
+	        // var uuvv =  [
+	        //     0,1,
+	        //     0,0,
+	        //     1,1,
+	        //     1,0
+	        // ];
+
+	        //  var iindi = [0,1,2,  1,3,2];
+
+	        //  this.vertices = vv;
+	        //  this.indices = iindi;
+	        //  this.uv = uuvv;
+
+	    }
+
+	    updateMaterial (gl) {
+	        
+	        if(!this.material.isUploaded){
+	            this.material.upload(gl);
+	        }
+	    }
+
+	    upload (gl, material) {
+	        
+
+	        return;
+	        if(!Sprite._indexBuffer){
+	            
+	            console.log("Sprite > Create Buffer");
+	           
+
+	        
+	            Sprite._indexBuffer = this.indexBuffer;
+	            Sprite._vertexBuffer = this.buffer;
+	            Sprite._uvBuffer = this.uvBuffer;
+	           
+	        } else {
+
+	            this.buffer = Sprite._vertexBuffer;
+	            this.uvBuffer = Sprite._uvBuffer;
+	            this.indexBuffer = Sprite._indexBuffer;
+	        }
+	        
+	    }
+
+	    update  () {
+	        //super.update();   
+	    }
+
+	    draw  (gl, camera){
+
+	        
+	    }
+
+	    uploadData2 (gl) {
+
+	        if(!this.isUploaded) {
+
+	            var vertexShaderSRC =  document.getElementById( 'vertexShader' ).textContent;
+	            var fragmentShaderSRC = document.getElementById( 'fragmentShader' ).textContent;
+
+
+	            this.fragmentShaderBuffer = gl.createShader(gl.FRAGMENT_SHADER);
+	            gl.shaderSource( this.fragmentShaderBuffer, fragmentShaderSRC );
+	            gl.compileShader( this.fragmentShaderBuffer );
+
+	            if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
+	                let finfo = gl.getShaderInfoLog( this.fragmentShaderBuffer );
+	                throw "Could not compile WebGL program. \n\n" + finfo;
+	            }
+
+	            this.vertexSahderBuffer = gl.createShader(gl.VERTEX_SHADER);
+	            gl.shaderSource( this.vertexSahderBuffer, vertexShaderSRC );
+	            gl.compileShader( this.vertexSahderBuffer );
+
+	            if ( !gl.getShaderParameter(this.vertexSahderBuffer, gl.COMPILE_STATUS) ) {
+	                let info = gl.getShaderInfoLog( this.vertexSahderBuffer );
+	                throw "Could not compile WebGL program. \n\n" + info;
+	            }
+
+	            this.shaderProgram = gl.createProgram();
+	            gl.attachShader(this.shaderProgram, this.vertexSahderBuffer);
+	            gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
+	            gl.linkProgram(this.shaderProgram);
+
+
+	            this.positionLocation = gl.getAttribLocation(this.shaderProgram,"position");
+	          //  this.uvLocation = gl.getAttribLocation(this.shaderProgram,"uv");
+
+
+	            this.vertexBuffer =  gl.createBuffer();
+	            gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+	            this.verticesTyped = new Float32Array(this.vertices);
+	            gl.bufferData(gl.ARRAY_BUFFER, this.verticesTyped,  gl.STREAM_DRAW);
+	            gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+	            gl.enableVertexAttribArray(this.positionLocation);
+
+	            // this.uvBuffer =  gl.createBuffer();
+	            // gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
+	            // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.uv),  gl.STATIC_DRAW);
+	            // gl.vertexAttribPointer(this.uvLocation, 2, gl.FLOAT, false, 0, 0);
+
+	            this.indexBuffer = gl.createBuffer();
+	            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+	            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
+
+
+	            this.isUploaded = true;
+	            
+	        }
+
+	    }
+
+
+	    drawTest (gl) {
+
+	        var camera = this.stage.camera;
+
+	        this.uploadData2(gl);
+	        gl.useProgram(this.shaderProgram);
+
+
+	        var projLocation = gl.getUniformLocation(this.shaderProgram, "projectionMatrix");
+	        gl.uniformMatrix3fv(projLocation , false , camera.projectionMatrix.matrixArray);
+
+	        var worlLoca = gl.getUniformLocation(this.shaderProgram, "viewMatrix");
+	        gl.uniformMatrix3fv(worlLoca , false , camera.worldMatrix.matrixArray);
+
+
+
+	        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+	        gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.verticesTyped);
+	        gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+	        
+
+	        gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
+	    }
+	}
+
 	class Camera extends Object2D{
 
 	    constructor (){
@@ -1666,7 +1892,8 @@
 	exports.Sprite2D = Sprite2D;
 	exports.Quad = Quad;
 	exports.TestSprite = TestSprite;
-	exports.Sprite = Sprite;
+	exports.DenemeSprite = DenemeSprite;
+	exports.Sprite = Sprite$1;
 	exports.Camera = Camera;
 
 	Object.defineProperty(exports, '__esModule', { value: true });

@@ -57,7 +57,7 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
              if(gl instanceof WebGLRenderingContext) {
                 this.renderer = new WebGLRenderer(this,gl);
 
-                gl.enable(gl.DEPTH_TEST);
+               // gl.enable(gl.DEPTH_TEST);
                 gl.viewport(0, 0, this.renderDom.width, this.renderDom.height);
                 gl.clearColor(0.6, 0.6, 0.6, 1.0);
              }
@@ -93,7 +93,6 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
 
             //gl.DEPTH_BUFFER_BIT
             gl.clear(gl.COLOR_BUFFER_BIT);
-
             // gl.enable(gl.CULL_FACE);
             // gl.cullFace(gl.FRONT);
            
@@ -125,11 +124,11 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
            this.renderOtherObjects();
            */
 
-           this.renderer.prepareForRender();
+          // this.renderer.prepareForRender();
 
             this.renderChild();
            //this.renderRecursively(this);
-          this.renderer.present(this.camera);
+          //this.renderer.present(this.camera);
 
         }
 
@@ -137,7 +136,8 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
 
             for (var i = 0; i < this.children.length; i++) {
                 
-                this.renderer.renderSingleObject(this.children[i], this.camera);
+                this.children[i].drawTest(this.context);
+               // this.renderer.renderSingleObject(this.children[i], this.camera);
                 
             }
 
