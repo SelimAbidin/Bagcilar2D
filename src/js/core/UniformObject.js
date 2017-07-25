@@ -26,7 +26,7 @@ class UniformObject extends EventableObject {
         for (var i = 0; i < n; i++) {
             var uniformInfo = gl.getActiveUniform(this._program, i);
             var location = gl.getUniformLocation(this._program, uniformInfo.name);
-            this.addUniform(location,uniformInfo);
+            this.addUniform(location , uniformInfo);
         }
 
     }

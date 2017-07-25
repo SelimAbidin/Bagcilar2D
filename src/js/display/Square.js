@@ -16,9 +16,10 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
             if(canvasID !== undefined){
                 
                 var canvas =  document.getElementById(canvasID);
+                
                 //var  gl = canvas.getContext("webgl2") || canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-                var  gl = canvas.getContext("webgl", {stencil:true}) || canvas.getContext("experimental-webgl", {stencil:true});  // webgl2 disabled for now
-               
+                var  gl = canvas.getContext("webgl");// || canvas.getContext("experimental-webgl", {stencil:true});  // webgl2 disabled for now
+                console.log(gl);
                 if(!gl){
                 
                     var error = "WebGL isn't supported on device";
@@ -26,12 +27,12 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
 
                 } 
                 
-                var instanced = gl.getExtension('ANGLE_instanced_arrays');
+                // var instanced = gl.getExtension('ANGLE_instanced_arrays');
                 
 
-                if(!instanced) {
-                    alert("Instanced doesn't work");
-                }
+                // if(!instanced) {
+                //     alert("Instanced doesn't work");
+                // }
 
 
 
@@ -76,7 +77,6 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
             }
         }
 
-
         // TODO silinecek. Testing method 
         // addQuadForTest (quad) {
         //     if(!this.testChilderen) {
@@ -87,55 +87,36 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
 
         update2 () {
             
-            // this.update();
-            this.dispacthEvent(Square.ENTER_FRAME, undefined);
+          // this.update();
+
+            
+
+           this.dispacthEvent(Square.ENTER_FRAME, undefined);
             var gl = this.context;
 
             //gl.DEPTH_BUFFER_BIT
+            gl.clearColor(0.3,0.3,0.3,1);
             gl.clear(gl.COLOR_BUFFER_BIT);
-            // gl.enable(gl.CULL_FACE);
-            // gl.cullFace(gl.FRONT);
-           
-
-            // gl.enable(gl.DEPTH_TEST);
-            // gl.depthFunc(gl.ALWAYS);
-
-           // gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-
-          // console.log(gl.getParameter(gl.CULL_FACE_MODE) == gl.BACK);
-            // gl.enable(gl.CULL_FACE);
-            // gl.cullFace(gl.BACK);
-                // Enable depth testing
-            //gl.enable(gl.DEPTH_TEST);
-            //gl.depthFunc(gl.LEQUAL);
-            // // Near things obscure far things
-           // gl.depthFunc(gl.LEQUAL);
-            // Clear the color as well as the depth buffer.
-
-           
-
-            /*
-            this._spriteRenderObjects = [];
-            this._renObjects = {};
-            this.collectObjects(this.children);
             
-            this.renderSprites();
-         
-           this.renderOtherObjects();
-           */
 
             this.renderer.prepareForRender();
-
-            for (var i = 0; i < this.children.length; i++) {
-                
-                this.renderer.renderSprite(this.children[i]);
-                
-            }
-
+            this.renderEachChildren();
             this.renderer.present2(this.camera);
-          //  this.renderChild();
+         
+
+          //  
+          //this.renderChild();
            //this.renderRecursively(this);
           //this.renderer.present(this.camera);
+
+        }
+
+        renderEachChildren () {
+            
+            for (var i = 0; i < this.children.length; i++) {
+                 this.children[i].update();
+                this.renderer.renderSprite(this.children[i]);
+            }
 
         }
 

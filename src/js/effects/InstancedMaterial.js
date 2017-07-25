@@ -168,7 +168,7 @@ class InstancedMaterial extends DefaultEffect {
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.uv), gl.STATIC_DRAW);
             gl.vertexAttribPointer(this.uvLocation, 2, gl.FLOAT, false, 0, 0);
 
-
+            
             var texture = gl.createTexture();
             var image = window.flame;
             gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -177,8 +177,6 @@ class InstancedMaterial extends DefaultEffect {
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
             gl.generateMipmap(gl.TEXTURE_2D);
             gl.bindTexture(gl.TEXTURE_2D, texture);
-
-
             gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
             this.isUploaded = true;
         }

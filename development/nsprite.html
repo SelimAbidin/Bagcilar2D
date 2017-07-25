@@ -11,7 +11,10 @@
     uniform mat3 projectionMatrix; 
     uniform mat3 viewMatrix;
     attribute vec2 position;
+    attribute vec2 uv;
+    varying vec2 uvData;
     void main() {
+        uvData = uv;
         vec3 newPos = vec3(position.x, position.y, 1.0 ) * (projectionMatrix * viewMatrix);
         gl_Position = vec4(newPos , 1.0);
     }
@@ -19,10 +22,12 @@
 </script>
 
 <script id="fragmentShader" type="x-shader/x-fragment">
-    precision mediump float;
+    precision lowp float;
+    uniform sampler2D uSampler;
+    varying vec2 uvData;
     void main() { 
-        vec4 c =  vec4(1.0, 1.0, 0.5, 1.0);
-        gl_FragColor = c;
+        vec4 c = texture2D(uSampler,uvData);
+        gl_FragColor = vec4(c);
     }
 </script>
 
@@ -38,15 +43,21 @@
 
     function init(){
 
+
+        window.addEventListener('gliready', function(){
+
+
+          alert("1");
+        });
         window.flame = new Image();
         window.flame.onload = function() {
             
             baslat();
         }
 
-        flame.src = "face.png"; 
+        flame.src = "bunny.png"; 
     }
-    
+
 
 
     function baslat() {
@@ -67,7 +78,7 @@
         var sp;
         function enterFrame(event) {
            
-            var start = new Date().getTime();
+            //var start = new Date().getTime();
 
               for(var i = 0 ; i < sprites.length; i++){
 
@@ -94,13 +105,13 @@
                 }
             }
 
-            var elapsed = new Date().getTime() - start;
-
+           // var elapsed = new Date().getTime() - start;
         }
         
 
          requestAnimationFrame(updateScreen);
 
+         
     }
 
 
@@ -116,7 +127,6 @@
         sp.vy = 1 + Math.random() * 2;
         sp.rv = Math.random() * 0.1;
         sprites.push(sp);
-
     }
 
 
@@ -132,13 +142,21 @@
     }
 
 
+    var say = 0;
     function updateScreen() {
 
        stats.begin();
-        meydan.update2();
-        requestAnimationFrame(updateScreen);
+        
+       meydan.update2();
+      // say++;
+       if(say < 500) requestAnimationFrame(updateScreen);
         stats.end();
     }
+
+
+
+
+
 
     
 

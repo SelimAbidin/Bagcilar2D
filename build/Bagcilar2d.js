@@ -113,7 +113,7 @@
 	        for (var i = 0; i < n; i++) {
 	            var uniformInfo = gl.getActiveUniform(this._program, i);
 	            var location = gl.getUniformLocation(this._program, uniformInfo.name);
-	            this.addUniform(location,uniformInfo);
+	            this.addUniform(location , uniformInfo);
 	        }
 
 	    }
@@ -375,7 +375,7 @@
 
 
 	var _materialInstance;
-	class InstancedMaterial$1 extends DefaultEffect {
+	class InstancedMaterial extends DefaultEffect {
 	    
 	    constructor (color) {
 	        super();
@@ -423,7 +423,7 @@
 	    static getInstance() {
 
 	        if(!_materialInstance){
-	            _materialInstance = new InstancedMaterial$1();
+	            _materialInstance = new InstancedMaterial();
 	        }
 
 	        return _materialInstance;
@@ -537,7 +537,7 @@
 	            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.uv), gl.STATIC_DRAW);
 	            gl.vertexAttribPointer(this.uvLocation, 2, gl.FLOAT, false, 0, 0);
 
-
+	            
 	            var texture = gl.createTexture();
 	            var image = window.flame;
 	            gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -546,8 +546,6 @@
 	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
 	            gl.generateMipmap(gl.TEXTURE_2D);
 	            gl.bindTexture(gl.TEXTURE_2D, texture);
-
-
 	            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
 	            this.isUploaded = true;
 	        }
@@ -579,10 +577,11 @@
 	}
 
 	var cccc$1 = 0;
-	var MAX_INSTANCE$1 = 1;
+	var MAX_INSTANCE$1 = 30000;
 
 
-	var _materialInstance$1;
+	var _currentEmptyInstance;
+	var _instancedMaterials = [];
 	class RegularEffect extends DefaultEffect {
 	    
 	    constructor (color) {
@@ -590,9 +589,8 @@
 	        this.count = 0;
 	        this.id = "id_"+cccc$1++;
 	        this.isUploaded = false;
-	        
 
-	        var f = 10;
+	        var f = 20;
 	        var vv  = [
 	            -f,  f, // left - top
 	            -f, -f, // left - bottom
@@ -605,7 +603,41 @@
 	        var uvCounter       = 0;
 	        this.vertices       = new Float32Array(8 * MAX_INSTANCE$1);
 	        this.uvs            = new Float32Array(8 * MAX_INSTANCE$1);
-	        this.indices        = new Float32Array(6 * MAX_INSTANCE$1);
+	        this.colors         = new Float32Array(12 * MAX_INSTANCE$1);
+	        this.indices        = new Uint16Array(6 * MAX_INSTANCE$1);
+
+	        var r,g,b;
+	        for (var i = 0; i < this.colors.length; i+=12) {
+	            
+	            r = Math.random();
+	            g = Math.random();
+	            b = Math.random();
+
+	            this.colors[i] = r;
+	            this.colors[i + 1] = g;
+	            this.colors[i + 2] = b;
+
+
+	            this.colors[i + 3] = r;
+	            this.colors[i + 4] = g;
+	            this.colors[i + 5] = b;
+
+
+	            this.colors[i + 6] = r;
+	            this.colors[i + 7] = g;
+	            this.colors[i + 8] = b;
+
+
+	            this.colors[i + 9] = r;
+	            this.colors[i + 10] = g;
+	            this.colors[i + 11] = b;
+
+	            
+	        }
+	        
+	        for (var i = 0; i < this.vertices.length; i+=8) {
+	          this.vertices[i] = 0;
+	        }
 
 	        for (var i = 0; i < this.vertices.length; i+=8) {
 	            
@@ -624,7 +656,7 @@
 	            this.uvs[uvCounter + 5] = 1;
 
 	            this.uvs[uvCounter + 6] = 1;
-	            this.uvs[uvCounter + 7] = 1;
+	            this.uvs[uvCounter + 7] = 0;
 
 	            uvCounter += 8; 
 	            
@@ -641,26 +673,83 @@
 	        }
 	        
 
-	        console.log(this.vertices);
-	        console.log(this.indices);
 	    }
 
-	    
-	    static getInstance() {
 
-	        if(!_materialInstance$1){
-	            _materialInstance$1 = new InstancedMaterial();
+	    appendVerices (vertices) {
+	        var vertexIndex = this.count * 8;
+	        
+	        this.vertices[vertexIndex] = vertices[0];
+	        this.vertices[vertexIndex + 1] = vertices[1];
+	        this.vertices[vertexIndex + 2] = vertices[2];
+	        this.vertices[vertexIndex + 3] = vertices[3];
+	        this.vertices[vertexIndex + 4] = vertices[4];
+	        this.vertices[vertexIndex + 5] = vertices[5];
+	        this.vertices[vertexIndex + 6] = vertices[6];
+	        this.vertices[vertexIndex + 7] = vertices[7];
+
+	    }
+
+
+	    appendColors (colors) {
+
+	        var vertexIndex = this.count * 12;
+	        this.colors[vertexIndex] = colors[0];
+	        this.colors[vertexIndex + 1] = colors[1];
+	        this.colors[vertexIndex + 2] = colors[2];
+	        this.colors[vertexIndex + 3] = colors[3];
+	        this.colors[vertexIndex + 4] = colors[4];
+	        this.colors[vertexIndex + 5] = colors[5];
+	        this.colors[vertexIndex + 6] = colors[6];
+	        this.colors[vertexIndex + 7] = colors[7];
+	        this.colors[vertexIndex + 8] = colors[8];
+	        this.colors[vertexIndex + 9] = colors[9];
+	        this.colors[vertexIndex + 10] = colors[10];
+	        this.colors[vertexIndex + 11] = colors[11];
+	    }
+
+	    hasRoom () {
+
+	        return this.getLenght() < MAX_INSTANCE$1;
+
+	    }
+
+
+
+
+	    static getEmptyInstance () {
+	        
+	        if(_currentEmptyInstance === undefined || !_currentEmptyInstance.hasRoom()) {
+
+	            for (var i = 0; i < _instancedMaterials.length; i++) {
+	                var element = _instancedMaterials[i];
+
+	                if(element.hasRoom()) {
+	                   _currentEmptyInstance = element;
+	                    return _currentEmptyInstance;
+	                }
+	                
+	            }
+	            
+	            
+	           _currentEmptyInstance = new RegularEffect();
+	            _instancedMaterials.push(_currentEmptyInstance);
 	        }
-
-	        return _materialInstance$1;
+	        
+	        return _currentEmptyInstance;
 	    }
+
 	    
 	    reset () {
 	        this.count = -1;
+
+	       
 	    }
 	   
 	    next () {
+	        
 	        this.count++;
+
 	    }
 
 	    getLenght () {
@@ -682,7 +771,6 @@
 	                let finfo = gl.getShaderInfoLog( this.fragmentShaderBuffer );
 	                throw "Could not compile WebGL program. \n\n" + finfo;
 	            }
-
 	            
 	            this.vertexShaderBuffer = gl.createShader(gl.VERTEX_SHADER);
 	            gl.shaderSource( this.vertexShaderBuffer, vertexShaderSRC );
@@ -700,18 +788,56 @@
 
 
 	            this.positionLocation = gl.getAttribLocation(this.shaderProgram,"position");
+	            this.uvLocation = gl.getAttribLocation(this.shaderProgram,"uv");
 
+
+	  
 	            this.vertexBuffer = gl.createBuffer();
 	            gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-	            gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.STREAM_DRAW);
-	            gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0);
+	            gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.DYNAMIC_DRAW);
 	            gl.enableVertexAttribArray(this.positionLocation);
+	            gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0);
+	           
 
+
+	            this.uvBuffer = gl.createBuffer();
+	            gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
+	            gl.bufferData(gl.ARRAY_BUFFER, this.uvs, gl.STATIC_DRAW);
+	            gl.enableVertexAttribArray(this.uvLocation);
+	            gl.vertexAttribPointer(this.uvLocation, 2, gl.FLOAT, false, 0, 0);
+	           
+
+	            // this.colorBuffer = gl.createBuffer();
+	            // gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
+	            // gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STREAM_DRAW);
+	            // gl.vertexAttribPointer(this.colorPosition, 3, gl.FLOAT, false, 0, 0);
+	            // gl.enableVertexAttribArray(this.colorPosition);
 
 	            this.indexBuffer = gl.createBuffer();
 	            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
 	            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indices, gl.STATIC_DRAW);
 
+
+	            var n = gl.getProgramParameter(this.shaderProgram, gl.ACTIVE_ATTRIBUTES);
+
+	            for (var i = 0; i < n; i++) {
+	                var element = gl.getActiveAttrib(this.shaderProgram, i);
+	                console.log(element);
+	            }
+
+	            var texture = gl.createTexture();
+	            var image = window.flame;
+	            gl.bindTexture(gl.TEXTURE_2D, texture);
+	            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	            //gl.generateMipmap(gl.TEXTURE_2D);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	            //gl.bindTexture(gl.TEXTURE_2D, texture);
+	            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+
+	            this.textureBuffer = texture;
 
 	            this.uniform = new UniformObject(gl, this.shaderProgram);
 
@@ -905,7 +1031,7 @@
 	        
 
 	        if(!this.material){
-	            this.material = InstancedMaterial$1.getInstance();
+	            this.material = InstancedMaterial.getInstance();
 	        }
 	        
 	    }
@@ -964,6 +1090,10 @@
 	        this.material = new RegularEffect();
 
 	        gl.disable(gl.STENCIL_TEST);
+	        gl.disable(gl.DEPTH_TEST);
+	        
+	        gl.scissor(0, 0, 200, 200);
+	        
 	        gl.enable(gl.BLEND);
 	        gl.blendColor(0, 0, 0, 0);
 	        gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
@@ -978,173 +1108,73 @@
 
 	    renderSprite (sprite) {
 
-	        if(!sprite.material){
-	            sprite.material = this.material;
+	        var material = RegularEffect.getEmptyInstance();
+
+	        // if(this._materials.indexOf(material) == -1) {
+
+	        //     this._materials.push(material);
+	        // }
+
+	        if(this.infoID != material.renderID) {
+	            this._materials.push(material);
+	            material.upload(this.gl);
 	        }
 
-	        sprite.material.upload(this.gl);
+
+	        material.renderID = this.infoID;
+	        material.next();
 
 
-
+	        
+	        material.appendVerices(sprite.vertices);
+	      //  material.appendColors(sprite.colors);
 	    }
 
 
 	    present2 (camera) {
 
 	        var gl = this.gl;
-	        var material =  this.material;
-	        var uniform = material.uniform;
 
-	        gl.useProgram(material.shaderProgram);
-
-
-	           var projLocation = gl.getUniformLocation(material.shaderProgram, "projectionMatrix");
-	        gl.uniformMatrix3fv(projLocation , false , camera.projectionMatrix.matrixArray);
-
-	        var worlLoca = gl.getUniformLocation(material.shaderProgram, "viewMatrix");
-	        gl.uniformMatrix3fv(worlLoca , false , camera.worldMatrix.matrixArray);
-
-
-	        uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
-	        uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
-	        uniform.update(this.gl);
-
-	        gl.enableVertexAttribArray(this.positionLocation);
-	           
-	        gl.bindBuffer(gl.ARRAY_BUFFER, material.vertexBuffer);
-	        gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.vertices);
-	        gl.vertexAttribPointer(material.positionLocation, 2, gl.FLOAT, false, 0, 0);
-
-	        gl.drawElements(gl.TRIANGLES, material.indices.length, gl.UNSIGNED_SHORT, 0);
-	    }
-
-
-
-
-	    renderSingleObject (object, camera) {
-
-	        var gl = this.gl;
-	        var material = object.material;
-
-	        this.useMaterial(material, camera);
-	        
-	       // object.upload(gl , material);
-
-	        
-	        material.next();
-	        material.addRotation(object.rotation);
-	        material.addPosition(object.xPos, object.yPos);
-
-	        material.renderNumber = this.infoID;
-	    }
-
-	    useMaterial (material, camera) {
-
-	        if(!material.isUploaded) {
-	            var ext = this.exAngleInstance;
-	            material.upload(this.gl, ext);
-	        }
-
-	        if(material.id != this.lastMaterialID) {
-
-	            var gl = this.gl;
-	            //gl.useProgram(material.shaderProgram);
-	            //gl.activeTexture(gl.TEXTURE0);
-
-	            this.lastMaterialID = material.id;
-	        }
-
-
-	        var uniform = material.uniform;
-	       
-	        if(material.renderNumber !== this.infoID){
-	            
-	            material.reset();  
-	            this._materials.push(material);
-	            
-
-	        }
-	    }
-
-	    present (camera) {
-
-	        var gl = this.gl;
 	        for (var i = 0; i < this._materials.length; i++) {
 
-	                var material = this._materials[i];
-	                var gl = this.gl;
+	            var material =  this._materials[i];
+	            var uniform = material.uniform;
 
-	                gl.useProgram(material.shaderProgram);
+	            gl.useProgram(material.shaderProgram);
+	           
+	            uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
+	            uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
+	            uniform.setValue("uSampler", 0);
+	            uniform.update(this.gl);
 
-	                this.updateUniforms(material.uniform, camera);
+	            gl.activeTexture(gl.TEXTURE0);
+	            gl.bindTexture(gl.TEXTURE_2D, material.textureBuffer);
+	            
+	            gl.bindBuffer(gl.ARRAY_BUFFER, material.vertexBuffer);
+	            gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.vertices);
+	            gl.vertexAttribPointer(material.positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-	                this.enableAttributes(material);
+	            gl.bindBuffer(gl.ARRAY_BUFFER, material.uvBuffer);
+	            gl.vertexAttribPointer(material.uvLocation, 2, gl.FLOAT, false, 0,   0);
 
-	                this.updatePosition(material);
+	           // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, material.indexBuffer);
+	            var size = material.indices.length;
+	            var nsize = material.getLenght() * 6;
 
-	                this.updateOtherAttributes(material);
+	            
+	            gl.drawElements(gl.TRIANGLES, nsize, gl.UNSIGNED_SHORT, 0);
 
-	                gl.activeTexture(gl.TEXTURE0);
-
-	                
-	                this.drawVertices(material);
+	            material.reset();
 
 
 	        }
+
 	        
-
+	      
 	    }
 
 
-	    updateOtherAttributes (material) {
 
-	        var gl = this.gl;
-	        // gl.bindBuffer(gl.ARRAY_BUFFER, material.rotateBuffer);
-	        // gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.rotateArray);
-	        // gl.vertexAttribPointer(material.rotationLocation, 1, gl.FLOAT, false, 0, 0);
-
-	        // gl.bindBuffer(gl.ARRAY_BUFFER, material.offsetBuffer);
-	        // gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.offset);
-	        // gl.vertexAttribPointer(material.offsetLocation, 2, gl.FLOAT, false, 0, 0);
-
-	        // gl.bindBuffer(gl.ARRAY_BUFFER, material.colorBuffer);
-	        // gl.vertexAttribPointer(material.colorLocation, 3, gl.FLOAT, false, 0, 0);
-
-	        // gl.bindBuffer(gl.ARRAY_BUFFER, material.uvBuffer);
-	        // gl.vertexAttribPointer(material.uvLocation, 2, gl.FLOAT, false, 0, 0);
-
-	    }
-
-	    updatePosition (material) {
-
-	        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, material.buffer);
-	        this.gl.vertexAttribPointer(material.positionLocation, 2, this.gl.FLOAT, false, 0, 0);
-
-	    }
-
-	    drawVertices (material) {
-	        
-	        var size = 6;
-	        this.exAngleInstance.drawElementsInstancedANGLE(this.gl.TRIANGLES, size, this.gl.UNSIGNED_SHORT, 0, material.getLenght());
-	    }
-
-
-	    enableAttributes (material) {
-
-	        this.gl.enableVertexAttribArray(material.rotationLocation);
-	        this.gl.enableVertexAttribArray(material.positionLocation);
-	        this.gl.enableVertexAttribArray(material.colorLocation);
-	        this.gl.enableVertexAttribArray(material.uvLocation);
-	        this.gl.enableVertexAttribArray(material.offsetLocation);
-	    }
-
-
-	    updateUniforms (uniform, camera) {
-	        uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
-	        uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
-	        uniform.setValue("uSampler", 0);
-	        uniform.update(this.gl);
-	    }
 
 	}
 
@@ -1244,9 +1274,10 @@
 	            if(canvasID !== undefined){
 	                
 	                var canvas =  document.getElementById(canvasID);
+	                
 	                //var  gl = canvas.getContext("webgl2") || canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-	                var  gl = canvas.getContext("webgl", {stencil:true}) || canvas.getContext("experimental-webgl", {stencil:true});  // webgl2 disabled for now
-	               
+	                var  gl = canvas.getContext("webgl");// || canvas.getContext("experimental-webgl", {stencil:true});  // webgl2 disabled for now
+	                console.log(gl);
 	                if(!gl){
 	                
 	                    var error = "WebGL isn't supported on device";
@@ -1254,12 +1285,12 @@
 
 	                } 
 	                
-	                var instanced = gl.getExtension('ANGLE_instanced_arrays');
+	                // var instanced = gl.getExtension('ANGLE_instanced_arrays');
 	                
 
-	                if(!instanced) {
-	                    alert("Instanced doesn't work");
-	                }
+	                // if(!instanced) {
+	                //     alert("Instanced doesn't work");
+	                // }
 
 
 
@@ -1304,7 +1335,6 @@
 	            }
 	        }
 
-
 	        // TODO silinecek. Testing method 
 	        // addQuadForTest (quad) {
 	        //     if(!this.testChilderen) {
@@ -1315,55 +1345,36 @@
 
 	        update2 () {
 	            
-	            // this.update();
-	            this.dispacthEvent(Square.ENTER_FRAME, undefined);
+	          // this.update();
+
+	            
+
+	           this.dispacthEvent(Square.ENTER_FRAME, undefined);
 	            var gl = this.context;
 
 	            //gl.DEPTH_BUFFER_BIT
+	            gl.clearColor(0.3,0.3,0.3,1);
 	            gl.clear(gl.COLOR_BUFFER_BIT);
-	            // gl.enable(gl.CULL_FACE);
-	            // gl.cullFace(gl.FRONT);
-	           
-
-	            // gl.enable(gl.DEPTH_TEST);
-	            // gl.depthFunc(gl.ALWAYS);
-
-	           // gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-
-	          // console.log(gl.getParameter(gl.CULL_FACE_MODE) == gl.BACK);
-	            // gl.enable(gl.CULL_FACE);
-	            // gl.cullFace(gl.BACK);
-	                // Enable depth testing
-	            //gl.enable(gl.DEPTH_TEST);
-	            //gl.depthFunc(gl.LEQUAL);
-	            // // Near things obscure far things
-	           // gl.depthFunc(gl.LEQUAL);
-	            // Clear the color as well as the depth buffer.
-
-	           
-
-	            /*
-	            this._spriteRenderObjects = [];
-	            this._renObjects = {};
-	            this.collectObjects(this.children);
 	            
-	            this.renderSprites();
-	         
-	           this.renderOtherObjects();
-	           */
 
 	            this.renderer.prepareForRender();
-
-	            for (var i = 0; i < this.children.length; i++) {
-	                
-	                this.renderer.renderSprite(this.children[i]);
-	                
-	            }
-
+	            this.renderEachChildren();
 	            this.renderer.present2(this.camera);
-	          //  this.renderChild();
+	         
+
+	          //  
+	          //this.renderChild();
 	           //this.renderRecursively(this);
 	          //this.renderer.present(this.camera);
+
+	        }
+
+	        renderEachChildren () {
+	            
+	            for (var i = 0; i < this.children.length; i++) {
+	                 this.children[i].update();
+	                this.renderer.renderSprite(this.children[i]);
+	            }
 
 	        }
 
@@ -1850,11 +1861,111 @@
 	class NormalSprite extends ObjectContainer2D {
 
 	    constructor () {
-
+	        
 	        super();
 
+	        var f = 16;
+
+	      
+	        this.vertices  = [
+	                            -f,  f, // left - top
+	                            -f, -f, // left - bottom
+	                            f,  f, // right - top
+	                            f, -f, // right - bottom
+	                        ];
+	        
+	        this.colors = [];
+	        var r,g,b;
+	        r = Math.random();
+	        g = Math.random();
+	        b = Math.random();
+
+	        this.colors[0] = r;
+	        this.colors[1] = g;
+	        this.colors[2] = b;
+
+
+	        this.colors[3] = r;
+	        this.colors[4] = g;
+	        this.colors[5] = b;
+
+
+	        this.colors[6] = r;
+	        this.colors[7] = g;
+	        this.colors[8] = b;
+
+
+	        this.colors[9] = r;
+	        this.colors[10] = g;
+	        this.colors[11] = b;
 	    }
 
+
+	    update () {
+	        //super.update();
+	        //console.log(this.positionMatrix.matrixArray);
+	        //this.updateWorldMatrix();
+	    //  this.updateScale();
+	    //         this.updateRotation();
+	      //  this.updatePosition();  
+	        var f = 16;
+	        
+	        var bh = 18;
+	        var bw = 15;
+
+
+
+	        var w = bw * this.scaleX;
+	        var h = bh * this.scaleY;
+	        var p1x = -w + this.xPos; 
+	        var p1y = h + this.yPos; 
+
+	       // var p2x = p1x;//(-f * this.scaleX) + this.xPos; 
+	        var p2y = -h + this.yPos;
+
+	        var p3x = w + this.xPos; 
+	       // var p3y = p1y;//(f * this.scaleY) + this.yPos;
+
+	        //var p4x = p3x;//(f * this.scaleX) + this.xPos; 
+	        //var p4y = p2y;//(-f * this.scaleY) + this.yPos;
+	        
+
+	        // this.p1x = p1x;
+	        // this.p2x = p2x;
+	        // this.p3x = p3x;
+	        // this.p4x = p4x;
+
+	        // this.p1y = p1y;
+	        // this.p2y = p2y;
+	        // this.p3y = p3y;
+	        // this.p4y = p4y;
+
+	        this.vertices[0] = p1x; 
+	        this.vertices[1] = p1y; 
+
+	        this.vertices[2] = p1x;//p2x; 
+	        this.vertices[3] = p2y;
+
+	        this.vertices[4] = p3x; 
+	        this.vertices[5] = p1y;//p3y; 
+
+	        this.vertices[6] = p3x;//p4x;
+	        this.vertices[7] = p2y;//p4y; 
+
+	        
+	        // this.vertices[0] = -f + this.xPos; 
+	        // this.vertices[1] =  f + this.yPos; 
+
+	        // this.vertices[2] = -f + this.xPos; 
+	        // this.vertices[3] =  -f + this.yPos;
+
+	        // this.vertices[4] = f + this.xPos; 
+	        // this.vertices[5] =  f + this.yPos; 
+
+	        // this.vertices[6] = f + this.xPos; 
+	        // this.vertices[7] =  -f + this.yPos; 
+
+	    }
 
 
 
@@ -2102,7 +2213,7 @@
 	exports.WebGLRenderer = WebGLRenderer;
 	exports.DefaultEffect = DefaultEffect;
 	exports.ColorEffect = ColorEffect;
-	exports.InstancedMaterial = InstancedMaterial$1;
+	exports.InstancedMaterial = InstancedMaterial;
 	exports.Square = Square;
 	exports.Object2D = Object2D;
 	exports.ObjectContainer2D = ObjectContainer2D;
