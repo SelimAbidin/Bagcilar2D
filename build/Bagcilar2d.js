@@ -577,7 +577,7 @@
 	}
 
 	var cccc$1 = 0;
-	var MAX_INSTANCE$1 = 30000;
+	var MAX_INSTANCE$1 = 14000;
 
 
 	var _currentEmptyInstance;
@@ -759,8 +759,8 @@
 	    upload (gl){
 	        
 
-	        if(!this.isUploaded)
-	        {
+	        if(!this.isUploaded){
+	            
 	            var vertexShaderSRC =  document.getElementById( 'vertexShader' ).textContent;
 	            var fragmentShaderSRC = document.getElementById( 'fragmentShader' ).textContent;
 	            
@@ -789,15 +789,14 @@
 
 	            this.positionLocation = gl.getAttribLocation(this.shaderProgram,"position");
 	            this.uvLocation = gl.getAttribLocation(this.shaderProgram,"uv");
-
+	            this.colorLocation = gl.getAttribLocation(this.shaderProgram,"color");
 
 	  
 	            this.vertexBuffer = gl.createBuffer();
 	            gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-	            gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.DYNAMIC_DRAW);
+	            gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.STREAM_DRAW);
 	            gl.enableVertexAttribArray(this.positionLocation);
 	            gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0);
-	           
 
 
 	            this.uvBuffer = gl.createBuffer();
@@ -807,11 +806,11 @@
 	            gl.vertexAttribPointer(this.uvLocation, 2, gl.FLOAT, false, 0, 0);
 	           
 
-	            // this.colorBuffer = gl.createBuffer();
-	            // gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
-	            // gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STREAM_DRAW);
-	            // gl.vertexAttribPointer(this.colorPosition, 3, gl.FLOAT, false, 0, 0);
-	            // gl.enableVertexAttribArray(this.colorPosition);
+	            this.colorBuffer = gl.createBuffer();
+	            gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
+	            gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STREAM_DRAW);
+	            gl.vertexAttribPointer(this.colorLocation, 3, gl.FLOAT, false, 0, 0);
+	            gl.enableVertexAttribArray(this.colorLocation);
 
 	            this.indexBuffer = gl.createBuffer();
 	            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
@@ -827,20 +826,24 @@
 
 	            var texture = gl.createTexture();
 	            var image = window.flame;
+	            // gl.bindTexture(gl.TEXTURE_2D, texture);
+	            // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	            // gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+
 	            gl.bindTexture(gl.TEXTURE_2D, texture);
 	            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
 	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-	            //gl.generateMipmap(gl.TEXTURE_2D);
 	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-	            //gl.bindTexture(gl.TEXTURE_2D, texture);
-	            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+	           // gl.generateMipmap(gl.TEXTURE_2D);
 
 	            this.textureBuffer = texture;
-
 	            this.uniform = new UniformObject(gl, this.shaderProgram);
-
 	            this.isUploaded = true;
 	        }
 	       
@@ -1092,13 +1095,9 @@
 	        gl.disable(gl.STENCIL_TEST);
 	        gl.disable(gl.DEPTH_TEST);
 	        
-	        gl.scissor(0, 0, 200, 200);
-	        
 	        gl.enable(gl.BLEND);
-	        gl.blendColor(0, 0, 0, 0);
-	        gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-	        gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-	        gl.blendEquationSeparate(gl.FUNC_ADD, gl.FUNC_ADD);
+	        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
 	    }
 
 	    prepareForRender () {
@@ -1109,11 +1108,6 @@
 	    renderSprite (sprite) {
 
 	        var material = RegularEffect.getEmptyInstance();
-
-	        // if(this._materials.indexOf(material) == -1) {
-
-	        //     this._materials.push(material);
-	        // }
 
 	        if(this.infoID != material.renderID) {
 	            this._materials.push(material);
@@ -1127,13 +1121,20 @@
 
 	        
 	        material.appendVerices(sprite.vertices);
-	      //  material.appendColors(sprite.colors);
+	        material.appendColors(sprite.colors);
 	    }
 
 
 	    present2 (camera) {
 
 	        var gl = this.gl;
+
+	        if(gl.isContextLost()) {
+	            return;
+	        }
+
+
+	    
 
 	        for (var i = 0; i < this._materials.length; i++) {
 
@@ -1153,6 +1154,11 @@
 	            gl.bindBuffer(gl.ARRAY_BUFFER, material.vertexBuffer);
 	            gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.vertices);
 	            gl.vertexAttribPointer(material.positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+
+	            gl.bindBuffer(gl.ARRAY_BUFFER, material.colorBuffer);
+	            gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.colors);
+	            gl.vertexAttribPointer(material.colorLocation, 3, gl.FLOAT, false, 0, 0);
 
 	            gl.bindBuffer(gl.ARRAY_BUFFER, material.uvBuffer);
 	            gl.vertexAttribPointer(material.uvLocation, 2, gl.FLOAT, false, 0,   0);
@@ -1273,7 +1279,19 @@
 	            this.stage = this;
 	            if(canvasID !== undefined){
 	                
-	                var canvas =  document.getElementById(canvasID);
+
+	            var cAttributes = {
+	                    alpha: false,
+	                    antialias: false,
+	                    depth: false,
+	                    failIfMajorPerformanceCaveat: false,
+	                    premultipliedAlpha: false,
+	                    preserveDrawingBuffer: false,
+	                    stencil: true
+	                };
+
+
+	                var canvas =  document.getElementById(canvasID, cAttributes);
 	                
 	                //var  gl = canvas.getContext("webgl2") || canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
 	                var  gl = canvas.getContext("webgl");// || canvas.getContext("experimental-webgl", {stencil:true});  // webgl2 disabled for now
@@ -1284,7 +1302,13 @@
 	                    this.dispatchEvent(Square.ERROR , { message : error });
 
 	                } 
-	                
+
+	                gl.clearColor(1, 1, 1, 1);
+	               // gl.colorMask(false, false, false, true);
+	                gl.clear(gl.COLOR_BUFFER_BIT);
+
+	                //gl.colorMask(true, true, true, false);
+
 	                // var instanced = gl.getExtension('ANGLE_instanced_arrays');
 	                
 
@@ -1354,6 +1378,8 @@
 
 	            //gl.DEPTH_BUFFER_BIT
 	            gl.clearColor(0.3,0.3,0.3,1);
+	            
+
 	            gl.clear(gl.COLOR_BUFFER_BIT);
 	            
 
@@ -1914,21 +1940,43 @@
 	        var bw = 15;
 
 
+	        var mm00 = Math.cos(this.rotation);
+	        var mm01 = Math.sin(this.rotation);
+	        var mm10 = -mm01;
+	        var mm11 =  mm00;
+
+
+
 
 	        var w = bw * this.scaleX;
 	        var h = bh * this.scaleY;
-	        var p1x = -w + this.xPos; 
-	        var p1y = h + this.yPos; 
 
-	       // var p2x = p1x;//(-f * this.scaleX) + this.xPos; 
-	        var p2y = -h + this.yPos;
 
-	        var p3x = w + this.xPos; 
-	       // var p3y = p1y;//(f * this.scaleY) + this.yPos;
 
-	        //var p4x = p3x;//(f * this.scaleX) + this.xPos; 
-	        //var p4y = p2y;//(-f * this.scaleY) + this.yPos;
+	        var p1x = -w; 
+	        var p1y = h;
+
+	        p1x = this.xPos + (p1x * mm00) + (mm10 * p1y); 
+	        p1y = this.yPos +  (-w * mm01) + (mm11 * p1y); 
 	        
+	        var p2x = -w;
+	        var p2y = -h;
+
+	        p2x = this.xPos + (p2x * mm00) + (mm10 * p2y); 
+	        p2y = this.yPos + (-w * mm01) + (mm11 * p2y); 
+
+	        var p3x = w; 
+	        var p3y = h;
+	        
+	        p3x = this.xPos +  (p3x * mm00) + (mm10 * p3y); 
+	        p3y = this.yPos + (w * mm01) + (mm11 * p3y); 
+	        
+
+	        var p4x = w; 
+	        var p4y = -h;
+
+	        p4x = this.xPos + (p4x * mm00) + (mm10 * p4y); 
+	        p4y = this.yPos + (w * mm01) + (mm11 * p4y); 
 
 	        // this.p1x = p1x;
 	        // this.p2x = p2x;
@@ -1943,14 +1991,14 @@
 	        this.vertices[0] = p1x; 
 	        this.vertices[1] = p1y; 
 
-	        this.vertices[2] = p1x;//p2x; 
+	        this.vertices[2] = p2x;//p2x; 
 	        this.vertices[3] = p2y;
 
 	        this.vertices[4] = p3x; 
-	        this.vertices[5] = p1y;//p3y; 
+	        this.vertices[5] = p3y;//p3y; 
 
-	        this.vertices[6] = p3x;//p4x;
-	        this.vertices[7] = p2y;//p4y; 
+	        this.vertices[6] = p4x;
+	        this.vertices[7] = p4y; 
 
 	        
 	        // this.vertices[0] = -f + this.xPos; 

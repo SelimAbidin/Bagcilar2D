@@ -15,7 +15,19 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
             this.stage = this;
             if(canvasID !== undefined){
                 
-                var canvas =  document.getElementById(canvasID);
+
+            var cAttributes = {
+                    alpha: false,
+                    antialias: false,
+                    depth: false,
+                    failIfMajorPerformanceCaveat: false,
+                    premultipliedAlpha: false,
+                    preserveDrawingBuffer: false,
+                    stencil: true
+                }
+
+
+                var canvas =  document.getElementById(canvasID, cAttributes);
                 
                 //var  gl = canvas.getContext("webgl2") || canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
                 var  gl = canvas.getContext("webgl");// || canvas.getContext("experimental-webgl", {stencil:true});  // webgl2 disabled for now
@@ -26,7 +38,13 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
                     this.dispatchEvent(Square.ERROR , { message : error });
 
                 } 
-                
+
+                gl.clearColor(1, 1, 1, 1);
+               // gl.colorMask(false, false, false, true);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+
+                //gl.colorMask(true, true, true, false);
+
                 // var instanced = gl.getExtension('ANGLE_instanced_arrays');
                 
 
@@ -96,6 +114,8 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
 
             //gl.DEPTH_BUFFER_BIT
             gl.clearColor(0.3,0.3,0.3,1);
+            
+
             gl.clear(gl.COLOR_BUFFER_BIT);
             
 

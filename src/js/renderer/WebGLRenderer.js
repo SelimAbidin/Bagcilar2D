@@ -17,13 +17,9 @@ class WebGLRenderer extends EventableObject
         gl.disable(gl.STENCIL_TEST);
         gl.disable(gl.DEPTH_TEST);
         
-        gl.scissor(0, 0, 200, 200);
-        
         gl.enable(gl.BLEND);
-        gl.blendColor(0, 0, 0, 0);
-        gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-        gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-        gl.blendEquationSeparate(gl.FUNC_ADD, gl.FUNC_ADD);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
     }
 
     prepareForRender () {
@@ -34,11 +30,6 @@ class WebGLRenderer extends EventableObject
     renderSprite (sprite) {
 
         var material = RegularEffect.getEmptyInstance();
-
-        // if(this._materials.indexOf(material) == -1) {
-
-        //     this._materials.push(material);
-        // }
 
         if(this.infoID != material.renderID) {
             this._materials.push(material);
@@ -52,13 +43,20 @@ class WebGLRenderer extends EventableObject
 
         
         material.appendVerices(sprite.vertices);
-      //  material.appendColors(sprite.colors);
+        material.appendColors(sprite.colors);
     }
 
 
     present2 (camera) {
 
         var gl = this.gl;
+
+        if(gl.isContextLost()) {
+            return;
+        }
+
+
+    
 
         for (var i = 0; i < this._materials.length; i++) {
 
@@ -78,6 +76,11 @@ class WebGLRenderer extends EventableObject
             gl.bindBuffer(gl.ARRAY_BUFFER, material.vertexBuffer);
             gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.vertices);
             gl.vertexAttribPointer(material.positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, material.colorBuffer);
+            gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.colors);
+            gl.vertexAttribPointer(material.colorLocation, 3, gl.FLOAT, false, 0, 0);
 
             gl.bindBuffer(gl.ARRAY_BUFFER, material.uvBuffer);
             gl.vertexAttribPointer(material.uvLocation, 2, gl.FLOAT, false, 0,   0);

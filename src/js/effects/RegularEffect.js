@@ -2,7 +2,7 @@ import {DefaultEffect} from "./DefaultEffect";
 import {Color} from "../math/Color";
 import {UniformObject} from "../core/UniformObject";
 var cccc = 0;
-var MAX_INSTANCE = 30000;
+var MAX_INSTANCE = 14000;
 
 
 var _currentEmptyInstance;
@@ -185,8 +185,8 @@ class RegularEffect extends DefaultEffect {
     upload (gl){
         
 
-        if(!this.isUploaded)
-        {
+        if(!this.isUploaded){
+            
             var vertexShaderSRC =  document.getElementById( 'vertexShader' ).textContent;
             var fragmentShaderSRC = document.getElementById( 'fragmentShader' ).textContent;
             
@@ -215,15 +215,14 @@ class RegularEffect extends DefaultEffect {
 
             this.positionLocation = gl.getAttribLocation(this.shaderProgram,"position");
             this.uvLocation = gl.getAttribLocation(this.shaderProgram,"uv");
-
+            this.colorLocation = gl.getAttribLocation(this.shaderProgram,"color");
 
   
             this.vertexBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.DYNAMIC_DRAW);
+            gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.STREAM_DRAW);
             gl.enableVertexAttribArray(this.positionLocation);
             gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0);
-           
 
 
             this.uvBuffer = gl.createBuffer();
@@ -233,11 +232,11 @@ class RegularEffect extends DefaultEffect {
             gl.vertexAttribPointer(this.uvLocation, 2, gl.FLOAT, false, 0, 0);
            
 
-            // this.colorBuffer = gl.createBuffer();
-            // gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
-            // gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STREAM_DRAW);
-            // gl.vertexAttribPointer(this.colorPosition, 3, gl.FLOAT, false, 0, 0);
-            // gl.enableVertexAttribArray(this.colorPosition);
+            this.colorBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STREAM_DRAW);
+            gl.vertexAttribPointer(this.colorLocation, 3, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(this.colorLocation);
 
             this.indexBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
@@ -253,20 +252,24 @@ class RegularEffect extends DefaultEffect {
 
             var texture = gl.createTexture();
             var image = window.flame;
+            // gl.bindTexture(gl.TEXTURE_2D, texture);
+            // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            // gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+
             gl.bindTexture(gl.TEXTURE_2D, texture);
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-            //gl.generateMipmap(gl.TEXTURE_2D);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-            //gl.bindTexture(gl.TEXTURE_2D, texture);
-            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+           // gl.generateMipmap(gl.TEXTURE_2D);
 
             this.textureBuffer = texture;
-
             this.uniform = new UniformObject(gl, this.shaderProgram);
-
             this.isUploaded = true;
         }
        
