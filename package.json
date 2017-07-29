@@ -4,11 +4,12 @@
   "description": "2D pet engine",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "karma start",
     "dev": "gulp dev",
     "watch-dev": "gulp watch-dev",
     "eslint": "eslint src/js/*/*.js",
-    "eslint-fix": "eslint src/js/*/*.js --fix"
+    "eslint-fix": "eslint src/js/*/*.js --fix",
+    "karma-init": "karma init"
   },
   "repository": {
     "type": "git",
@@ -27,12 +28,18 @@
   "homepage": "https://github.com/SelimAbidin/Bagcilar2D#readme",
   "dependencies": {},
   "devDependencies": {
+    "browserify": "^14.4.0",
     "eslint": "^4.0.0",
     "eslint-config-standard": "^10.2.1",
     "eslint-plugin-promise": "^3.5.0",
     "eslint-plugin-standard": "^3.0.1",
     "gulp": "^3.9.1",
     "gulp-connect": "^5.0.0",
+    "jasmine-core": "^2.7.0",
+    "karma": "^1.7.0",
+    "karma-browserify": "^5.1.1",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-jasmine": "^1.1.0",
     "pump": "^1.0.2",
     "rollup": "^0.43.0"
   }
