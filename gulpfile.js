@@ -27,7 +27,7 @@ gulp.task('reload', function (callBack) {
             gulp.src('./src/js/*.js'),
             connect.reload()
         ],callBack);
-
+        
     console.log("reload oldu");
     
 });
