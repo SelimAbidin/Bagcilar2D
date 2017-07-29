@@ -1,0 +1,348 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Empty</title>
+</head>
+
+
+
+<script id="vertexShader" type="x-shader/x-vertex">
+
+    uniform mat3 projectionMatrix; 
+    attribute vec2 position;
+    attribute vec3 color;
+    varying vec3 colorData;
+    void main() {
+        colorData = color;
+        vec3 newPos = vec3(position.x, position.y, 1.0 ) * projectionMatrix;
+        gl_Position = vec4(newPos.xy, 0.0 , 1.0);
+    }
+    
+</script>
+
+<script id="fragmentShader" type="x-shader/x-fragment">
+    precision lowp float;
+    varying vec3 colorData;
+    void main() { 
+        gl_FragColor = vec4(colorData, 1.0);
+    }
+</script>
+
+
+<script>
+
+var objects = [];
+var MAX_COUNT = 85000;
+var projectionMatrix;
+var gl;
+var positionVertexBuffer;
+var colorVertexBuffer;
+var indicesBuffer;
+
+
+window.onload = function() {
+
+    var cAttributes = {
+        alpha: false,
+        antialias: false,
+        depth: false,
+        failIfMajorPerformanceCaveat: false,
+        premultipliedAlpha: true,
+        preserveDrawingBuffer: false,
+        stencil: true
+    }
+
+
+    gl = document.getElementById("renderCanvas").getContext("webgl", cAttributes);
+    gl.disable(gl.STENCIL_TEST);
+    gl.disable(gl.DEPTH_TEST);
+  
+    document.getElementById("renderCanvas").onclick = createObjects;
+    createObjects();
+   requestAnimationFrame(updateScreen);
+}
+
+
+function createObjects () {
+
+     projectionMatrix = new Float32Array([
+        0.0033333333333333335,0,0,
+        0,-0.0033333333333333335,0,
+        0,0,1
+    ]);
+    
+    var rObject = {};
+
+    rObject.projectionMatrix = projectionMatrix;
+    createPrograms(rObject);
+
+    createAttributes(rObject);
+
+    createMoveObjects(rObject);
+
+    rObject.id = "id_" + objects.length ;
+    objects.push(rObject);
+}
+
+function createMoveObjects (outObject) {
+
+    outObject.points = [];
+
+    var k = 0;
+    for (var i = 0; i < MAX_COUNT; i++) {
+          
+        var x = (Math.random() * 600) - 300;
+        var y = (Math.random() * 600) - 300;
+        var vx =  (Math.random() * 10) - 5;
+        var vy =  (Math.random() * 10) - 5;
+        var size = 30 + Math.random() * 1;
+        var w = 26 / 2;
+        var h = 37 / 2;
+        var p = {w:w, h:h, x:x, y:y, vx:vx, vy:vy, size:size};
+        outObject.points.push(p);
+    }
+}
+
+
+
+var shaderProgram;
+function createPrograms(outObject) {
+
+    var vertexShader = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vertexShader, document.getElementById("vertexShader").textContent );
+    gl.compileShader(vertexShader);
+
+    if ( !gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS) ) {
+        let finfo = gl.getShaderInfoLog( vertexShader );
+        console.log("Vertex Shader Fail" , finfo);
+    }
+
+    var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fragmentShader, document.getElementById("fragmentShader").textContent);
+    gl.compileShader(fragmentShader);
+
+    if ( !gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS) ) {
+        let finfo = gl.getShaderInfoLog( fragmentShader );
+        console.log("Fragment Shader Fail" , finfo);
+    }
+
+    shaderProgram = gl.createProgram();
+    gl.attachShader(shaderProgram, vertexShader);
+    gl.attachShader(shaderProgram, fragmentShader);
+
+    gl.linkProgram(shaderProgram);
+
+
+    gl.bindAttribLocation(shaderProgram, 0, 'position');
+
+    var pmlocation = gl.getUniformLocation(shaderProgram,"projectionMatrix");
+    gl.useProgram(shaderProgram);
+    gl.uniformMatrix3fv(pmlocation, false , outObject.projectionMatrix);
+    outObject.projectionMatrixLocation = pmlocation;
+    outObject.shaderProgram = shaderProgram;
+
+}
+
+function createAttributes(outObject) {
+    
+    var vertices = new Float32Array(MAX_COUNT * 8);
+    var colors   = new Float32Array(MAX_COUNT * 12);
+    var indices  = new Uint16Array(6 * MAX_COUNT);
+
+    var index = 0;
+    for (var i = 0; i < indices.length; i+=6) {        
+
+        indices[i    ] = index;
+        indices[i + 1] = index + 1;
+        indices[i + 2] = index + 2;
+
+        indices[i + 3] = index + 1;
+        indices[i + 4] = index + 3;
+        indices[i + 5] = index + 2;
+        index += 4;
+    }
+    
+    var r,g,b;
+
+    for (var i = 0; i < colors.length; i+=12) {
+        
+        r = Math.random();
+        g = Math.random();
+        b = Math.random();
+
+        colors[i] = r;
+        colors[i + 1] = g;
+        colors[i + 2] = b;
+
+
+        colors[i + 3] = r;
+        colors[i + 4] = g;
+        colors[i + 5] = b;
+
+
+        colors[i + 6] = r;
+        colors[i + 7] = g;
+        colors[i + 8] = b;
+
+
+        colors[i + 9] = r;
+        colors[i + 10] = g;
+        colors[i + 11] = b;
+    }
+
+    var k = 0;
+    var w = 26 / 2;
+    var h = 37 / 2;
+    var x,y;
+    for (var i = 0; i < vertices.length; i++) {
+
+        x = (Math.random() * 600) - 300; 
+        y = (Math.random() * 600) - 300; 
+        vertices[k]     = -w + x; vertices[k + 1] =  h + y;
+        vertices[k + 2] = -w + x; vertices[k + 3] = -h + y;
+        vertices[k + 4] =  w + x; vertices[k + 5] =  h + y;
+        vertices[k + 6] =  w + x; vertices[k + 7] = -h + y;
+        k +=8;
+    }
+
+    positionVertexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionVertexBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+    positionVertexBuffer.location = gl.getAttribLocation(shaderProgram,"position");
+    gl.vertexAttribPointer(positionVertexBuffer.location,2 ,gl.FLOAT, false, 0,0);
+    gl.enableVertexAttribArray(positionVertexBuffer.location);
+    
+
+
+    colorVertexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorVertexBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
+    colorVertexBuffer.location = gl.getAttribLocation(shaderProgram,"color");
+    gl.vertexAttribPointer(colorVertexBuffer.location,3 ,gl.FLOAT, false, 0,0);
+    gl.enableVertexAttribArray(colorVertexBuffer.location);
+    
+    indicesBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indicesBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+
+
+
+    outObject.positionVertexBuffer = positionVertexBuffer;
+    outObject.colorVertexBuffer = colorVertexBuffer;
+    outObject.indicesBuffer = indicesBuffer;
+
+    outObject.vertices = vertices;
+    outObject.indices = indices;
+    outObject.colors = colors;
+
+    outObject.colorVertexLocation = colorVertexBuffer.location;
+    outObject.positionVertexLocation = positionVertexBuffer.location;
+}
+
+
+
+function updateAllPoints() {
+
+    var points;
+    var p;
+    
+    for (var i = 0; i < objects.length; i++) {
+        
+        points = objects[i].points;
+
+        var k = 0;
+        for (var j = 0; j < points.length; j++) {
+            
+            p = points[j];
+
+            p.x += p.vx;
+            p.y += p.vy;
+
+            if(p.x >= 300){
+                p.x = 300;
+                p.vx *= -1;
+            } else if(p.x <= -300) {
+                p.x = -300;
+                p.vx *= -1;
+            } else if(p.y >= 300){
+                p.y = 300;
+                p.vy *= -1;
+            } else if(p.y <= -300) {
+                p.y = -300;
+                p.vy *= -1;
+            }
+
+            var vertices = objects[i].vertices;
+            vertices[k]     = -p.w + p.x; vertices[k + 1] = p.h + p.y;
+            vertices[k + 2] = -p.w + p.x; vertices[k + 3] = -p.h + p.y;
+            vertices[k + 4] =  p.w + p.x; vertices[k + 5] = p.h + p.y;
+            vertices[k + 6] =  p.w + p.x; vertices[k + 7] = -p.h + p.y;
+            
+            k +=8;
+        }
+
+
+    }
+
+
+} 
+
+function renderScene() {
+
+  // updateAllPoints();
+
+    var totalDraw = 0;
+    gl.clearColor(0.3,0.3,0.3,1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    var rO;
+    for (var i = 0; i < objects.length; i++) {
+        
+        rO = objects[i];
+        
+        drawObjects(rO);
+
+          totalDraw += MAX_COUNT;
+    }
+
+
+    document.getElementById("objectCounter").innerHTML = totalDraw + " Objects"
+
+}
+
+function drawObjects (rO) {
+
+    gl.useProgram(rO.shaderProgram);
+   
+    gl.bindBuffer(gl.ARRAY_BUFFER, rO.positionVertexBuffer);
+  //  gl.bufferSubData(gl.ARRAY_BUFFER, 0, rO.vertices);
+    gl.vertexAttribPointer(rO.positionVertexLocation,2 ,gl.FLOAT, false, 0,0);
+    
+    gl.bindBuffer(gl.ARRAY_BUFFER, rO.colorVertexBuffer);
+    gl.vertexAttribPointer(rO.colorVertexLocation,3 ,gl.FLOAT, false, 0,0);
+    gl.drawElements(gl.TRIANGLES,MAX_COUNT * 6 , gl.UNSIGNED_SHORT, 0);
+
+}
+
+
+
+
+function updateScreen() {
+
+    if(gl){
+
+        renderScene();
+        requestAnimationFrame(updateScreen);
+    }
+    
+}
+
+</script>
+<body style="background-color: #ccc; margin:0px;">
+
+<canvas  style="transform: translateZ(0px); position: absolute;" id="renderCanvas" width="600" height="600" ></canvas>
+
+<div id="objectCounter" style="position: absolute; top:600px;" ></div>
+<div style="position: absolute; top:650px;" >Evevy Click adds 10K Squares </div>
+</body>
+</html>

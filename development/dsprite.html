@@ -1,0 +1,158 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Empty</title>
+</head>
+
+
+
+<script id="vertexShader" type="x-shader/x-vertex">
+
+    uniform mat3 projectionMatrix; 
+    uniform mat3 viewMatrix;
+    attribute vec2 position;
+    void main() {
+        
+        vec3 newPos = vec3(position.x, position.y, 1.0 ) * (projectionMatrix * viewMatrix);
+        gl_Position = vec4(newPos , 1.0);
+    }
+</script>
+
+<script id="fragmentShader" type="x-shader/x-fragment">
+    precision mediump float;
+    
+    void main() { 
+
+        vec4 c =  vec4(1.0, 1.0, 0.5, 1.0);
+        gl_FragColor = c;
+    }
+</script>
+
+
+
+<script src="../libs/stats.min.js" ></script>
+<script src="../build/Bagcilar2d.js" ></script>
+
+<script>
+
+
+
+
+    function init(){
+
+        window.flame = new Image();
+        window.flame.onload = function() {
+            
+            baslat();
+        }
+
+        flame.src = "face.png"; 
+    }
+    
+
+
+    function baslat() {
+        
+        window.stats = new Stats();
+        document.body.appendChild( stats.domElement );
+        stats.domElement.style.position = "absolute";
+        stats.domElement.style.top = "0px";
+       
+        window.meydan = new Bagcilar.Square("renderCanvas");
+        window.meydan.addEventListener(Bagcilar.Square.ENTER_FRAME, this, enterFrame);
+        meydan.camera = new Bagcilar.Camera();
+        meydan.setAutoUpdate(false);
+        window.sprites = [];
+
+        dataEkle();
+
+        var sp;
+        function enterFrame(event) {
+           
+            var start = new Date().getTime();
+
+              for(var i = 0 ; i < sprites.length; i++){
+
+                sp = sprites[i];
+                
+                sp.yPos += sp.vy;
+                sp.xPos += sp.vx;
+                sp.rotation += sp.rv;
+                
+                if(sp.xPos >= 300){
+                    sp.xPos = 300;
+                    sp.vx *= -1;
+                } else if(sp.xPos <= -300) {
+                    sp.xPos = -300;
+                    sp.vx *= -1;
+                } else if(sp.yPos >= 300){
+                    sp.yPos = 300;
+                    sp.vy *= -1;
+                    sp.rv = sp.vy * .01;
+                } else if(sp.yPos <= -300) {
+                    sp.yPos = -300;
+                    sp.vy *= -1;
+                    sp.rv = sp.vy * .01;
+                }
+            }
+
+            var elapsed = new Date().getTime() - start;
+
+        }
+        
+
+         requestAnimationFrame(updateScreen);
+
+    }
+
+
+
+    function dataEkle(m) {
+        
+        var sp;
+        sp = new Bagcilar.DenemeSprite();
+        
+        sp.id = "id_" + sprites.length;
+        meydan.addChild(sp);
+        sp.vx = 1 + Math.random() * 2;
+        sp.vy = 1 + Math.random() * 2;
+        sp.rv = Math.random() * 0.1;
+        sprites.push(sp);
+
+    }
+
+
+
+    var say = 1;
+    function cokDataEkle() {
+        say +=1;
+        for (var i = 0; i < 1; i++) {
+            dataEkle();
+        }
+
+
+        document.getElementById("btn").innerHTML =  "Kare Ekle ("+sprites.length+")"
+    }
+
+
+    function updateScreen() {
+
+        
+       stats.begin();
+        meydan.update2();
+        requestAnimationFrame(updateScreen);
+        stats.end();
+    }
+
+    
+
+</script>
+<body onload="init()" style="background-color: #cc0000">
+
+<canvas id="renderCanvas" width="600" height="600" ></canvas>
+
+<div id="framef"></div>
+<div id="frameMax"></div>
+<button id="btn" onclick="cokDataEkle()"> Kare Ekle </button>
+</body>
+</html>

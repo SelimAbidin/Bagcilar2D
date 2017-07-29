@@ -19,7 +19,7 @@ class Matrix3 {
     setMatrix  (    
                 n00, n10, n20, 
                 n01, n11, n21,
-                n02, n12, n22,
+                n02, n12, n22 
                 ){
 
         var m = this.matrixArray;

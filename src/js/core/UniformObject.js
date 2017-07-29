@@ -9,6 +9,10 @@ function vector3Fv(gl, uniObject){
      gl.uniform4fv(uniObject.location , uniObject.value);
 }
 
+function uniform1i(gl, uniObject){
+     gl.uniform1i(uniObject.location , uniObject.value);
+}
+
 
 class UniformObject extends EventableObject {
 
@@ -22,7 +26,7 @@ class UniformObject extends EventableObject {
         for (var i = 0; i < n; i++) {
             var uniformInfo = gl.getActiveUniform(this._program, i);
             var location = gl.getUniformLocation(this._program, uniformInfo.name);
-            this.addUniform(location,uniformInfo);
+            this.addUniform(location , uniformInfo);
         }
 
     }
@@ -33,9 +37,11 @@ class UniformObject extends EventableObject {
             case 35675: // matrix3
                 return matrix3Fv;
             case 35666:
-                return vector3Fv
-        
+                return vector3Fv;
+            case 35678: 
+                return uniform1i;
             default:
+                console.log("yoktipi");
                 break;
         }
         return 

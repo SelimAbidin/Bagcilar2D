@@ -82,7 +82,7 @@ class Object2D  extends EventableObject{
 
         set y (y) {
             this.yPos = y;
-            this.isPositionDirty = y;
+            this.isPositionDirty = true;
         }
 
         get x () {
