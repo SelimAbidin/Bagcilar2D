@@ -30,14 +30,11 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
                 
                 //var  gl = canvas.getContext("webgl2") || canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
                 var  gl = canvas.getContext("webgl");// || canvas.getContext("experimental-webgl", {stencil:true});  // webgl2 disabled for now
-                console.log(gl);
                 if(!gl){
                     
-                    throw "something";
-                    console.error("test");
-                   // var error = "WebGL isn't supported on device";
-                    //this.dispatchEvent(Square.ERROR , { message : error });
-
+                    var error = "WebGL isn't supported on device";
+                    this.dispatchEvent(Square.ERROR , { message : error });
+                    throw error;
                 } 
 
                 gl.clearColor(1, 1, 1, 1);
