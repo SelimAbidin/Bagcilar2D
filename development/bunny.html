@@ -1,0 +1,247 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Empty</title>
+</head>
+
+
+
+<script id="vertexShader" type="x-shader/x-vertex">
+
+    uniform mat3 projectionMatrix; 
+    uniform mat3 viewMatrix;
+    attribute vec2 position;
+    attribute vec2 uv;
+    attribute vec3 color;
+    varying vec3 colorVar;
+    varying vec2 uvData;
+    void main() {
+        uvData = uv;
+        colorVar = color;
+        vec3 newPos = vec3(position.x, position.y, 1.0 ) * (projectionMatrix * viewMatrix);
+        gl_Position = vec4(newPos , 1.0);
+    }
+    
+</script>
+
+<script id="fragmentShader" type="x-shader/x-fragment">
+    precision lowp float;
+    uniform sampler2D uSampler;
+    varying vec2 uvData;
+    varying vec3 colorVar;
+    void main() { 
+        vec4 c = texture2D(uSampler,uvData) * vec4(colorVar, 1.0);
+        gl_FragColor = c;
+    }
+</script>
+
+
+
+<script src="../libs/stats.min.js" ></script>
+<script src="../build/Bagcilar2d.js" ></script>
+
+<script>
+
+
+
+
+    function init(){
+
+
+        window.flame = new Image();
+        window.flame.onload = function() {
+            
+            baslat();
+        }
+
+        flame.src = "bunny.png"; 
+    }
+
+
+
+    function baslat() {
+    
+       
+        window.meydan = new Bagcilar.Square("renderCanvas");
+        window.meydan.addEventListener(Bagcilar.Square.ENTER_FRAME, this, enterFrame);
+        meydan.camera = new Bagcilar.Camera();
+        meydan.setAutoUpdate(false);
+        window.sprites = [];
+
+        dataEkle();
+
+        var sp;
+        var gravity = 0.1;
+        var maxX = 300;
+        var minX = -300;
+        var maxY = 300;
+        var minY = -300;
+
+        var isPressed = false;
+        document.addEventListener("mousedown", function (){
+             isPressed = true;
+        });
+
+        document.addEventListener("mouseup", function (){
+           isPressed = false;
+        });
+        
+
+        function enterFrame(event) {
+            
+
+            if(isPressed) {
+                cokDataEkle();
+            }
+
+
+
+            for (var i = 0; i < sprites.length; i++)
+            {
+                var sp = sprites[i];
+                //bunny.rotation += 0.1
+
+                sp.x += sp.speedX;
+                sp.y += sp.speedY;
+                sp.rotation += sp.rotationSpeed;
+                sp.speedY += gravity;
+
+                
+                if (sp.x > maxX)
+                {
+                    sp.speedX *= -1;
+                    sp.x = maxX;
+                }
+                else if (sp.x < minX)
+                {
+                    sp.speedX *= -1;
+                    sp.x = minX;
+                }
+
+                if (sp.y > maxY)
+                {
+                    sp.speedY *= -0.85;
+                    sp.y = maxY;
+                    
+                    if (Math.random() > 0.5)
+                    {
+                        sp.speedY -= Math.random() * 6;
+                    }
+                }
+                else if (sp.y < minY)
+                {
+                    sp.speedY = 0;
+                    sp.y = minY;
+                }
+
+            }
+
+            //var start = new Date().getTime();
+            /*
+              for(var i = 0 ; i < sprites.length; i++){
+
+                sp = sprites[i];
+                
+                sp.yPos += sp.vy;
+                sp.xPos += sp.vx;
+                sp.rotation += sp.rv;
+                
+                if(sp.xPos >= 300){
+                    sp.xPos = 300;
+                    sp.vx *= -1;
+                } else if(sp.xPos <= -300) {
+                    sp.xPos = -300;
+                    sp.vx *= -1;
+                } else if(sp.yPos >= 300){
+                    sp.yPos = 300;
+                    sp.vy *= -1;
+                    sp.rv = sp.vy * .01;
+                } else if(sp.yPos <= -300) {
+                    sp.yPos = -300;
+                    sp.vy *= -1;
+                    sp.rv = sp.vy * .01;
+                }
+            }
+
+           // var elapsed = new Date().getTime() - start;
+           */
+        }
+        
+
+         requestAnimationFrame(updateScreen);
+
+         
+    }
+
+
+    var isLeft = true;
+    function dataEkle(m) {
+        
+        var sp;
+        sp = new Bagcilar.NormalSprite();
+        
+        sp.id = "id_" + sprites.length;
+        meydan.addChild(sp);
+
+        /*
+        sp.vx = 1 + Math.random() * 2;
+        sp.vy = 1 + Math.random() * 2;
+        sp.rv = Math.random() * 0.1;
+        */
+
+        sp.speedX = Math.random() * 10;
+        sp.speedY = (Math.random() * 10) - 5;
+        
+        sp.rotationSpeed = Math.random() * 0.1;
+
+        if(isLeft) {
+            sp.x = -300;
+        } else {
+            sp.x = 300;
+        }
+        isLeft = !isLeft;
+        sp.y = -300;
+        sp.scaleY = sp.scaleX = 0.1 + Math.random();
+
+        sprites.push(sp);
+    }
+
+
+    var say = 1;
+    var lastBunnyCount = 0;
+    function cokDataEkle() {
+        say +=1;
+        for (var i = 0; i < 300; i++) {
+            dataEkle();
+        }
+
+        if(lastBunnyCount != sprites.length) {
+            lastBunnyCount = sprites.length;
+            document.getElementById("bunnyCount").innerHTML =  "Total Bunny : " + lastBunnyCount;
+        }
+        
+    }
+
+
+    var say = 0;
+    function updateScreen() {
+        meydan.update2();
+        requestAnimationFrame(updateScreen);
+    }
+
+
+
+
+
+
+    
+
+</script>
+<body onload="init()" style="background-color: #cc0000">
+
+<canvas id="renderCanvas" width="600" height="600" ></canvas>
+
+<div id="bunnyCount"></div>
+
+</body>
+</html>

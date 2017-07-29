@@ -63,9 +63,9 @@ class DefaultEffect {
         if(!this.shaderProgram){
             this.upload(gl);
         }
+
         gl.useProgram(this.shaderProgram);
         this.uniform.update(gl);
-       
     }
 
 }

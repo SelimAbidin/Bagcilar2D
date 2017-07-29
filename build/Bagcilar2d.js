@@ -46,6 +46,7 @@
 
 	function EventableObject() {
 	    CoreObject.apply(this, arguments);
+	    this._listeners = {};
 	}
 
 	function orderPriority (a, b){
@@ -95,6 +96,10 @@
 	     gl.uniform4fv(uniObject.location , uniObject.value);
 	}
 
+	function uniform1i(gl, uniObject){
+	     gl.uniform1i(uniObject.location , uniObject.value);
+	}
+
 
 	class UniformObject extends EventableObject {
 
@@ -108,7 +113,7 @@
 	        for (var i = 0; i < n; i++) {
 	            var uniformInfo = gl.getActiveUniform(this._program, i);
 	            var location = gl.getUniformLocation(this._program, uniformInfo.name);
-	            this.addUniform(location,uniformInfo);
+	            this.addUniform(location , uniformInfo);
 	        }
 
 	    }
@@ -119,9 +124,11 @@
 	            case 35675: // matrix3
 	                return matrix3Fv;
 	            case 35666:
-	                return vector3Fv
-	        
+	                return vector3Fv;
+	            case 35678: 
+	                return uniform1i;
 	            default:
+	                console.log("yoktipi");
 	                break;
 	        }
 	        return 
@@ -183,7 +190,7 @@
 	    setMatrix  (    
 	                n00, n10, n20, 
 	                n01, n11, n21,
-	                n02, n12, n22,
+	                n02, n12, n22 
 	                ){
 
 	        var m = this.matrixArray;
@@ -356,71 +363,193 @@
 	        if(!this.shaderProgram){
 	            this.upload(gl);
 	        }
+
 	        gl.useProgram(this.shaderProgram);
 	        this.uniform.update(gl);
-	       
 	    }
 
 	}
 
 	var cccc = 0;
-	class ColorEffect extends DefaultEffect {
+	var MAX_INSTANCE = 350000;
 
+
+	var _materialInstance;
+	class InstancedMaterial extends DefaultEffect {
+	    
 	    constructor (color) {
 	        super();
+	        this.count = 0;
 	        this.id = "id_"+cccc++;
 	        this.isUploaded = false;
 	        this._color = color;
+	        
+	        this.offset = new Float32Array( 2 * MAX_INSTANCE);
+	        
+	        this.colorArray = new Float32Array( 3 * MAX_INSTANCE);
+	        this.rotateArray = new Float32Array(MAX_INSTANCE);
+	        
+
+	        var f = 10;
+	        this.vertices = [
+	            -f,  f, // left - top
+	            -f, -f, // left - bottom
+	            f,  f, // right - top
+	            f, -f, // right - bottom
+	        ];
+
+	        this.uv = [
+	            0,1,
+	            0,0,
+	            1,1,
+	            1,0
+	        ];
+	        
+	        this.indices = [2,1,0,  1,3,2];
+	        this.color = [Math.random(), Math.random(), Math.random(),1];
+	        var r = Math.random();
+	        var g = Math.random();
+	        var b = Math.random();
+	        for (var i = 0; i < this.colorArray.length; i+=3) {
+	            
+	            this.colorArray[i] = r;
+	            this.colorArray[i+1] = g;
+	            this.colorArray[i+2] = b;
+	        }
+
 	    }
 
-	    upload (gl){
-	        
-	        var vertexShaderSRC =  "uniform mat3 modelMatrix;"+
-	                               "uniform mat3 projectionMatrix;"+
-	                               "uniform mat3 viewMatrix;"+
-	                                "attribute vec2 position;"+      
-	                                "void main() {"+
-	                                "   vec3 pos = vec3(position.x,position.y, 1.0);"+
-	                                "   mat3 m =  projectionMatrix * (modelMatrix * viewMatrix);"+  
-	                                "   vec3 pm = m * pos;"+     
-	                                "   gl_Position = vec4(pm.x,pm.y, 0, 1.0);"+     
-	                                "   gl_PointSize = 10.0;"+     
-	                                "}";
+	    
+	    static getInstance() {
 
-	          var fragmentShaderSRC =   "precision mediump float;"+
-	                                    "uniform vec4 color;"+
-	                                    "void main() {"+        
-	                                    "   gl_FragColor = color;"+     
-	                                    "}";
-
-	        this.fragmentShaderBuffer = gl.createShader(gl.FRAGMENT_SHADER);
-	        gl.shaderSource( this.fragmentShaderBuffer, fragmentShaderSRC );
-	        gl.compileShader( this.fragmentShaderBuffer );
-	        
-	        if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
-	            let finfo = gl.getShaderInfoLog( this.fragmentShaderBuffer );
-	            throw "Could not compile WebGL program. \n\n" + finfo;
+	        if(!_materialInstance){
+	            _materialInstance = new InstancedMaterial();
 	        }
 
-	        this.vertexSahderBuffer = gl.createShader(gl.VERTEX_SHADER);
-	        gl.shaderSource( this.vertexSahderBuffer, vertexShaderSRC );
-	        gl.compileShader( this.vertexSahderBuffer );
+	        return _materialInstance;
+	    }
+	    
+	    reset () {
+	        this.count = -1;
+	    }
+	    
+	    addPosition (x, y) {
 
-	        if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
-	            let info = gl.getShaderInfoLog( this.fragmentShaderBuffer );
-	            throw "Could not compile WebGL program. \n\n" + info;
+	        var index = this.count * 2;
+	        this.offset[index] = x;
+	        this.offset[index + 1] = y;
+	    }
+
+	    addRotation (radian) {
+	        this.rotateArray[this.count] = radian;
+	    }
+
+	    next () {
+	        this.count++;
+	    }
+
+	    getLenght () {
+	        return this.count + 1;
+	    }
+
+	    upload (gl, angExt){
+	        
+
+	        if(!this.isUploaded)
+	        {
+	             var vertexShaderSRC =  document.getElementById( 'vertexShaderInstanced' ).textContent;
+
+	            var fragmentShaderSRC = document.getElementById( 'fragmentShaderInstanced' ).textContent;
+	            
+	            this.fragmentShaderBuffer = gl.createShader(gl.FRAGMENT_SHADER);
+	            gl.shaderSource( this.fragmentShaderBuffer, fragmentShaderSRC );
+	            gl.compileShader( this.fragmentShaderBuffer );
+	            
+	            if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
+	                let finfo = gl.getShaderInfoLog( this.fragmentShaderBuffer );
+	                throw "Could not compile WebGL program. \n\n" + finfo;
+	            }
+
+	            this.vertexSahderBuffer = gl.createShader(gl.VERTEX_SHADER);
+	            gl.shaderSource( this.vertexSahderBuffer, vertexShaderSRC );
+	            gl.compileShader( this.vertexSahderBuffer );
+
+	            if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
+	                let info = gl.getShaderInfoLog( this.fragmentShaderBuffer );
+	                throw "Could not compile WebGL program. \n\n" + info;
+	            }
+
+	            this.shaderProgram = gl.createProgram();
+	            gl.attachShader(this.shaderProgram, this.vertexSahderBuffer);
+	            gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
+	            gl.linkProgram(this.shaderProgram);
+	            
+	            gl.useProgram(this.shaderProgram);
+
+	            this.uniform = new UniformObject(gl,this.shaderProgram);
+
+	            this.offsetLocation = gl.getAttribLocation(this.shaderProgram,"offset");
+	            this.rotationLocation = gl.getAttribLocation(this.shaderProgram,"rotation");
+	            this.colorLocation = gl.getAttribLocation(this.shaderProgram,"color");
+	            this.positionLocation =  gl.getAttribLocation(this.shaderProgram,"position");
+	            this.uvLocation =  gl.getAttribLocation(this.shaderProgram,"uv");
+	          //  this.texture0Location =  gl.getUniformLocation(this.shaderProgram,"uSampler");
+
+	            this.rotateBuffer = gl.createBuffer();
+	            gl.bindBuffer(gl.ARRAY_BUFFER, this.rotateBuffer);
+	            gl.bufferData(gl.ARRAY_BUFFER, this.rotateArray, gl.DYNAMIC_DRAW);
+	            gl.vertexAttribPointer(this.rotationLocation, 1, gl.FLOAT, false, 0, 0);
+	            angExt.vertexAttribDivisorANGLE(this.rotationLocation , 1);
+
+	            var offsetLoc = gl.getAttribLocation(this.shaderProgram,"offset");
+	            this.offsetBuffer = gl.createBuffer();
+	            gl.bindBuffer(gl.ARRAY_BUFFER, this.offsetBuffer);
+	            gl.bufferData(gl.ARRAY_BUFFER, this.offset, gl.DYNAMIC_DRAW);
+	            gl.vertexAttribPointer(offsetLoc, 2, gl.FLOAT, false, 0, 0);
+	            angExt.vertexAttribDivisorANGLE(offsetLoc , 1);
+
+
+	            var colorLoc = gl.getAttribLocation(this.shaderProgram,"color");
+	            this.colorBuffer = gl.createBuffer();
+	            gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
+	            gl.bufferData(gl.ARRAY_BUFFER, this.colorArray, gl.STATIC_DRAW);
+	            gl.vertexAttribPointer(colorLoc, 3, gl.FLOAT, false, 0, 0);
+	            angExt.vertexAttribDivisorANGLE(colorLoc , 1);
+	            
+	            
+
+
+
+	            this.buffer = gl.createBuffer();
+	            gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+	            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
+
+	            var positionLocation = this.positionLocation;
+	            gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+	            
+	            this.indexBuffer = gl.createBuffer();
+	            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+	            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
+
+	            this.uvBuffer = gl.createBuffer();
+	            gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
+	            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.uv), gl.STATIC_DRAW);
+	            gl.vertexAttribPointer(this.uvLocation, 2, gl.FLOAT, false, 0, 0);
+
+	            
+	            var texture = gl.createTexture();
+	            var image = window.flame;
+	            gl.bindTexture(gl.TEXTURE_2D, texture);
+	            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+	            gl.generateMipmap(gl.TEXTURE_2D);
+	            gl.bindTexture(gl.TEXTURE_2D, texture);
+	            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+	            this.isUploaded = true;
 	        }
-
-
-	        this.shaderProgram = gl.createProgram();
-	        gl.attachShader(this.shaderProgram, this.vertexSahderBuffer);
-	        gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
-	        gl.linkProgram(this.shaderProgram);
-	        this.isUploaded = true;
-
-	        this.uniform = new UniformObject(gl,this.shaderProgram);
-	        this.color = this._color;
-	        this.uniform.setValue("color", this.color.elements);
+	       
 	    }
 	    
 	    set color (value){
@@ -436,12 +565,296 @@
 
 	    draw (gl){
 
-	        if(!this.shaderProgram){
-	            this.upload(gl);
+
+	        // if(!this.shaderProgram){
+	        //     this.upload(gl);
+	        // }
+	        // console.log("use program");
+	        // gl.useProgram(this.shaderProgram);
+	        // this.uniform.update(gl);
+	    }
+
+	}
+
+	var cccc$1 = 0;
+	var MAX_INSTANCE$1 = 14000;
+
+
+	var _currentEmptyInstance;
+	var _instancedMaterials = [];
+	class RegularEffect extends DefaultEffect {
+	    
+	    constructor (color) {
+	        super();
+	        this.count = 0;
+	        this.id = "id_"+cccc$1++;
+	        this.isUploaded = false;
+
+	        var f = 20;
+	        var vv  = [
+	            -f,  f, // left - top
+	            -f, -f, // left - bottom
+	            f,  f, // right - top
+	            f, -f, // right - bottom
+	        ];
+
+	        var index = 0;
+	        var indexCounter    = 0;
+	        var uvCounter       = 0;
+	        this.vertices       = new Float32Array(8 * MAX_INSTANCE$1);
+	        this.uvs            = new Float32Array(8 * MAX_INSTANCE$1);
+	        this.colors         = new Float32Array(12 * MAX_INSTANCE$1);
+	        this.indices        = new Uint16Array(6 * MAX_INSTANCE$1);
+
+	        var r,g,b;
+	        for (var i = 0; i < this.colors.length; i+=12) {
+	            
+	            r = Math.random();
+	            g = Math.random();
+	            b = Math.random();
+
+	            this.colors[i] = r;
+	            this.colors[i + 1] = g;
+	            this.colors[i + 2] = b;
+
+
+	            this.colors[i + 3] = r;
+	            this.colors[i + 4] = g;
+	            this.colors[i + 5] = b;
+
+
+	            this.colors[i + 6] = r;
+	            this.colors[i + 7] = g;
+	            this.colors[i + 8] = b;
+
+
+	            this.colors[i + 9] = r;
+	            this.colors[i + 10] = g;
+	            this.colors[i + 11] = b;
+
+	            
 	        }
 	        
-	        gl.useProgram(this.shaderProgram);
-	        this.uniform.update(gl);
+	        for (var i = 0; i < this.vertices.length; i+=8) {
+	          this.vertices[i] = 0;
+	        }
+
+	        for (var i = 0; i < this.vertices.length; i+=8) {
+	            
+	            this.vertices[i]     = -f; this.vertices[i + 1] = f;
+	            this.vertices[i + 2] = -f; this.vertices[i + 3] = -f;
+	            this.vertices[i + 4] =  f; this.vertices[i + 5] = f;
+	            this.vertices[i + 6] =  f; this.vertices[i + 7] = -f;
+
+	            this.uvs[uvCounter]     = 0;
+	            this.uvs[uvCounter + 1] = 1;
+
+	            this.uvs[uvCounter + 2] = 0;
+	            this.uvs[uvCounter + 3] = 0;
+
+	            this.uvs[uvCounter + 4] = 1;
+	            this.uvs[uvCounter + 5] = 1;
+
+	            this.uvs[uvCounter + 6] = 1;
+	            this.uvs[uvCounter + 7] = 0;
+
+	            uvCounter += 8; 
+	            
+	            this.indices[indexCounter    ] = index;
+	            this.indices[indexCounter + 1] = index + 1;
+	            this.indices[indexCounter + 2] = index + 2;
+
+	            this.indices[indexCounter + 3] = index + 1;
+	            this.indices[indexCounter + 4] = index + 3;
+	            this.indices[indexCounter + 5] = index + 2;
+
+	            index += 4;
+	            indexCounter += 6;
+	        }
+	        
+
+	    }
+
+
+	    appendVerices (vertices) {
+	        var vertexIndex = this.count * 8;
+	        
+	        this.vertices[vertexIndex] = vertices[0];
+	        this.vertices[vertexIndex + 1] = vertices[1];
+	        this.vertices[vertexIndex + 2] = vertices[2];
+	        this.vertices[vertexIndex + 3] = vertices[3];
+	        this.vertices[vertexIndex + 4] = vertices[4];
+	        this.vertices[vertexIndex + 5] = vertices[5];
+	        this.vertices[vertexIndex + 6] = vertices[6];
+	        this.vertices[vertexIndex + 7] = vertices[7];
+
+	    }
+
+
+	    appendColors (colors) {
+
+	        var vertexIndex = this.count * 12;
+	        this.colors[vertexIndex] = colors[0];
+	        this.colors[vertexIndex + 1] = colors[1];
+	        this.colors[vertexIndex + 2] = colors[2];
+	        this.colors[vertexIndex + 3] = colors[3];
+	        this.colors[vertexIndex + 4] = colors[4];
+	        this.colors[vertexIndex + 5] = colors[5];
+	        this.colors[vertexIndex + 6] = colors[6];
+	        this.colors[vertexIndex + 7] = colors[7];
+	        this.colors[vertexIndex + 8] = colors[8];
+	        this.colors[vertexIndex + 9] = colors[9];
+	        this.colors[vertexIndex + 10] = colors[10];
+	        this.colors[vertexIndex + 11] = colors[11];
+	    }
+
+	    hasRoom () {
+
+	        return this.getLenght() < MAX_INSTANCE$1;
+
+	    }
+
+
+
+
+	    static getEmptyInstance () {
+	        
+	        if(_currentEmptyInstance === undefined || !_currentEmptyInstance.hasRoom()) {
+
+	            for (var i = 0; i < _instancedMaterials.length; i++) {
+	                var element = _instancedMaterials[i];
+
+	                if(element.hasRoom()) {
+	                   _currentEmptyInstance = element;
+	                    return _currentEmptyInstance;
+	                }
+	                
+	            }
+	            
+	            
+	           _currentEmptyInstance = new RegularEffect();
+	            _instancedMaterials.push(_currentEmptyInstance);
+	        }
+	        
+	        return _currentEmptyInstance;
+	    }
+
+	    
+	    reset () {
+	        this.count = -1;
+
+	       
+	    }
+	   
+	    next () {
+	        
+	        this.count++;
+
+	    }
+
+	    getLenght () {
+	        return this.count + 1;
+	    }
+
+	    upload (gl){
+	        
+
+	        if(!this.isUploaded){
+	            
+	            var vertexShaderSRC =  document.getElementById( 'vertexShader' ).textContent;
+	            var fragmentShaderSRC = document.getElementById( 'fragmentShader' ).textContent;
+	            
+	            this.fragmentShaderBuffer = gl.createShader(gl.FRAGMENT_SHADER);
+	            gl.shaderSource( this.fragmentShaderBuffer, fragmentShaderSRC );
+	            gl.compileShader( this.fragmentShaderBuffer );
+	            if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
+	                let finfo = gl.getShaderInfoLog( this.fragmentShaderBuffer );
+	                throw "Could not compile WebGL program. \n\n" + finfo;
+	            }
+	            
+	            this.vertexShaderBuffer = gl.createShader(gl.VERTEX_SHADER);
+	            gl.shaderSource( this.vertexShaderBuffer, vertexShaderSRC );
+	            gl.compileShader( this.vertexShaderBuffer );
+	            if ( !gl.getShaderParameter(this.vertexShaderBuffer, gl.COMPILE_STATUS) ) {
+	                let finfo = gl.getShaderInfoLog( this.vertexShaderBuffer );
+	                throw "Could not compile WebGL program. \n\n" + finfo;
+	            }
+
+	            this.shaderProgram = gl.createProgram();
+
+	            gl.attachShader(this.shaderProgram, this.vertexShaderBuffer);
+	            gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
+	            gl.linkProgram(this.shaderProgram);
+
+
+	            this.positionLocation = gl.getAttribLocation(this.shaderProgram,"position");
+	            this.uvLocation = gl.getAttribLocation(this.shaderProgram,"uv");
+	            this.colorLocation = gl.getAttribLocation(this.shaderProgram,"color");
+
+	  
+	            this.vertexBuffer = gl.createBuffer();
+	            gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+	            gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.STREAM_DRAW);
+	            gl.enableVertexAttribArray(this.positionLocation);
+	            gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+
+	            this.uvBuffer = gl.createBuffer();
+	            gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
+	            gl.bufferData(gl.ARRAY_BUFFER, this.uvs, gl.STATIC_DRAW);
+	            gl.enableVertexAttribArray(this.uvLocation);
+	            gl.vertexAttribPointer(this.uvLocation, 2, gl.FLOAT, false, 0, 0);
+	           
+
+	            this.colorBuffer = gl.createBuffer();
+	            gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
+	            gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STREAM_DRAW);
+	            gl.vertexAttribPointer(this.colorLocation, 3, gl.FLOAT, false, 0, 0);
+	            gl.enableVertexAttribArray(this.colorLocation);
+
+	            this.indexBuffer = gl.createBuffer();
+	            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+	            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indices, gl.STATIC_DRAW);
+
+
+	            var n = gl.getProgramParameter(this.shaderProgram, gl.ACTIVE_ATTRIBUTES);
+
+	            for (var i = 0; i < n; i++) {
+	                var element = gl.getActiveAttrib(this.shaderProgram, i);
+	                console.log(element);
+	            }
+
+	            var texture = gl.createTexture();
+	            var image = window.flame;
+	            // gl.bindTexture(gl.TEXTURE_2D, texture);
+	            // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	            // gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+
+	            gl.bindTexture(gl.TEXTURE_2D, texture);
+	            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	           // gl.generateMipmap(gl.TEXTURE_2D);
+
+	            this.textureBuffer = texture;
+	            this.uniform = new UniformObject(gl, this.shaderProgram);
+	            this.isUploaded = true;
+	        }
+	       
+	    }
+	   
+
+
+	    draw (gl){
+
+	       
+
 	    }
 
 	}
@@ -525,7 +938,7 @@
 
 	        set y (y) {
 	            this.yPos = y;
-	            this.isPositionDirty = y;
+	            this.isPositionDirty = true;
 	        }
 
 	        get x () {
@@ -559,6 +972,7 @@
 	class ObjectContainer2D extends Object2D {
 	    
 	    constructor (){
+
 	        super();
 	        this.children = [];
 
@@ -569,6 +983,7 @@
 	        if(child instanceof Object2D) {
 	        
 	            child.stage = this.stage;
+	            
 	            child.context = this.context;
 	            this.children.push(child);
 	        
@@ -589,6 +1004,269 @@
 	    }
 	}
 
+	class Sprite$1 extends ObjectContainer2D {
+
+	    constructor (params) {
+	        super();
+	        
+	        var f = 20;
+	        this.vertices = [
+	            -f,  f, // left - top
+	            -f, -f, // left - bottom
+	            f,  f, // right - top
+	            f, -f, // right - bottom
+	        ];
+
+	        this.uv = [
+	            0,1,
+	            0,0,
+	            1,1,
+	            1,0
+	        ];
+	        
+	        this.indices = [0,1,2,  1,3,2];
+	        this.color = [Math.random(), Math.random(), Math.random(),1];
+	        
+	        for(var str in params){
+	            var param = str;
+	            this[param] = params[str];        
+	        }
+	        
+
+	        if(!this.material){
+	            this.material = InstancedMaterial.getInstance();
+	        }
+	        
+	    }
+
+	    updateMaterial (gl) {
+	        
+	       
+	        
+	        if(!this.material.isUploaded){
+	            this.material.upload(gl);
+	        }
+	    }
+
+	    upload (gl, material) {
+	        
+
+	        return;
+	        if(!Sprite$1._indexBuffer){
+	            
+	            console.log("Sprite > Create Buffer");
+	           
+
+	        
+	            Sprite$1._indexBuffer = this.indexBuffer;
+	            Sprite$1._vertexBuffer = this.buffer;
+	            Sprite$1._uvBuffer = this.uvBuffer;
+	           
+	        } else {
+
+	            this.buffer = Sprite$1._vertexBuffer;
+	            this.uvBuffer = Sprite$1._uvBuffer;
+	            this.indexBuffer = Sprite$1._indexBuffer;
+	        }
+	        
+	    }
+
+	    update  () {
+	        //super.update();   
+	    }
+
+	    draw  (gl, camera){
+
+	        
+	    }
+	}
+
+	class WebGLRenderer extends EventableObject
+	{
+	    constructor (square, gl) {
+	        super();
+	        this.infoID = 0;
+	        this.gl = gl;
+	        this._materials = [];
+	        this.square = square;
+
+	        this.material = new RegularEffect();
+
+	        gl.disable(gl.STENCIL_TEST);
+	        gl.disable(gl.DEPTH_TEST);
+	        
+	        gl.enable(gl.BLEND);
+	        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+	    }
+
+	    prepareForRender () {
+	        this._materials.length = 0;
+	        this.infoID++;
+	    }
+
+	    renderSprite (sprite) {
+
+	        var material = RegularEffect.getEmptyInstance();
+
+	        if(this.infoID != material.renderID) {
+	            this._materials.push(material);
+	            material.upload(this.gl);
+	        }
+
+
+	        material.renderID = this.infoID;
+	        material.next();
+
+
+	        
+	        material.appendVerices(sprite.vertices);
+	        material.appendColors(sprite.colors);
+	    }
+
+
+	    present2 (camera) {
+
+	        var gl = this.gl;
+
+	        if(gl.isContextLost()) {
+	            return;
+	        }
+
+
+	    
+
+	        for (var i = 0; i < this._materials.length; i++) {
+
+	            var material =  this._materials[i];
+	            var uniform = material.uniform;
+
+	            gl.useProgram(material.shaderProgram);
+	           
+	            uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
+	            uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
+	            uniform.setValue("uSampler", 0);
+	            uniform.update(this.gl);
+
+	            gl.activeTexture(gl.TEXTURE0);
+	            gl.bindTexture(gl.TEXTURE_2D, material.textureBuffer);
+	            
+	            gl.bindBuffer(gl.ARRAY_BUFFER, material.vertexBuffer);
+	            gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.vertices);
+	            gl.vertexAttribPointer(material.positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+
+	            gl.bindBuffer(gl.ARRAY_BUFFER, material.colorBuffer);
+	            gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.colors);
+	            gl.vertexAttribPointer(material.colorLocation, 3, gl.FLOAT, false, 0, 0);
+
+	            gl.bindBuffer(gl.ARRAY_BUFFER, material.uvBuffer);
+	            gl.vertexAttribPointer(material.uvLocation, 2, gl.FLOAT, false, 0,   0);
+
+	           // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, material.indexBuffer);
+	            var size = material.indices.length;
+	            var nsize = material.getLenght() * 6;
+
+	            
+	            gl.drawElements(gl.TRIANGLES, nsize, gl.UNSIGNED_SHORT, 0);
+
+	            material.reset();
+
+
+	        }
+
+	        
+	      
+	    }
+
+
+
+
+	}
+
+	var cccc$2 = 0;
+	class ColorEffect extends DefaultEffect {
+
+	    constructor (color) {
+	        super();
+	        this.id = "id_"+cccc$2++;
+	        this.isUploaded = false;
+	        this._color = color;
+	    }
+
+	    upload (gl){
+	        
+	        var vertexShaderSRC =  "uniform mat3 modelMatrix;"+
+	                               "uniform mat3 projectionMatrix;"+
+	                               "uniform mat3 viewMatrix;"+
+	                                "attribute vec2 position;"+      
+	                                "void main() {"+
+	                                "   vec3 pos = vec3(position.x,position.y, 1.0);"+
+	                                "   mat3 m =  projectionMatrix * (modelMatrix * viewMatrix);"+  
+	                                "   vec3 pm = m * pos;"+     
+	                                "   gl_Position = vec4(pm.x,pm.y, 0, 1.0);"+     
+	                                "   gl_PointSize = 10.0;"+     
+	                                "}";
+
+	          var fragmentShaderSRC =   "precision mediump float;"+
+	                                    "uniform vec4 color;"+
+	                                    "void main() {"+        
+	                                    "   gl_FragColor = color;"+     
+	                                    "}";
+
+	        this.fragmentShaderBuffer = gl.createShader(gl.FRAGMENT_SHADER);
+	        gl.shaderSource( this.fragmentShaderBuffer, fragmentShaderSRC );
+	        gl.compileShader( this.fragmentShaderBuffer );
+	        
+	        if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
+	            let finfo = gl.getShaderInfoLog( this.fragmentShaderBuffer );
+	            throw "Could not compile WebGL program. \n\n" + finfo;
+	        }
+
+	        this.vertexSahderBuffer = gl.createShader(gl.VERTEX_SHADER);
+	        gl.shaderSource( this.vertexSahderBuffer, vertexShaderSRC );
+	        gl.compileShader( this.vertexSahderBuffer );
+
+	        if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
+	            let info = gl.getShaderInfoLog( this.fragmentShaderBuffer );
+	            throw "Could not compile WebGL program. \n\n" + info;
+	        }
+
+
+	        this.shaderProgram = gl.createProgram();
+	        gl.attachShader(this.shaderProgram, this.vertexSahderBuffer);
+	        gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
+	        gl.linkProgram(this.shaderProgram);
+	        this.isUploaded = true;
+
+	        this.uniform = new UniformObject(gl,this.shaderProgram);
+	        this.color = this._color;
+	        this.uniform.setValue("color", this.color.elements);
+	    }
+	    
+	    set color (value){
+	        
+	        this._color = value;
+	    }
+
+	    get color (){
+
+	        return this._color;
+	    }
+
+
+	    draw (gl){
+
+	        if(!this.shaderProgram){
+	            this.upload(gl);
+	        }
+	        
+	        gl.useProgram(this.shaderProgram);
+	        this.uniform.update(gl);
+	    }
+
+	}
+
 	class Square extends ObjectContainer2D {
 	        
 	        static get ENTER_FRAME () { return "enterFrame"; }
@@ -596,22 +1274,61 @@
 	        constructor (canvasID) {
 	            
 	            super(canvasID);
+	            this.min = 500000;
+	            this.max = -500000;
 	            this.stage = this;
 	            if(canvasID !== undefined){
+
+	            var cAttributes = {
+	                    alpha: false,
+	                    antialias: false,
+	                    depth: false,
+	                    failIfMajorPerformanceCaveat: false,
+	                    premultipliedAlpha: false,
+	                    preserveDrawingBuffer: false,
+	                    stencil: true
+	                };
+
+
+	                var canvas =  document.getElementById(canvasID, cAttributes);
 	                
-	                var canvas =  document.getElementById(canvasID);
-	                var  gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-	                
+	                //var  gl = canvas.getContext("webgl2") || canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+	                var  gl = canvas.getContext("webgl");// || canvas.getContext("experimental-webgl", {stencil:true});  // webgl2 disabled for now
+	                console.log(gl);
 	                if(!gl){
-	                
-	                    var error = "WebGL isn't supported on device";
-	                    this.dispatchEvent(Square.ERROR , { message : error });
+	                    
+	                    throw "something";
+	                    console.error("test");
+	                   // var error = "WebGL isn't supported on device";
+	                    //this.dispatchEvent(Square.ERROR , { message : error });
 
 	                } 
 
+	                gl.clearColor(1, 1, 1, 1);
+	               // gl.colorMask(false, false, false, true);
+	                gl.clear(gl.COLOR_BUFFER_BIT);
+
+	                //gl.colorMask(true, true, true, false);
+
+	                // var instanced = gl.getExtension('ANGLE_instanced_arrays');
+	                
+
+	                // if(!instanced) {
+	                //     alert("Instanced doesn't work");
+	                // }
+
+
+
 	                this.renderDom = canvas;
+	                if(gl.hasOwnProperty("rawgl")){
+	                    gl = gl.rawgl;
+	                }
 	                this.setWebGLContext(gl);
 	                this.init();
+	            } else {
+
+	                throw "no canvas found";
+
 	            }
 
 	        }
@@ -623,7 +1340,15 @@
 	        }
 	        
 	        setWebGLContext (gl) {
-	            this.context = gl; 
+	            this.context = gl;
+
+	             if(gl instanceof WebGLRenderingContext) {
+	                this.renderer = new WebGLRenderer(this,gl);
+
+	               // gl.enable(gl.DEPTH_TEST);
+	                gl.viewport(0, 0, this.renderDom.width, this.renderDom.height);
+	                gl.clearColor(0.6, 0.6, 0.6, 1.0);
+	             }
 	        }
 
 	        setAutoUpdate (b) {
@@ -639,7 +1364,6 @@
 	            }
 	        }
 
-
 	        // TODO silinecek. Testing method 
 	        // addQuadForTest (quad) {
 	        //     if(!this.testChilderen) {
@@ -648,47 +1372,113 @@
 	        //     this.testChilderen.push(quad);
 	        // }
 
-	        update () {
+	        update2 () {
 	            
+	          // this.update();
+
 	            
-	            this.dispacthEvent(Square.ENTER_FRAME, undefined);
+
+	           this.dispacthEvent(Square.ENTER_FRAME, undefined);
 	            var gl = this.context;
-	            gl.enable(gl.DEPTH_TEST);
-	            gl.viewport(0, 0, this.renderDom.width, this.renderDom.height);
-	            gl.clearColor(0.6, 0.6, 0.6, 1.0);
-	            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	            // Enable depth testing
-	            //gl.enable(gl.DEPTH_TEST);
-	            // Near things obscure far things
-	            //gl.depthFunc(gl.LEQUAL);
-	            // Clear the color as well as the depth buffer.
-
-	            super.update();
-
+	            //gl.DEPTH_BUFFER_BIT
+	            gl.clearColor(0.3,0.3,0.3,1);
 	            
-	            drawObjects(this.children, gl, this.camera);
+
+	            gl.clear(gl.COLOR_BUFFER_BIT);
 	            
-	            // if(this.testChilderen){
 
-	            //     for (var i = 0; i < this.testChilderen.length; i++) {
-	            //         this.testChilderen[i].draw(gl);
-	            //     }
-	            // }
+	            this.renderer.prepareForRender();
+	            this.renderEachChildren();
+	            this.renderer.present2(this.camera);
+	         
 
-
+	          //  
+	          //this.renderChild();
+	           //this.renderRecursively(this);
+	          //this.renderer.present(this.camera);
 
 	        }
 
-	    }
+	        renderEachChildren () {
+	            
+	            for (var i = 0; i < this.children.length; i++) {
+	                 this.children[i].update();
+	                this.renderer.renderSprite(this.children[i]);
+	            }
+
+	        }
+
+	        renderChild () {    
+
+	            for (var i = 0; i < this.children.length; i++) {
+	                
+	                this.children[i].drawTest(this.context);
+	               // this.renderer.renderSingleObject(this.children[i], this.camera);
+	                
+	            }
+
+	        }
 
 
-	    function drawObjects(objects, context, camera) {
+	        renderRecursively (o) {
+
+	            if(o instanceof Sprite$1) {
+
+	                this.renderer.renderSingleObject(o);
+	            }
+
+	            if(o.children.length > 0) {
+	            
+	                for (var i = 0; i < o.children.length; i++) {
+	                
+	                    this.renderRecursively(o.children[i]);
+	                
+	                }
+	            }
+
+	          
+
+	        }
+
+
+	        renderOtherObjects () {
+	             for (var str in this._renObjects) {
+	                
+	                if (this._renObjects.hasOwnProperty(str)){
+	                    this.renderer.renderObjects(this._renObjects[str], this.camera);
+	                }
+	            }
+	        }
+
+	        renderSprites () {
+	              this.renderer.renderObjects(this._spriteRenderObjects, this.camera);
+	        }
 	        
-	        for (var i = 0; i < objects.length; i++) {
-	            var element = objects[i];
-	            element.draw(context, camera);
-	            drawObjects(element.children, context, camera);
+	        collectObjects (children) {
+
+	            
+	            for (var i = 0; i < children.length; i++) {
+	                
+	                var a = children[i];
+	                
+	                if(a instanceof Sprite$1){
+	                    
+	                    this._spriteRenderObjects.push(a);
+
+	                } else {
+
+	                    if(!this._renObjects.hasOwnProperty(a.material.id)){
+	                        this._renObjects[a.material.id] = [];
+	                    }
+
+	                    var ar = this._renObjects[a.material.id];
+	                    ar.push(a);
+
+	                }
+
+	            }
+
 	        }
 
 	    }
@@ -710,13 +1500,15 @@
 
 	    function updateMeydans(){
 
+
 	        for (var i = 0; i < _meydanInstances.length; i++) {
-	            _meydanInstances[i].update();
+	            _meydanInstances[i].update2();
 	        }
 	        
 	        if(_meydanInstances.length > 0){
 	            requestAnimationFrame(updateMeydans);
 	        }
+
 	    }
 
 	function Sprite2D (){
@@ -1097,6 +1889,355 @@
 	    }
 	}
 
+	class NormalSprite extends ObjectContainer2D {
+
+	    constructor () {
+	        
+	        super();
+
+	        var f = 16;
+
+	      
+	        this.vertices  = [
+	                            -f,  f, // left - top
+	                            -f, -f, // left - bottom
+	                            f,  f, // right - top
+	                            f, -f, // right - bottom
+	                        ];
+	        
+	        this.colors = [];
+	        var r,g,b;
+	        r = Math.random();
+	        g = Math.random();
+	        b = Math.random();
+
+	        this.colors[0] = r;
+	        this.colors[1] = g;
+	        this.colors[2] = b;
+
+
+	        this.colors[3] = r;
+	        this.colors[4] = g;
+	        this.colors[5] = b;
+
+
+	        this.colors[6] = r;
+	        this.colors[7] = g;
+	        this.colors[8] = b;
+
+
+	        this.colors[9] = r;
+	        this.colors[10] = g;
+	        this.colors[11] = b;
+	    }
+
+
+	    update () {
+	        //super.update();
+	        //console.log(this.positionMatrix.matrixArray);
+	        //this.updateWorldMatrix();
+	    //  this.updateScale();
+	    //         this.updateRotation();
+	      //  this.updatePosition();  
+	        var f = 16;
+	        
+	        var bh = 18;
+	        var bw = 15;
+
+
+	        var mm00 = Math.cos(this.rotation);
+	        var mm01 = Math.sin(this.rotation);
+	        var mm10 = -mm01;
+	        var mm11 =  mm00;
+
+
+
+
+	        var w = bw * this.scaleX;
+	        var h = bh * this.scaleY;
+
+
+
+	        var p1x = -w; 
+	        var p1y = h;
+
+	        p1x = this.xPos + (p1x * mm00) + (mm10 * p1y); 
+	        p1y = this.yPos +  (-w * mm01) + (mm11 * p1y); 
+	        
+	        var p2x = -w;
+	        var p2y = -h;
+
+	        p2x = this.xPos + (p2x * mm00) + (mm10 * p2y); 
+	        p2y = this.yPos + (-w * mm01) + (mm11 * p2y); 
+
+	        var p3x = w; 
+	        var p3y = h;
+	        
+	        p3x = this.xPos +  (p3x * mm00) + (mm10 * p3y); 
+	        p3y = this.yPos + (w * mm01) + (mm11 * p3y); 
+	        
+
+	        var p4x = w; 
+	        var p4y = -h;
+
+	        p4x = this.xPos + (p4x * mm00) + (mm10 * p4y); 
+	        p4y = this.yPos + (w * mm01) + (mm11 * p4y); 
+
+	        // this.p1x = p1x;
+	        // this.p2x = p2x;
+	        // this.p3x = p3x;
+	        // this.p4x = p4x;
+
+	        // this.p1y = p1y;
+	        // this.p2y = p2y;
+	        // this.p3y = p3y;
+	        // this.p4y = p4y;
+
+	        this.vertices[0] = p1x; 
+	        this.vertices[1] = p1y; 
+
+	        this.vertices[2] = p2x;//p2x; 
+	        this.vertices[3] = p2y;
+
+	        this.vertices[4] = p3x; 
+	        this.vertices[5] = p3y;//p3y; 
+
+	        this.vertices[6] = p4x;
+	        this.vertices[7] = p4y; 
+
+	        
+	        // this.vertices[0] = -f + this.xPos; 
+	        // this.vertices[1] =  f + this.yPos; 
+
+	        // this.vertices[2] = -f + this.xPos; 
+	        // this.vertices[3] =  -f + this.yPos;
+
+	        // this.vertices[4] = f + this.xPos; 
+	        // this.vertices[5] =  f + this.yPos; 
+
+	        // this.vertices[6] = f + this.xPos; 
+	        // this.vertices[7] =  -f + this.yPos; 
+
+	    }
+
+
+
+
+	}
+
+	class DenemeSprite extends ObjectContainer2D {
+
+	    constructor (params) {
+	        super();
+	        
+	        var f = 1;
+	        
+
+	        this.uv = []; 
+	        this.vertices = [];
+	        this.indices = [];
+
+	        var size = 10000;
+	        var vSize = 30 * 8;
+	        var trans;
+	        var transX;
+	        var indexCounter = 0;
+	        for (var i = 0; i < size; i++) 
+	        {
+	            trans = (Math.random() * 600) - 300;
+	            transX = (Math.random() * 600) - 300;
+
+	            this.vertices.push(-f + transX);
+	            this.vertices.push(f + trans);
+	            this.vertices.push(-f + transX);
+	            this.vertices.push(-f + trans);
+
+	            this.vertices.push(f + transX);
+	            this.vertices.push(f + trans);
+	            this.vertices.push(f + transX);
+	            this.vertices.push(-f + trans);
+
+	            this.uv.push(0);
+	            this.uv.push(1);
+
+	            this.uv.push(0);
+	            this.uv.push(0);
+
+	            this.uv.push(1);
+	            this.uv.push(1);
+
+	            this.uv.push(1);
+	            this.uv.push(0);
+
+
+	            this.indices.push(indexCounter);
+	            this.indices.push(indexCounter + 1);
+	            this.indices.push(indexCounter + 2);
+
+	            this.indices.push(indexCounter + 1);
+	            this.indices.push(indexCounter + 3);
+	            this.indices.push(indexCounter + 2);
+	            indexCounter += 4;
+	        }
+
+
+
+	        this.color = [Math.random(), Math.random(), Math.random(),1];
+	        
+	        for(var str in params){
+	            var param = str;
+	            this[param] = params[str];        
+	        }
+	        
+
+	        // var vv = [
+	        //     -f,  f, // left - top
+	        //     -f, -f, // left - bottom
+	        //     f,  f, // right - top
+	        //     f, -f, // right - bottom
+	        // ];
+
+	        // var uuvv =  [
+	        //     0,1,
+	        //     0,0,
+	        //     1,1,
+	        //     1,0
+	        // ];
+
+	        //  var iindi = [0,1,2,  1,3,2];
+
+	        //  this.vertices = vv;
+	        //  this.indices = iindi;
+	        //  this.uv = uuvv;
+
+	    }
+
+	    updateMaterial (gl) {
+	        
+	        if(!this.material.isUploaded){
+	            this.material.upload(gl);
+	        }
+	    }
+
+	    upload (gl, material) {
+	        
+
+	        return;
+	        if(!Sprite._indexBuffer){
+	            
+	            console.log("Sprite > Create Buffer");
+	           
+
+	        
+	            Sprite._indexBuffer = this.indexBuffer;
+	            Sprite._vertexBuffer = this.buffer;
+	            Sprite._uvBuffer = this.uvBuffer;
+	           
+	        } else {
+
+	            this.buffer = Sprite._vertexBuffer;
+	            this.uvBuffer = Sprite._uvBuffer;
+	            this.indexBuffer = Sprite._indexBuffer;
+	        }
+	        
+	    }
+
+	    update  () {
+	        //super.update();   
+	    }
+
+	    draw  (gl, camera){
+
+	        
+	    }
+
+	    uploadData2 (gl) {
+
+	        if(!this.isUploaded) {
+
+	            var vertexShaderSRC =  document.getElementById( 'vertexShader' ).textContent;
+	            var fragmentShaderSRC = document.getElementById( 'fragmentShader' ).textContent;
+
+
+	            this.fragmentShaderBuffer = gl.createShader(gl.FRAGMENT_SHADER);
+	            gl.shaderSource( this.fragmentShaderBuffer, fragmentShaderSRC );
+	            gl.compileShader( this.fragmentShaderBuffer );
+
+	            if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
+	                let finfo = gl.getShaderInfoLog( this.fragmentShaderBuffer );
+	                throw "Could not compile WebGL program. \n\n" + finfo;
+	            }
+
+	            this.vertexSahderBuffer = gl.createShader(gl.VERTEX_SHADER);
+	            gl.shaderSource( this.vertexSahderBuffer, vertexShaderSRC );
+	            gl.compileShader( this.vertexSahderBuffer );
+
+	            if ( !gl.getShaderParameter(this.vertexSahderBuffer, gl.COMPILE_STATUS) ) {
+	                let info = gl.getShaderInfoLog( this.vertexSahderBuffer );
+	                throw "Could not compile WebGL program. \n\n" + info;
+	            }
+
+	            this.shaderProgram = gl.createProgram();
+	            gl.attachShader(this.shaderProgram, this.vertexSahderBuffer);
+	            gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
+	            gl.linkProgram(this.shaderProgram);
+
+
+	            this.positionLocation = gl.getAttribLocation(this.shaderProgram,"position");
+	          //  this.uvLocation = gl.getAttribLocation(this.shaderProgram,"uv");
+
+
+	            this.vertexBuffer =  gl.createBuffer();
+	            gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+	            this.verticesTyped = new Float32Array(this.vertices);
+	            gl.bufferData(gl.ARRAY_BUFFER, this.verticesTyped,  gl.STREAM_DRAW);
+	            gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+	            gl.enableVertexAttribArray(this.positionLocation);
+
+	            // this.uvBuffer =  gl.createBuffer();
+	            // gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
+	            // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.uv),  gl.STATIC_DRAW);
+	            // gl.vertexAttribPointer(this.uvLocation, 2, gl.FLOAT, false, 0, 0);
+
+	            this.indexBuffer = gl.createBuffer();
+	            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+	            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
+
+
+	            this.isUploaded = true;
+	            
+	        }
+
+	    }
+
+
+	    drawTest (gl) {
+
+	        var camera = this.stage.camera;
+
+	        this.uploadData2(gl);
+	        gl.useProgram(this.shaderProgram);
+
+
+	        var projLocation = gl.getUniformLocation(this.shaderProgram, "projectionMatrix");
+	        gl.uniformMatrix3fv(projLocation , false , camera.projectionMatrix.matrixArray);
+
+	        var worlLoca = gl.getUniformLocation(this.shaderProgram, "viewMatrix");
+	        gl.uniformMatrix3fv(worlLoca , false , camera.worldMatrix.matrixArray);
+
+
+
+	        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+	        gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.verticesTyped);
+	        gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+	        
+
+	        gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
+	    }
+	}
+
 	class Camera extends Object2D{
 
 	    constructor (){
@@ -1122,14 +2263,19 @@
 	exports.Vector2 = Vector2;
 	exports.Matrix3 = Matrix3;
 	exports.Color = Color;
+	exports.WebGLRenderer = WebGLRenderer;
 	exports.DefaultEffect = DefaultEffect;
 	exports.ColorEffect = ColorEffect;
+	exports.InstancedMaterial = InstancedMaterial;
 	exports.Square = Square;
 	exports.Object2D = Object2D;
 	exports.ObjectContainer2D = ObjectContainer2D;
 	exports.Sprite2D = Sprite2D;
 	exports.Quad = Quad;
 	exports.TestSprite = TestSprite;
+	exports.NormalSprite = NormalSprite;
+	exports.DenemeSprite = DenemeSprite;
+	exports.Sprite = Sprite$1;
 	exports.Camera = Camera;
 
 	Object.defineProperty(exports, '__esModule', { value: true });

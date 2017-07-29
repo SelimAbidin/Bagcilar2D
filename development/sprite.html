@@ -1,0 +1,202 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Empty</title>
+</head>
+
+
+
+<script id="vertexShaderInstanced" type="x-shader/x-vertex">
+
+    uniform mat3 projectionMatrix; 
+    uniform mat3 viewMatrix;
+    attribute vec2 position;
+    attribute vec2 uv;
+    attribute vec2 offset;
+    attribute float rotation;
+    attribute vec3 color;
+    varying vec3 colorVar;
+    varying vec2 uvVar;
+
+    mat3 getRotationMatrix(float r){
+        mat3 rotationM = mat3(
+                            cos(r),   sin(r),       0.0,
+                            -sin(r),   cos(r),      0.0,
+                            0.0,         0.0,       1.0
+                            );
+
+
+        return rotationM;
+    } 
+
+    mat3 getPositionMatrix (float posX, float posY){ 
+
+        mat3 translateMat = mat3(
+                                    1.0,  0.0,  0.0,
+                                    0.0,  1.0,  0.0,
+                                    posX,  posY,  1.0
+                                    );
+        return translateMat;
+    } 
+
+    void main() {
+        
+        colorVar = color;
+        vec3 pos3V = vec3(position.x, position.y, 1.0);
+        mat3 modelMatrix = getPositionMatrix(offset.x, offset.y) * getRotationMatrix(rotation);
+        mat3 modeViewProjection =  projectionMatrix * viewMatrix * modelMatrix;
+
+
+        
+        uvVar = uv;
+        float xx = offset.x + rotation;
+        vec3 worlPosition = modeViewProjection * pos3V;
+        gl_Position = vec4(worlPosition.x, worlPosition.y, 0, 1.0);
+
+    }
+</script>
+
+<script id="fragmentShaderInstanced" type="x-shader/x-fragment">
+    precision mediump float;
+    varying vec3 colorVar;
+    varying vec2 uvVar;
+    uniform sampler2D uSampler;
+    
+    void main() { 
+        vec4 c = texture2D( uSampler, uvVar) * vec4(colorVar, 1.0);
+        gl_FragColor = c;
+    }
+</script>
+
+
+
+<script src="../libs/stats.min.js" ></script>
+<script src="../build/Bagcilar2d.js" ></script>
+
+<script>
+
+
+
+
+    function init(){
+
+        window.flame = new Image();
+        window.flame.onload = function() {
+            
+            baslat();
+        }
+
+        flame.src = "face.png"; 
+    }
+    
+
+
+    function baslat() {
+        
+        window.stats = new Stats();
+        document.body.appendChild( stats.domElement );
+        stats.domElement.style.position = "absolute";
+        stats.domElement.style.top = "0px";
+       
+        window.meydan = new Bagcilar.Square("renderCanvas");
+        window.meydan.addEventListener(Bagcilar.Square.ENTER_FRAME, this, enterFrame);
+        meydan.camera = new Bagcilar.Camera();
+        meydan.setAutoUpdate(false);
+        window.sprites = [];
+
+        dataEkle();
+
+        var sp;
+        function enterFrame(event) {
+           
+            var start = new Date().getTime();
+
+              for(var i = 0 ; i < sprites.length; i++){
+
+                sp = sprites[i];
+                
+                sp.yPos += sp.vy;
+                sp.xPos += sp.vx;
+                sp.rotation += sp.rv;
+                
+                if(sp.xPos >= 300){
+                    sp.xPos = 300;
+                    sp.vx *= -1;
+                } else if(sp.xPos <= -300) {
+                    sp.xPos = -300;
+                    sp.vx *= -1;
+                } else if(sp.yPos >= 300){
+                    sp.yPos = 300;
+                    sp.vy *= -1;
+                    sp.rv = sp.vy * .01;
+                } else if(sp.yPos <= -300) {
+                    sp.yPos = -300;
+                    sp.vy *= -1;
+                    sp.rv = sp.vy * .01;
+                }
+            }
+
+            var elapsed = new Date().getTime() - start;
+
+        }
+        
+
+         requestAnimationFrame(updateScreen);
+
+    }
+
+
+
+    function dataEkle(m) {
+        
+        var sp;
+        if(m === undefined) {
+            sp = new Bagcilar.Sprite();
+        } else {
+            sp = new Bagcilar.Sprite({material:m});
+        }
+        
+        sp.id = "id_" + sprites.length;
+        meydan.addChild(sp);
+        sp.vx = 1 + Math.random() * 2;
+        sp.vy = 1 + Math.random() * 2;
+        sp.rv = Math.random() * 0.1;
+        sprites.push(sp);
+
+    }
+
+
+
+    var say = 1;
+    function cokDataEkle() {
+        say +=1;
+        var instanced = new Bagcilar.InstancedMaterial();
+        for (var i = 0; i < 30000; i++) {
+            dataEkle(instanced);
+        }
+
+
+        document.getElementById("btn").innerHTML =  "Kare Ekle ("+sprites.length+")"
+    }
+
+
+    function updateScreen() {
+
+       stats.begin();
+        meydan.update2();
+        requestAnimationFrame(updateScreen);
+        stats.end();
+    }
+
+    
+
+</script>
+<body onload="init()" style="background-color: #cc0000">
+
+<canvas id="renderCanvas" width="600" height="600" ></canvas>
+
+<div id="framef"></div>
+<div id="frameMax"></div>
+<button id="btn" onclick="cokDataEkle()"> Kare Ekle </button>
+</body>
+</html>
