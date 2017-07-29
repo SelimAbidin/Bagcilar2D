@@ -13,13 +13,10 @@ class WebGLRenderer extends EventableObject
         this.square = square;
 
         this.material = new RegularEffect();
-
         gl.disable(gl.STENCIL_TEST);
         gl.disable(gl.DEPTH_TEST);
-        
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
     }
 
     prepareForRender () {

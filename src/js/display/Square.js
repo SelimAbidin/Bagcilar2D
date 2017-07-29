@@ -14,7 +14,6 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
             this.max = -500000;
             this.stage = this;
             if(canvasID !== undefined){
-                
 
             var cAttributes = {
                     alpha: false,
@@ -33,9 +32,11 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
                 var  gl = canvas.getContext("webgl");// || canvas.getContext("experimental-webgl", {stencil:true});  // webgl2 disabled for now
                 console.log(gl);
                 if(!gl){
-                
-                    var error = "WebGL isn't supported on device";
-                    this.dispatchEvent(Square.ERROR , { message : error });
+                    
+                    throw "something";
+                    console.error("test");
+                   // var error = "WebGL isn't supported on device";
+                    //this.dispatchEvent(Square.ERROR , { message : error });
 
                 } 
 
@@ -60,6 +61,10 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
                 }
                 this.setWebGLContext(gl);
                 this.init();
+            } else {
+
+                throw "no canvas found";
+
             }
 
         }
