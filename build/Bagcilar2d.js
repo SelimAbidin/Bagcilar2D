@@ -411,7 +411,500 @@
 	}
 
 	var cccc = 0;
-	var MAX_INSTANCE = 350000;
+	var MAX_INSTANCE = 14000;
+
+
+	var _currentEmptyInstance;
+	var _instancedMaterials = [];
+	class RegularEffect extends DefaultEffect {
+	    
+	    constructor () {
+	        super();
+	        this.count = 0;
+	        this.id = "id_"+cccc++;
+	        this.isUploaded = false;
+
+	        var f = 20;
+	        // var vv  = [
+	        //     -f,  f, // left - top
+	        //     -f, -f, // left - bottom
+	        //     f,  f, // right - top
+	        //     f, -f, // right - bottom
+	        // ];
+
+	        var index = 0;
+	        var indexCounter    = 0;
+	        var uvCounter       = 0;
+	        this.vertices       = new Float32Array(8 * MAX_INSTANCE);
+	        this.uvs            = new Float32Array(8 * MAX_INSTANCE);
+	        this.colors         = new Float32Array(12 * MAX_INSTANCE);
+	        this.indices        = new Uint16Array(6 * MAX_INSTANCE);
+
+	        var r,g,b;
+	        var i;
+	        for (i = 0; i < this.colors.length; i+=12) {
+	            
+	            r = Math.random();
+	            g = Math.random();
+	            b = Math.random();
+
+	            this.colors[i] = r;
+	            this.colors[i + 1] = g;
+	            this.colors[i + 2] = b;
+
+
+	            this.colors[i + 3] = r;
+	            this.colors[i + 4] = g;
+	            this.colors[i + 5] = b;
+
+
+	            this.colors[i + 6] = r;
+	            this.colors[i + 7] = g;
+	            this.colors[i + 8] = b;
+
+
+	            this.colors[i + 9] = r;
+	            this.colors[i + 10] = g;
+	            this.colors[i + 11] = b;
+
+	            
+	        }
+	        
+	        
+	        for (i = 0; i < this.vertices.length; i+=8) {
+	            this.vertices[i] = 0;
+	        }
+
+	        for (i = 0; i < this.vertices.length; i+=8) {
+	            
+	            this.vertices[i]     = -f; this.vertices[i + 1] = f;
+	            this.vertices[i + 2] = -f; this.vertices[i + 3] = -f;
+	            this.vertices[i + 4] =  f; this.vertices[i + 5] = f;
+	            this.vertices[i + 6] =  f; this.vertices[i + 7] = -f;
+
+	            this.uvs[uvCounter]     = 0;
+	            this.uvs[uvCounter + 1] = 1;
+
+	            this.uvs[uvCounter + 2] = 0;
+	            this.uvs[uvCounter + 3] = 0;
+
+	            this.uvs[uvCounter + 4] = 1;
+	            this.uvs[uvCounter + 5] = 1;
+
+	            this.uvs[uvCounter + 6] = 1;
+	            this.uvs[uvCounter + 7] = 0;
+
+	            uvCounter += 8; 
+	            
+	            this.indices[indexCounter    ] = index;
+	            this.indices[indexCounter + 1] = index + 1;
+	            this.indices[indexCounter + 2] = index + 2;
+
+	            this.indices[indexCounter + 3] = index + 1;
+	            this.indices[indexCounter + 4] = index + 3;
+	            this.indices[indexCounter + 5] = index + 2;
+
+	            index += 4;
+	            indexCounter += 6;
+	        }
+	        
+
+	    }
+
+
+	    appendVerices (vertices) {
+	        var vertexIndex = this.count * 8;
+	        
+	        this.vertices[vertexIndex] = vertices[0];
+	        this.vertices[vertexIndex + 1] = vertices[1];
+	        this.vertices[vertexIndex + 2] = vertices[2];
+	        this.vertices[vertexIndex + 3] = vertices[3];
+	        this.vertices[vertexIndex + 4] = vertices[4];
+	        this.vertices[vertexIndex + 5] = vertices[5];
+	        this.vertices[vertexIndex + 6] = vertices[6];
+	        this.vertices[vertexIndex + 7] = vertices[7];
+
+	    }
+
+
+	    appendColors (colors) {
+
+	        var vertexIndex = this.count * 12;
+	        this.colors[vertexIndex] = colors[0];
+	        this.colors[vertexIndex + 1] = colors[1];
+	        this.colors[vertexIndex + 2] = colors[2];
+	        this.colors[vertexIndex + 3] = colors[3];
+	        this.colors[vertexIndex + 4] = colors[4];
+	        this.colors[vertexIndex + 5] = colors[5];
+	        this.colors[vertexIndex + 6] = colors[6];
+	        this.colors[vertexIndex + 7] = colors[7];
+	        this.colors[vertexIndex + 8] = colors[8];
+	        this.colors[vertexIndex + 9] = colors[9];
+	        this.colors[vertexIndex + 10] = colors[10];
+	        this.colors[vertexIndex + 11] = colors[11];
+	    }
+
+	    hasRoom () {
+
+	        return this.getLenght() < MAX_INSTANCE;
+
+	    }
+
+
+
+
+	    static getEmptyInstance () {
+	        
+	        if(_currentEmptyInstance === undefined || !_currentEmptyInstance.hasRoom()) {
+
+	            for (var i = 0; i < _instancedMaterials.length; i++) {
+	                var element = _instancedMaterials[i];
+
+	                if(element.hasRoom()) {
+	                    _currentEmptyInstance = element;
+	                    return _currentEmptyInstance;
+	                }
+	                
+	            }
+	            
+	            
+	            _currentEmptyInstance = new RegularEffect();
+	            _instancedMaterials.push(_currentEmptyInstance);
+	        }
+	        
+	        return _currentEmptyInstance;
+	    }
+
+	    
+	    reset () {
+	        this.count = -1;
+
+	       
+	    }
+	   
+	    next () {
+	        
+	        this.count++;
+
+	    }
+
+	    getLenght () {
+	        return this.count + 1;
+	    }
+
+	    upload (gl){
+	        
+
+	        if(!this.isUploaded){
+
+
+	            var vertexShaderSRC =  `
+                uniform mat3 projectionMatrix; 
+                uniform mat3 viewMatrix;
+                attribute vec2 position;
+                attribute vec2 uv;
+                attribute vec3 color;
+                varying vec3 colorVar;
+                varying vec2 uvData;
+                void main() {
+                    uvData = uv;
+                    colorVar = color;
+                    vec3 newPos = vec3(position.x, position.y, 1.0 ) * (projectionMatrix * viewMatrix);
+                    gl_Position = vec4(newPos , 1.0);
+                }
+            `;
+
+	            var fragmentShaderSRC = `
+                precision lowp float;
+                uniform sampler2D uSampler;
+                varying vec2 uvData;
+                varying vec3 colorVar;
+                void main() { 
+                    vec4 c = texture2D(uSampler,uvData) * vec4(colorVar, 1.0);
+                    gl_FragColor = c;
+                }
+            `;
+	            
+	            //var vertexShaderSRC =  document.getElementById( 'vertexShader' ).textContent;
+	            //var fragmentShaderSRC = document.getElementById( 'fragmentShader' ).textContent;
+	            
+	            this.fragmentShaderBuffer = gl.createShader(gl.FRAGMENT_SHADER);
+	            gl.shaderSource( this.fragmentShaderBuffer, fragmentShaderSRC );
+	            gl.compileShader( this.fragmentShaderBuffer );
+	            if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
+	                let finfo = gl.getShaderInfoLog( this.fragmentShaderBuffer );
+	                throw "Could not compile WebGL program. \n\n" + finfo;
+	            }
+	            
+	            this.vertexShaderBuffer = gl.createShader(gl.VERTEX_SHADER);
+	            gl.shaderSource( this.vertexShaderBuffer, vertexShaderSRC );
+	            gl.compileShader( this.vertexShaderBuffer );
+	            if ( !gl.getShaderParameter(this.vertexShaderBuffer, gl.COMPILE_STATUS) ) {
+	                let finfo = gl.getShaderInfoLog( this.vertexShaderBuffer );
+	                throw "Could not compile WebGL program. \n\n" + finfo;
+	            }
+
+	            this.shaderProgram = gl.createProgram();
+
+	            gl.attachShader(this.shaderProgram, this.vertexShaderBuffer);
+	            gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
+	            gl.linkProgram(this.shaderProgram);
+
+
+	            this.positionLocation = gl.getAttribLocation(this.shaderProgram,"position");
+	            this.uvLocation = gl.getAttribLocation(this.shaderProgram,"uv");
+	            this.colorLocation = gl.getAttribLocation(this.shaderProgram,"color");
+
+	  
+	            this.vertexBuffer = gl.createBuffer();
+	            gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+	            gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.STREAM_DRAW);
+	            gl.enableVertexAttribArray(this.positionLocation);
+	            gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+
+	            this.uvBuffer = gl.createBuffer();
+	            gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
+	            gl.bufferData(gl.ARRAY_BUFFER, this.uvs, gl.STATIC_DRAW);
+	            gl.enableVertexAttribArray(this.uvLocation);
+	            gl.vertexAttribPointer(this.uvLocation, 2, gl.FLOAT, false, 0, 0);
+	           
+
+	            this.colorBuffer = gl.createBuffer();
+	            gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
+	            gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STREAM_DRAW);
+	            gl.vertexAttribPointer(this.colorLocation, 3, gl.FLOAT, false, 0, 0);
+	            gl.enableVertexAttribArray(this.colorLocation);
+
+	            this.indexBuffer = gl.createBuffer();
+	            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+	            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indices, gl.STATIC_DRAW);
+
+
+	            // var n = gl.getProgramParameter(this.shaderProgram, gl.ACTIVE_ATTRIBUTES);
+	            // for (var i = 0; i < n; i++) {
+	            //     gl.getActiveAttrib(this.shaderProgram, i);
+	            // }
+
+	            var texture = gl.createTexture();
+	            var image = window.flame;
+	            // gl.bindTexture(gl.TEXTURE_2D, texture);
+	            // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	            // gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+
+	            gl.bindTexture(gl.TEXTURE_2D, texture);
+	            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	            // gl.generateMipmap(gl.TEXTURE_2D);
+
+	            this.textureBuffer = texture;
+	            this.uniform = new UniformObject(gl, this.shaderProgram);
+	            this.isUploaded = true;
+	        }
+	       
+	    }
+	   
+
+
+	    draw (){
+
+	       
+
+	    }
+
+	}
+
+	class WebGLRenderer extends EventableObject
+	{
+	    constructor (square, gl) {
+	        super();
+	        this.infoID = 0;
+	        this.gl = gl;
+	        this._materials = [];
+	        this.square = square;
+
+	        this.material = new RegularEffect();
+	        gl.disable(gl.STENCIL_TEST);
+	        gl.disable(gl.DEPTH_TEST);
+	        gl.enable(gl.BLEND);
+	        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+	    }
+
+	    prepareForRender () {
+	        this._materials.length = 0;
+	        this.infoID++;
+	    }
+
+	    renderSprite (sprite) {
+
+	        var material = RegularEffect.getEmptyInstance();
+
+	        if(this.infoID != material.renderID) {
+	            this._materials.push(material);
+	            material.upload(this.gl);
+	        }
+
+
+	        material.renderID = this.infoID;
+	        material.next();
+
+
+	        
+	        material.appendVerices(sprite.vertices);
+	        material.appendColors(sprite.colors);
+	    }
+
+
+	    present2 (camera) {
+
+	        var gl = this.gl;
+
+	        if(gl.isContextLost()) {
+	            return;
+	        }
+
+
+	    
+
+	        for (var i = 0; i < this._materials.length; i++) {
+
+	            var material =  this._materials[i];
+	            var uniform = material.uniform;
+
+	            gl.useProgram(material.shaderProgram);
+	           
+	            uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
+	            uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
+	            uniform.setValue("uSampler", 0);
+	            uniform.update(this.gl);
+
+	            gl.activeTexture(gl.TEXTURE0);
+	            gl.bindTexture(gl.TEXTURE_2D, material.textureBuffer);
+	            
+	            gl.bindBuffer(gl.ARRAY_BUFFER, material.vertexBuffer);
+	            gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.vertices);
+	            gl.vertexAttribPointer(material.positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+
+	            gl.bindBuffer(gl.ARRAY_BUFFER, material.colorBuffer);
+	            gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.colors);
+	            gl.vertexAttribPointer(material.colorLocation, 3, gl.FLOAT, false, 0, 0);
+
+	            gl.bindBuffer(gl.ARRAY_BUFFER, material.uvBuffer);
+	            gl.vertexAttribPointer(material.uvLocation, 2, gl.FLOAT, false, 0,   0);
+
+	            // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, material.indexBuffer);
+	            var nsize = material.getLenght() * 6;
+
+	            
+	            gl.drawElements(gl.TRIANGLES, nsize, gl.UNSIGNED_SHORT, 0);
+
+	            material.reset();
+
+
+	        }
+
+	        
+	      
+	    }
+
+
+
+
+	}
+
+	var cccc$1 = 0;
+	class ColorEffect extends DefaultEffect {
+
+	    constructor (color) {
+	        super();
+	        this.id = "id_"+cccc$1++;
+	        this.isUploaded = false;
+	        this._color = color;
+	    }
+
+	    upload (gl){
+	        
+	        var vertexShaderSRC =  "uniform mat3 modelMatrix;"+
+	                               "uniform mat3 projectionMatrix;"+
+	                               "uniform mat3 viewMatrix;"+
+	                                "attribute vec2 position;"+      
+	                                "void main() {"+
+	                                "   vec3 pos = vec3(position.x,position.y, 1.0);"+
+	                                "   mat3 m =  projectionMatrix * (modelMatrix * viewMatrix);"+  
+	                                "   vec3 pm = m * pos;"+     
+	                                "   gl_Position = vec4(pm.x,pm.y, 0, 1.0);"+     
+	                                "   gl_PointSize = 10.0;"+     
+	                                "}";
+
+	        var fragmentShaderSRC =   "precision mediump float;"+
+	                                    "uniform vec4 color;"+
+	                                    "void main() {"+        
+	                                    "   gl_FragColor = color;"+     
+	                                    "}";
+
+	        this.fragmentShaderBuffer = gl.createShader(gl.FRAGMENT_SHADER);
+	        gl.shaderSource( this.fragmentShaderBuffer, fragmentShaderSRC );
+	        gl.compileShader( this.fragmentShaderBuffer );
+	        
+	        if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
+	            let finfo = gl.getShaderInfoLog( this.fragmentShaderBuffer );
+	            throw "Could not compile WebGL program. \n\n" + finfo;
+	        }
+
+	        this.vertexSahderBuffer = gl.createShader(gl.VERTEX_SHADER);
+	        gl.shaderSource( this.vertexSahderBuffer, vertexShaderSRC );
+	        gl.compileShader( this.vertexSahderBuffer );
+
+	        if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
+	            let info = gl.getShaderInfoLog( this.fragmentShaderBuffer );
+	            throw "Could not compile WebGL program. \n\n" + info;
+	        }
+
+
+	        this.shaderProgram = gl.createProgram();
+	        gl.attachShader(this.shaderProgram, this.vertexSahderBuffer);
+	        gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
+	        gl.linkProgram(this.shaderProgram);
+	        this.isUploaded = true;
+
+	        this.uniform = new UniformObject(gl,this.shaderProgram);
+	        this.color = this._color;
+	        this.uniform.setValue("color", this.color.elements);
+	    }
+	    
+	    set color (value){
+	        
+	        this._color = value;
+	    }
+
+	    get color (){
+
+	        return this._color;
+	    }
+
+
+	    draw (gl){
+
+	        if(!this.shaderProgram){
+	            this.upload(gl);
+	        }
+	        
+	        gl.useProgram(this.shaderProgram);
+	        this.uniform.update(gl);
+	    }
+
+	}
+
+	var cccc$2 = 0;
+	var MAX_INSTANCE$1 = 350000;
 
 
 	var _materialInstance;
@@ -420,14 +913,14 @@
 	    constructor (color) {
 	        super();
 	        this.count = 0;
-	        this.id = "id_"+cccc++;
+	        this.id = "id_"+cccc$2++;
 	        this.isUploaded = false;
 	        this._color = color;
 	        
-	        this.offset = new Float32Array( 2 * MAX_INSTANCE);
+	        this.offset = new Float32Array( 2 * MAX_INSTANCE$1);
 	        
-	        this.colorArray = new Float32Array( 3 * MAX_INSTANCE);
-	        this.rotateArray = new Float32Array(MAX_INSTANCE);
+	        this.colorArray = new Float32Array( 3 * MAX_INSTANCE$1);
+	        this.rotateArray = new Float32Array(MAX_INSTANCE$1);
 	        
 
 	        var f = 10;
@@ -603,7 +1096,7 @@
 	    }
 
 
-	    draw (gl){
+	    draw (){
 
 
 	        // if(!this.shaderProgram){
@@ -612,318 +1105,6 @@
 	        // console.log("use program");
 	        // gl.useProgram(this.shaderProgram);
 	        // this.uniform.update(gl);
-	    }
-
-	}
-
-	var cccc$1 = 0;
-	var MAX_INSTANCE$1 = 14000;
-
-
-	var _currentEmptyInstance;
-	var _instancedMaterials = [];
-	class RegularEffect extends DefaultEffect {
-	    
-	    constructor (color) {
-	        super();
-	        this.count = 0;
-	        this.id = "id_"+cccc$1++;
-	        this.isUploaded = false;
-
-	        var f = 20;
-	        var vv  = [
-	            -f,  f, // left - top
-	            -f, -f, // left - bottom
-	            f,  f, // right - top
-	            f, -f, // right - bottom
-	        ];
-
-	        var index = 0;
-	        var indexCounter    = 0;
-	        var uvCounter       = 0;
-	        this.vertices       = new Float32Array(8 * MAX_INSTANCE$1);
-	        this.uvs            = new Float32Array(8 * MAX_INSTANCE$1);
-	        this.colors         = new Float32Array(12 * MAX_INSTANCE$1);
-	        this.indices        = new Uint16Array(6 * MAX_INSTANCE$1);
-
-	        var r,g,b;
-	        var i;
-	        for (i = 0; i < this.colors.length; i+=12) {
-	            
-	            r = Math.random();
-	            g = Math.random();
-	            b = Math.random();
-
-	            this.colors[i] = r;
-	            this.colors[i + 1] = g;
-	            this.colors[i + 2] = b;
-
-
-	            this.colors[i + 3] = r;
-	            this.colors[i + 4] = g;
-	            this.colors[i + 5] = b;
-
-
-	            this.colors[i + 6] = r;
-	            this.colors[i + 7] = g;
-	            this.colors[i + 8] = b;
-
-
-	            this.colors[i + 9] = r;
-	            this.colors[i + 10] = g;
-	            this.colors[i + 11] = b;
-
-	            
-	        }
-	        
-	        
-	        for (i = 0; i < this.vertices.length; i+=8) {
-	            this.vertices[i] = 0;
-	        }
-
-	        for (i = 0; i < this.vertices.length; i+=8) {
-	            
-	            this.vertices[i]     = -f; this.vertices[i + 1] = f;
-	            this.vertices[i + 2] = -f; this.vertices[i + 3] = -f;
-	            this.vertices[i + 4] =  f; this.vertices[i + 5] = f;
-	            this.vertices[i + 6] =  f; this.vertices[i + 7] = -f;
-
-	            this.uvs[uvCounter]     = 0;
-	            this.uvs[uvCounter + 1] = 1;
-
-	            this.uvs[uvCounter + 2] = 0;
-	            this.uvs[uvCounter + 3] = 0;
-
-	            this.uvs[uvCounter + 4] = 1;
-	            this.uvs[uvCounter + 5] = 1;
-
-	            this.uvs[uvCounter + 6] = 1;
-	            this.uvs[uvCounter + 7] = 0;
-
-	            uvCounter += 8; 
-	            
-	            this.indices[indexCounter    ] = index;
-	            this.indices[indexCounter + 1] = index + 1;
-	            this.indices[indexCounter + 2] = index + 2;
-
-	            this.indices[indexCounter + 3] = index + 1;
-	            this.indices[indexCounter + 4] = index + 3;
-	            this.indices[indexCounter + 5] = index + 2;
-
-	            index += 4;
-	            indexCounter += 6;
-	        }
-	        
-
-	    }
-
-
-	    appendVerices (vertices) {
-	        var vertexIndex = this.count * 8;
-	        
-	        this.vertices[vertexIndex] = vertices[0];
-	        this.vertices[vertexIndex + 1] = vertices[1];
-	        this.vertices[vertexIndex + 2] = vertices[2];
-	        this.vertices[vertexIndex + 3] = vertices[3];
-	        this.vertices[vertexIndex + 4] = vertices[4];
-	        this.vertices[vertexIndex + 5] = vertices[5];
-	        this.vertices[vertexIndex + 6] = vertices[6];
-	        this.vertices[vertexIndex + 7] = vertices[7];
-
-	    }
-
-
-	    appendColors (colors) {
-
-	        var vertexIndex = this.count * 12;
-	        this.colors[vertexIndex] = colors[0];
-	        this.colors[vertexIndex + 1] = colors[1];
-	        this.colors[vertexIndex + 2] = colors[2];
-	        this.colors[vertexIndex + 3] = colors[3];
-	        this.colors[vertexIndex + 4] = colors[4];
-	        this.colors[vertexIndex + 5] = colors[5];
-	        this.colors[vertexIndex + 6] = colors[6];
-	        this.colors[vertexIndex + 7] = colors[7];
-	        this.colors[vertexIndex + 8] = colors[8];
-	        this.colors[vertexIndex + 9] = colors[9];
-	        this.colors[vertexIndex + 10] = colors[10];
-	        this.colors[vertexIndex + 11] = colors[11];
-	    }
-
-	    hasRoom () {
-
-	        return this.getLenght() < MAX_INSTANCE$1;
-
-	    }
-
-
-
-
-	    static getEmptyInstance () {
-	        
-	        if(_currentEmptyInstance === undefined || !_currentEmptyInstance.hasRoom()) {
-
-	            for (var i = 0; i < _instancedMaterials.length; i++) {
-	                var element = _instancedMaterials[i];
-
-	                if(element.hasRoom()) {
-	                    _currentEmptyInstance = element;
-	                    return _currentEmptyInstance;
-	                }
-	                
-	            }
-	            
-	            
-	            _currentEmptyInstance = new RegularEffect();
-	            _instancedMaterials.push(_currentEmptyInstance);
-	        }
-	        
-	        return _currentEmptyInstance;
-	    }
-
-	    
-	    reset () {
-	        this.count = -1;
-
-	       
-	    }
-	   
-	    next () {
-	        
-	        this.count++;
-
-	    }
-
-	    getLenght () {
-	        return this.count + 1;
-	    }
-
-	    upload (gl){
-	        
-
-	        if(!this.isUploaded){
-
-
-	            var vertexShaderSRC =  `
-                uniform mat3 projectionMatrix; 
-                uniform mat3 viewMatrix;
-                attribute vec2 position;
-                attribute vec2 uv;
-                attribute vec3 color;
-                varying vec3 colorVar;
-                varying vec2 uvData;
-                void main() {
-                    uvData = uv;
-                    colorVar = color;
-                    vec3 newPos = vec3(position.x, position.y, 1.0 ) * (projectionMatrix * viewMatrix);
-                    gl_Position = vec4(newPos , 1.0);
-                }
-            `;
-
-	            var fragmentShaderSRC = `
-                precision lowp float;
-                uniform sampler2D uSampler;
-                varying vec2 uvData;
-                varying vec3 colorVar;
-                void main() { 
-                    vec4 c = texture2D(uSampler,uvData) * vec4(colorVar, 1.0);
-                    gl_FragColor = c;
-                }
-            `;
-	            
-	            //var vertexShaderSRC =  document.getElementById( 'vertexShader' ).textContent;
-	            //var fragmentShaderSRC = document.getElementById( 'fragmentShader' ).textContent;
-	            
-	            this.fragmentShaderBuffer = gl.createShader(gl.FRAGMENT_SHADER);
-	            gl.shaderSource( this.fragmentShaderBuffer, fragmentShaderSRC );
-	            gl.compileShader( this.fragmentShaderBuffer );
-	            if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
-	                let finfo = gl.getShaderInfoLog( this.fragmentShaderBuffer );
-	                throw "Could not compile WebGL program. \n\n" + finfo;
-	            }
-	            
-	            this.vertexShaderBuffer = gl.createShader(gl.VERTEX_SHADER);
-	            gl.shaderSource( this.vertexShaderBuffer, vertexShaderSRC );
-	            gl.compileShader( this.vertexShaderBuffer );
-	            if ( !gl.getShaderParameter(this.vertexShaderBuffer, gl.COMPILE_STATUS) ) {
-	                let finfo = gl.getShaderInfoLog( this.vertexShaderBuffer );
-	                throw "Could not compile WebGL program. \n\n" + finfo;
-	            }
-
-	            this.shaderProgram = gl.createProgram();
-
-	            gl.attachShader(this.shaderProgram, this.vertexShaderBuffer);
-	            gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
-	            gl.linkProgram(this.shaderProgram);
-
-
-	            this.positionLocation = gl.getAttribLocation(this.shaderProgram,"position");
-	            this.uvLocation = gl.getAttribLocation(this.shaderProgram,"uv");
-	            this.colorLocation = gl.getAttribLocation(this.shaderProgram,"color");
-
-	  
-	            this.vertexBuffer = gl.createBuffer();
-	            gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-	            gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.STREAM_DRAW);
-	            gl.enableVertexAttribArray(this.positionLocation);
-	            gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0);
-
-
-	            this.uvBuffer = gl.createBuffer();
-	            gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
-	            gl.bufferData(gl.ARRAY_BUFFER, this.uvs, gl.STATIC_DRAW);
-	            gl.enableVertexAttribArray(this.uvLocation);
-	            gl.vertexAttribPointer(this.uvLocation, 2, gl.FLOAT, false, 0, 0);
-	           
-
-	            this.colorBuffer = gl.createBuffer();
-	            gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
-	            gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STREAM_DRAW);
-	            gl.vertexAttribPointer(this.colorLocation, 3, gl.FLOAT, false, 0, 0);
-	            gl.enableVertexAttribArray(this.colorLocation);
-
-	            this.indexBuffer = gl.createBuffer();
-	            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-	            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indices, gl.STATIC_DRAW);
-
-
-	            var n = gl.getProgramParameter(this.shaderProgram, gl.ACTIVE_ATTRIBUTES);
-
-	            for (var i = 0; i < n; i++) {
-	                var element = gl.getActiveAttrib(this.shaderProgram, i);
-	            }
-
-	            var texture = gl.createTexture();
-	            var image = window.flame;
-	            // gl.bindTexture(gl.TEXTURE_2D, texture);
-	            // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-	            // gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
-
-	            gl.bindTexture(gl.TEXTURE_2D, texture);
-	            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-	            // gl.generateMipmap(gl.TEXTURE_2D);
-
-	            this.textureBuffer = texture;
-	            this.uniform = new UniformObject(gl, this.shaderProgram);
-	            this.isUploaded = true;
-	        }
-	       
-	    }
-	   
-
-
-	    draw (gl){
-
-	       
-
 	    }
 
 	}
@@ -1124,193 +1305,10 @@
 	        //super.update();   
 	    }
 
-	    draw  (gl, camera){
+	    draw  (){
 
 	        
 	    }
-	}
-
-	class WebGLRenderer extends EventableObject
-	{
-	    constructor (square, gl) {
-	        super();
-	        this.infoID = 0;
-	        this.gl = gl;
-	        this._materials = [];
-	        this.square = square;
-
-	        this.material = new RegularEffect();
-	        gl.disable(gl.STENCIL_TEST);
-	        gl.disable(gl.DEPTH_TEST);
-	        gl.enable(gl.BLEND);
-	        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-	    }
-
-	    prepareForRender () {
-	        this._materials.length = 0;
-	        this.infoID++;
-	    }
-
-	    renderSprite (sprite) {
-
-	        var material = RegularEffect.getEmptyInstance();
-
-	        if(this.infoID != material.renderID) {
-	            this._materials.push(material);
-	            material.upload(this.gl);
-	        }
-
-
-	        material.renderID = this.infoID;
-	        material.next();
-
-
-	        
-	        material.appendVerices(sprite.vertices);
-	        material.appendColors(sprite.colors);
-	    }
-
-
-	    present2 (camera) {
-
-	        var gl = this.gl;
-
-	        if(gl.isContextLost()) {
-	            return;
-	        }
-
-
-	    
-
-	        for (var i = 0; i < this._materials.length; i++) {
-
-	            var material =  this._materials[i];
-	            var uniform = material.uniform;
-
-	            gl.useProgram(material.shaderProgram);
-	           
-	            uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
-	            uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
-	            uniform.setValue("uSampler", 0);
-	            uniform.update(this.gl);
-
-	            gl.activeTexture(gl.TEXTURE0);
-	            gl.bindTexture(gl.TEXTURE_2D, material.textureBuffer);
-	            
-	            gl.bindBuffer(gl.ARRAY_BUFFER, material.vertexBuffer);
-	            gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.vertices);
-	            gl.vertexAttribPointer(material.positionLocation, 2, gl.FLOAT, false, 0, 0);
-
-
-	            gl.bindBuffer(gl.ARRAY_BUFFER, material.colorBuffer);
-	            gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.colors);
-	            gl.vertexAttribPointer(material.colorLocation, 3, gl.FLOAT, false, 0, 0);
-
-	            gl.bindBuffer(gl.ARRAY_BUFFER, material.uvBuffer);
-	            gl.vertexAttribPointer(material.uvLocation, 2, gl.FLOAT, false, 0,   0);
-
-	            // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, material.indexBuffer);
-	            var size = material.indices.length;
-	            var nsize = material.getLenght() * 6;
-
-	            
-	            gl.drawElements(gl.TRIANGLES, nsize, gl.UNSIGNED_SHORT, 0);
-
-	            material.reset();
-
-
-	        }
-
-	        
-	      
-	    }
-
-
-
-
-	}
-
-	var cccc$2 = 0;
-	class ColorEffect extends DefaultEffect {
-
-	    constructor (color) {
-	        super();
-	        this.id = "id_"+cccc$2++;
-	        this.isUploaded = false;
-	        this._color = color;
-	    }
-
-	    upload (gl){
-	        
-	        var vertexShaderSRC =  "uniform mat3 modelMatrix;"+
-	                               "uniform mat3 projectionMatrix;"+
-	                               "uniform mat3 viewMatrix;"+
-	                                "attribute vec2 position;"+      
-	                                "void main() {"+
-	                                "   vec3 pos = vec3(position.x,position.y, 1.0);"+
-	                                "   mat3 m =  projectionMatrix * (modelMatrix * viewMatrix);"+  
-	                                "   vec3 pm = m * pos;"+     
-	                                "   gl_Position = vec4(pm.x,pm.y, 0, 1.0);"+     
-	                                "   gl_PointSize = 10.0;"+     
-	                                "}";
-
-	        var fragmentShaderSRC =   "precision mediump float;"+
-	                                    "uniform vec4 color;"+
-	                                    "void main() {"+        
-	                                    "   gl_FragColor = color;"+     
-	                                    "}";
-
-	        this.fragmentShaderBuffer = gl.createShader(gl.FRAGMENT_SHADER);
-	        gl.shaderSource( this.fragmentShaderBuffer, fragmentShaderSRC );
-	        gl.compileShader( this.fragmentShaderBuffer );
-	        
-	        if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
-	            let finfo = gl.getShaderInfoLog( this.fragmentShaderBuffer );
-	            throw "Could not compile WebGL program. \n\n" + finfo;
-	        }
-
-	        this.vertexSahderBuffer = gl.createShader(gl.VERTEX_SHADER);
-	        gl.shaderSource( this.vertexSahderBuffer, vertexShaderSRC );
-	        gl.compileShader( this.vertexSahderBuffer );
-
-	        if ( !gl.getShaderParameter(this.fragmentShaderBuffer, gl.COMPILE_STATUS) ) {
-	            let info = gl.getShaderInfoLog( this.fragmentShaderBuffer );
-	            throw "Could not compile WebGL program. \n\n" + info;
-	        }
-
-
-	        this.shaderProgram = gl.createProgram();
-	        gl.attachShader(this.shaderProgram, this.vertexSahderBuffer);
-	        gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
-	        gl.linkProgram(this.shaderProgram);
-	        this.isUploaded = true;
-
-	        this.uniform = new UniformObject(gl,this.shaderProgram);
-	        this.color = this._color;
-	        this.uniform.setValue("color", this.color.elements);
-	    }
-	    
-	    set color (value){
-	        
-	        this._color = value;
-	    }
-
-	    get color (){
-
-	        return this._color;
-	    }
-
-
-	    draw (gl){
-
-	        if(!this.shaderProgram){
-	            this.upload(gl);
-	        }
-	        
-	        gl.useProgram(this.shaderProgram);
-	        this.uniform.update(gl);
-	    }
-
 	}
 
 	class Square extends ObjectContainer2D {
@@ -1513,6 +1511,18 @@
 	    }
 
 	}
+
+
+	// function drawObjects(renderer, objects, context, camera) {
+
+	//     renderer.renderObject();
+
+	//     for (var i = 0; i < objects.length; i++) {
+	//         var element = objects[i];
+	//         this.list.push(element);
+	//         drawObjects(element.children, context, camera);
+	//     }
+	// }
 
 
 	var _autoUpdate;
@@ -2041,7 +2051,6 @@
 	        //this.updatePosition();
 	        //this.translate
 
-	        var f = 16;
 
 	        var bh = 18;
 	        var bw = 15;

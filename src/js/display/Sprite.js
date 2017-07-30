@@ -1,8 +1,6 @@
 
 import {ObjectContainer2D} from "./ObjectContainer2D";
-import {DefaultEffect} from "../effects/DefaultEffect";
 import {InstancedMaterial} from "../effects/InstancedMaterial";
-import {Matrix3} from "../Math/Matrix3";
 
 
 
@@ -59,7 +57,7 @@ class Sprite extends ObjectContainer2D {
         //super.update();   
     }
 
-    draw  (gl, camera){
+    draw  (){
 
         
     }

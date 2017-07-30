@@ -1,7 +1,5 @@
 import {EventableObject} from "../core/EventableObject";
-import {InstancedMaterial} from "../effects/InstancedMaterial";
 import {RegularEffect} from "../effects/RegularEffect";
-import {Sprite} from "../display/Sprite";
 
 class WebGLRenderer extends EventableObject
 {
@@ -83,7 +81,6 @@ class WebGLRenderer extends EventableObject
             gl.vertexAttribPointer(material.uvLocation, 2, gl.FLOAT, false, 0,   0);
 
             // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, material.indexBuffer);
-            var size = material.indices.length;
             var nsize = material.getLenght() * 6;
 
             

@@ -59,7 +59,6 @@ class NormalSprite extends ObjectContainer2D {
         //this.updatePosition();
         //this.translate
 
-        var f = 16;
 
         var bh = 18;
         var bw = 15;

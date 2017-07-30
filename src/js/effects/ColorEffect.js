@@ -1,5 +1,4 @@
 import {DefaultEffect} from "./DefaultEffect";
-import {Color} from "../math/Color";
 import {UniformObject} from "../core/UniformObject";
 var cccc = 0;
 class ColorEffect extends DefaultEffect {

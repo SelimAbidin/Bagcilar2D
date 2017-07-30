@@ -1,5 +1,4 @@
 import {Matrix3} from "./Matrix3.js";
-import {Vector3} from "./Vector3.js";
 
 
 class Transform2D {

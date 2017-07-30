@@ -1,5 +1,4 @@
 import {DefaultEffect} from "./DefaultEffect";
-import {Color} from "../math/Color";
 import {UniformObject} from "../core/UniformObject";
 var cccc = 0;
 var MAX_INSTANCE = 350000;
@@ -194,7 +193,7 @@ class InstancedMaterial extends DefaultEffect {
     }
 
 
-    draw (gl){
+    draw (){
 
 
         // if(!this.shaderProgram){

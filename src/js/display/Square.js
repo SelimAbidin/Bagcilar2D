@@ -205,16 +205,16 @@ class Square extends ObjectContainer2D {
 }
 
 
-function drawObjects(renderer, objects, context, camera) {
+// function drawObjects(renderer, objects, context, camera) {
 
-    renderer.renderObject();
+//     renderer.renderObject();
 
-    for (var i = 0; i < objects.length; i++) {
-        var element = objects[i];
-        this.list.push(element);
-        drawObjects(element.children, context, camera);
-    }
-}
+//     for (var i = 0; i < objects.length; i++) {
+//         var element = objects[i];
+//         this.list.push(element);
+//         drawObjects(element.children, context, camera);
+//     }
+// }
 
 
 var _autoUpdate;

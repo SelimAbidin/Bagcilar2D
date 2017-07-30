@@ -1,28 +1,26 @@
 import {DefaultEffect} from "./DefaultEffect";
-import {Color} from "../math/Color";
 import {UniformObject} from "../core/UniformObject";
 var cccc = 0;
 var MAX_INSTANCE = 14000;
 
 
 var _currentEmptyInstance;
-var _materialInstance;
 var _instancedMaterials = [];
 class RegularEffect extends DefaultEffect {
     
-    constructor (color) {
+    constructor () {
         super();
         this.count = 0;
         this.id = "id_"+cccc++;
         this.isUploaded = false;
 
         var f = 20;
-        var vv  = [
-            -f,  f, // left - top
-            -f, -f, // left - bottom
-            f,  f, // right - top
-            f, -f, // right - bottom
-        ];
+        // var vv  = [
+        //     -f,  f, // left - top
+        //     -f, -f, // left - bottom
+        //     f,  f, // right - top
+        //     f, -f, // right - bottom
+        // ];
 
         var index = 0;
         var indexCounter    = 0;
@@ -273,11 +271,10 @@ class RegularEffect extends DefaultEffect {
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indices, gl.STATIC_DRAW);
 
 
-            var n = gl.getProgramParameter(this.shaderProgram, gl.ACTIVE_ATTRIBUTES);
-
-            for (var i = 0; i < n; i++) {
-                var element = gl.getActiveAttrib(this.shaderProgram, i);
-            }
+            // var n = gl.getProgramParameter(this.shaderProgram, gl.ACTIVE_ATTRIBUTES);
+            // for (var i = 0; i < n; i++) {
+            //     gl.getActiveAttrib(this.shaderProgram, i);
+            // }
 
             var texture = gl.createTexture();
             var image = window.flame;
@@ -306,7 +303,7 @@ class RegularEffect extends DefaultEffect {
    
 
 
-    draw (gl){
+    draw (){
 
        
 

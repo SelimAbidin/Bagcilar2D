@@ -1,7 +1,6 @@
 
 import {ObjectContainer2D} from "./ObjectContainer2D";
 import {DefaultEffect} from "../effects/DefaultEffect";
-import {Matrix3} from "../Math/Matrix3";
 
 
 
