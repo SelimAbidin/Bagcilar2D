@@ -6,7 +6,7 @@
   "scripts": {
     "test": "karma start",
     "dev": "gulp dev",
-    "before-travis" : "karma start && eslint ./src/js/*/*.js", 
+    "before-travis": "karma start && eslint ./src/js/*/*.js",
     "watch-dev": "gulp watch-dev",
     "eslint": "eslint ./src/js/*/*.js",
     "eslint-fix": "eslint ./src/js/*/*.js --fix",
@@ -29,7 +29,6 @@
   "homepage": "https://github.com/SelimAbidin/Bagcilar2D#readme",
   "dependencies": {},
   "devDependencies": {
-    "browserify": "^14.4.0",
     "eslint": "^4.0.0",
     "eslint-config-standard": "^10.2.1",
     "eslint-plugin-promise": "^3.5.0",
