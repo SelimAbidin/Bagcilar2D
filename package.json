@@ -6,9 +6,10 @@
   "scripts": {
     "test": "karma start",
     "dev": "gulp dev",
+    "before-travis" : "karma start && eslint ./src/js/*/*.js", 
     "watch-dev": "gulp watch-dev",
-    "eslint": "eslint src/js/*/*.js",
-    "eslint-fix": "eslint src/js/*/*.js --fix",
+    "eslint": "eslint ./src/js/*/*.js",
+    "eslint-fix": "eslint ./src/js/*/*.js --fix",
     "karma-init": "karma init"
   },
   "repository": {
