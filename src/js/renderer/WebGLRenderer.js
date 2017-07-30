@@ -82,7 +82,7 @@ class WebGLRenderer extends EventableObject
             gl.bindBuffer(gl.ARRAY_BUFFER, material.uvBuffer);
             gl.vertexAttribPointer(material.uvLocation, 2, gl.FLOAT, false, 0,   0);
 
-           // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, material.indexBuffer);
+            // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, material.indexBuffer);
             var size = material.indices.length;
             var nsize = material.getLenght() * 6;
 
@@ -103,4 +103,4 @@ class WebGLRenderer extends EventableObject
 
 }
 
-export {WebGLRenderer}
+export {WebGLRenderer};

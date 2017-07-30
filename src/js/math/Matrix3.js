@@ -1,28 +1,26 @@
-
-
 class Matrix3 {
     constructor() {
         this.matrixArray = [
-                            1,0,0,
-                            0,1,0,
-                            0,0,1
-                            ];
+            1,0,0,
+            0,1,0,
+            0,0,1
+        ];
         
         
     }
 
     makeIdentity (){
         this.setMatrix(
-                        1,0,0,
-                        0,1,0,
-                        0,0,1);
+            1,0,0,
+            0,1,0,
+            0,0,1);
     }
 
     setMatrix  (    
-                n00, n10, n20, 
-                n01, n11, n21,
-                n02, n12, n22 
-                ){
+        n00, n10, n20, 
+        n01, n11, n21,
+        n02, n12, n22 
+    ){
 
         var m = this.matrixArray;
         m[0] = n00; m[1] = n10; m[2] = n20;
@@ -126,8 +124,6 @@ class Matrix3 {
         var d02 = a02 * b00 + a12 * b01 + a22 * b02;
         var d12 = a02 * b10 + a12 * b11 + a22 * b12;
         var d22 = a02 * b20 + a12 * b21 + a22 * b22;
-
-        console.log(a00, d01, d02);
 
         this.matrixArray[0] = d00 * c00 + d10 * c01 + d20 * c02;
         this.matrixArray[1] = d00 * c10 + d10 * c11 + d20 * c12;

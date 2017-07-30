@@ -1,5 +1,5 @@
-import {Transform2D} from "../math/Transform2D"
-import {ObjectContainer2D} from "./ObjectContainer2D.js"
+import {Transform2D} from "../math/Transform2D";
+import {ObjectContainer2D} from "./ObjectContainer2D.js";
 
 
 class NormalSprite extends ObjectContainer2D {
@@ -16,11 +16,11 @@ class NormalSprite extends ObjectContainer2D {
 
       
         this.vertices  = [
-                            -f,  f, // left - top
-                            -f, -f, // left - bottom
-                            f,  f, // right - top
-                            f, -f, // right - bottom
-                        ];
+            -f,  f, // left - top
+            -f, -f, // left - bottom
+            f,  f, // right - top
+            f, -f, // right - bottom
+        ];
         
         this.colors = [];
         var r,g,b;
@@ -146,4 +146,4 @@ class NormalSprite extends ObjectContainer2D {
 
 }
 
-export {NormalSprite}
+export {NormalSprite};

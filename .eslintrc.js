@@ -7,6 +7,7 @@ module.exports = {
     "parserOptions": {
         "sourceType": "module"
     },
+
     "rules": {
         "indent": [
             "error",
@@ -14,11 +15,14 @@ module.exports = {
         ],
         "linebreak-style": [
             "error",
-            "unix"
+            "windows"
         ],
         "quotes": [
             "error",
             "double"
+        ],
+        "no-unused-vars" :[
+            "warn"
         ],
         "semi": [
             "error",

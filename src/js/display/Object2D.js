@@ -27,89 +27,89 @@ class Object2D  extends EventableObject{
     
     }
 
-        setRotation (v){
-            this.rotation = v;
-            this.isRotationDirty = true;
-        }
+    setRotation (v){
+        this.rotation = v;
+        this.isRotationDirty = true;
+    }
 
-        getRotation (){
-            return this.rotation;
-        }
+    getRotation (){
+        return this.rotation;
+    }
 
-        updateRotation (){
-            this.rotationMatrix.setRotationZ(this.rotation);
-            this.isRotationDirty = false;
-        }
+    updateRotation (){
+        this.rotationMatrix.setRotationZ(this.rotation);
+        this.isRotationDirty = false;
+    }
 
-        updateScale (){
-            this.scaleMatrix.setScale(this.scaleX, this.scaleY);
-            this.isScaleDirty = false;
-        }
+    updateScale (){
+        this.scaleMatrix.setScale(this.scaleX, this.scaleY);
+        this.isScaleDirty = false;
+    }
 
-        updatePosition (){
-            this.positionMatrix.translate(this.xPos, this.yPos);
-            this.isPositionDirty = false;
-        }
+    updatePosition (){
+        this.positionMatrix.translate(this.xPos, this.yPos);
+        this.isPositionDirty = false;
+    }
 
-        setScale (scale) {
-            this.scaleX = scale;
-            this.scaley = scale;
-            this.isScaleDirty = true;
-        }
+    setScale (scale) {
+        this.scaleX = scale;
+        this.scaley = scale;
+        this.isScaleDirty = true;
+    }
 
-        setScaleX (x) {
-            this.scaleX = x;
-            this.isScaleDirty = true;
-        }
+    setScaleX (x) {
+        this.scaleX = x;
+        this.isScaleDirty = true;
+    }
 
-        setScaleY (y) {
-            this.scaleY = y;
-            this.isScaleDirty = true;
-        }
+    setScaleY (y) {
+        this.scaleY = y;
+        this.isScaleDirty = true;
+    }
 
-        getScaleY (){
-            return this.scaleY;
-        }
+    getScaleY (){
+        return this.scaleY;
+    }
 
-        getScaleX (){
-            return this.scaleX;
-        }
+    getScaleX (){
+        return this.scaleX;
+    }
 
-        set x (x) {
-            this.xPos = x;
-            this.isPositionDirty = true;
-        }
+    set x (x) {
+        this.xPos = x;
+        this.isPositionDirty = true;
+    }
 
-        set y (y) {
-            this.yPos = y;
-            this.isPositionDirty = true;
-        }
+    set y (y) {
+        this.yPos = y;
+        this.isPositionDirty = true;
+    }
 
-        get x () {
-            return this.xPos;
-        }
+    get x () {
+        return this.xPos;
+    }
 
-        get y () {
-            return this.yPos;
-        }
+    get y () {
+        return this.yPos;
+    }
         
 
-        updateWorldMatrix (){
+    updateWorldMatrix (){
             
-            this.worldMatrix.makeIdentity();
+        this.worldMatrix.makeIdentity();
             
-            this.updateScale();
-            this.updateRotation();
-            this.updatePosition();
+        this.updateScale();
+        this.updateRotation();
+        this.updatePosition();
 
-            this.worldMatrix.multiplyMatrix(this.positionMatrix);
-            this.worldMatrix.multiplyMatrix(this.rotationMatrix);
-            this.worldMatrix.multiplyMatrix(this.scaleMatrix); 
+        this.worldMatrix.multiplyMatrix(this.positionMatrix);
+        this.worldMatrix.multiplyMatrix(this.rotationMatrix);
+        this.worldMatrix.multiplyMatrix(this.scaleMatrix); 
             
-        }
+    }
 
-        update  () {
-            this.updateWorldMatrix();
-        }
+    update  () {
+        this.updateWorldMatrix();
+    }
 }
 export {Object2D};

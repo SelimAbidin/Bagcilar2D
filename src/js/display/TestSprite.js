@@ -27,7 +27,7 @@ class TestSprite extends ObjectContainer2D {
 
         if(!this.shaderProgram)
         {
-                var vertexShaderSRC =  document.getElementById( 'vertexShader' ).textContent;
+            var vertexShaderSRC =  document.getElementById( "vertexShader" ).textContent;
 
             var fragmentShaderSRC =    "precision mediump float;"+
                                         "varying vec4 colorVar;" +
@@ -69,21 +69,22 @@ class TestSprite extends ObjectContainer2D {
 
     upload (gl) {
         
-         if(!this.instanced){
-            this.instanced = gl.getExtension('ANGLE_instanced_arrays');
+        if(!this.instanced){
+            this.instanced = gl.getExtension("ANGLE_instanced_arrays");
         } 
 
         var f = 10;
-        var vertices = [
-            -f,  f, // left - top
-            -f, -f, // left - bottom
-            f,  f, // right - top
-            f, -f, // right - bottom
-        ];
+        // var vertices = [
+        //     -f,  f, // left - top
+        //     -f, -f, // left - bottom
+        //     f,  f, // right - top
+        //     f, -f, // right - bottom
+        // ];
 
         var count = 27 * 27;
         this.vs = [];
-        for (var i = 0; i < count; i++) {
+        var i;
+        for (i = 0; i < count; i++) {
             
             var speedX = Math.random() * 4; 
             var speedY = Math.random() * 4; 
@@ -106,12 +107,13 @@ class TestSprite extends ObjectContainer2D {
         this.insVertices = vertices;        
         var offset = new Float32Array( 2 * count);
         
-        for (var i = 0; i < offset.length; i++) {
+       
+        for (i = 0; i < offset.length; i++) {
             offset[i] = 0;//(Math.random() * 400) - 300;
         } 
 
-            var index = 0;
-         for (var i = 0; i < offset.length; i+=2) {
+        var index = 0;
+        for (i = 0; i < offset.length; i+=2) {
 
             var column = index % 27;
             var row = Math.floor(index / 27);
@@ -123,7 +125,7 @@ class TestSprite extends ObjectContainer2D {
         }
 
         var colorArray = new Float32Array( 4 * count );
-        for (var i = 0; i < colorArray.length; i+=4) {
+        for (i = 0; i < colorArray.length; i+=4) {
             
             colorArray[i] = Math.random();//this.r;
             colorArray[i+1] = Math.random();
@@ -132,12 +134,12 @@ class TestSprite extends ObjectContainer2D {
         }
 
         var rotateArray = new Float32Array(count );
-        for (var i = 0; i < rotateArray.length; i++) {
+        for (i = 0; i < rotateArray.length; i++) {
             rotateArray[i] = Math.random() * (Math.PI * 2);
         }
 
         var orderArray = new Float32Array(count );
-        for (var i = 0; i < orderArray.length; i++) {
+        for (i = 0; i < orderArray.length; i++) {
             orderArray[i] = 0.0;//position;
         }
 
@@ -190,8 +192,8 @@ class TestSprite extends ObjectContainer2D {
     draw  (gl, camera){
 
         
-         if(!this.instanced){
-            this.instanced = gl.getExtension('ANGLE_instanced_arrays');
+        if(!this.instanced){
+            this.instanced = gl.getExtension("ANGLE_instanced_arrays");
         } 
 
 
@@ -231,7 +233,7 @@ class TestSprite extends ObjectContainer2D {
         
 
         
-       gl.useProgram(this.shaderProgram);
+        gl.useProgram(this.shaderProgram);
  
         
         this.uniform.update(gl);
@@ -259,7 +261,7 @@ class TestSprite extends ObjectContainer2D {
         
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.offsetBuffer);
-       //gl.bufferData(gl.ARRAY_BUFFER, this.offsetArray, gl.STATIC_DRAW);
+        //gl.bufferData(gl.ARRAY_BUFFER, this.offsetArray, gl.STATIC_DRAW);
         l = this.offsetBuffer.location;
         gl.enableVertexAttribArray(l);
         gl.vertexAttribPointer(l, 2, gl.FLOAT, false, 0, 0);
@@ -278,10 +280,10 @@ class TestSprite extends ObjectContainer2D {
         
 
      
-    //    var position =  gl.getActiveAttrib(this.shaderProgram,this.buffer.location );
-    //    var offset =  gl.getActiveAttrib(this.shaderProgram,this.offsetBuffer.location );
-    //     var color =  gl.getActiveAttrib(this.shaderProgram,this.colorBuffer.location );
-    //     var rotate =  gl.getActiveAttrib(this.shaderProgram,this.rotateBuffer.location );
+        //    var position =  gl.getActiveAttrib(this.shaderProgram,this.buffer.location );
+        //    var offset =  gl.getActiveAttrib(this.shaderProgram,this.offsetBuffer.location );
+        //     var color =  gl.getActiveAttrib(this.shaderProgram,this.colorBuffer.location );
+        //     var rotate =  gl.getActiveAttrib(this.shaderProgram,this.rotateBuffer.location );
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER , this.indexBuffer);
         let size = this.indices.length;
@@ -289,7 +291,7 @@ class TestSprite extends ObjectContainer2D {
         this.instanced.drawElementsInstancedANGLE(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, 0,this.count);
         //this.instanced.drawArraysInstancedANGLE(gl.TRIANGLES, 0, 4, this.count * 2);
 
-      //  gl.drawElements(gl.TRIANGLES , size , gl.UNSIGNED_SHORT , 0);
+        //  gl.drawElements(gl.TRIANGLES , size , gl.UNSIGNED_SHORT , 0);
 
     }
 }

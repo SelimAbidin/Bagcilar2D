@@ -50,27 +50,9 @@ class Sprite extends ObjectContainer2D {
         }
     }
 
-    upload (gl, material) {
+    upload () {
         
 
-        return;
-        if(!Sprite._indexBuffer){
-            
-            console.log("Sprite > Create Buffer");
-           
-
-        
-            Sprite._indexBuffer = this.indexBuffer;
-            Sprite._vertexBuffer = this.buffer;
-            Sprite._uvBuffer = this.uvBuffer;
-           
-        } else {
-
-            this.buffer = Sprite._vertexBuffer;
-            this.uvBuffer = Sprite._uvBuffer;
-            this.indexBuffer = Sprite._indexBuffer;
-        }
-        
     }
 
     update  () {

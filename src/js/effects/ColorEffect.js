@@ -25,7 +25,7 @@ class ColorEffect extends DefaultEffect {
                                 "   gl_PointSize = 10.0;"+     
                                 "}";
 
-          var fragmentShaderSRC =   "precision mediump float;"+
+        var fragmentShaderSRC =   "precision mediump float;"+
                                     "uniform vec4 color;"+
                                     "void main() {"+        
                                     "   gl_FragColor = color;"+     

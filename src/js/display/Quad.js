@@ -61,7 +61,7 @@ class Quad extends ObjectContainer2D {
             this.upload(gl);
         }
         
-         gl.enable(gl.DEPTH_TEST);
+        gl.enable(gl.DEPTH_TEST);
          
         this.updateMaterial(gl);
         

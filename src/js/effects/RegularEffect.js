@@ -33,7 +33,8 @@ class RegularEffect extends DefaultEffect {
         this.indices        = new Uint16Array(6 * MAX_INSTANCE);
 
         var r,g,b;
-        for (var i = 0; i < this.colors.length; i+=12) {
+        var i;
+        for (i = 0; i < this.colors.length; i+=12) {
             
             r = Math.random();
             g = Math.random();
@@ -61,11 +62,12 @@ class RegularEffect extends DefaultEffect {
             
         }
         
-        for (var i = 0; i < this.vertices.length; i+=8) {
-          this.vertices[i] = 0;
+        
+        for (i = 0; i < this.vertices.length; i+=8) {
+            this.vertices[i] = 0;
         }
 
-        for (var i = 0; i < this.vertices.length; i+=8) {
+        for (i = 0; i < this.vertices.length; i+=8) {
             
             this.vertices[i]     = -f; this.vertices[i + 1] = f;
             this.vertices[i + 2] = -f; this.vertices[i + 3] = -f;
@@ -151,14 +153,14 @@ class RegularEffect extends DefaultEffect {
                 var element = _instancedMaterials[i];
 
                 if(element.hasRoom()) {
-                   _currentEmptyInstance = element;
+                    _currentEmptyInstance = element;
                     return _currentEmptyInstance;
                 }
                 
             }
             
             
-           _currentEmptyInstance = new RegularEffect();
+            _currentEmptyInstance = new RegularEffect();
             _instancedMaterials.push(_currentEmptyInstance);
         }
         
@@ -188,7 +190,7 @@ class RegularEffect extends DefaultEffect {
         if(!this.isUploaded){
 
 
-          var vertexShaderSRC =  `
+            var vertexShaderSRC =  `
                 uniform mat3 projectionMatrix; 
                 uniform mat3 viewMatrix;
                 attribute vec2 position;
@@ -275,7 +277,6 @@ class RegularEffect extends DefaultEffect {
 
             for (var i = 0; i < n; i++) {
                 var element = gl.getActiveAttrib(this.shaderProgram, i);
-                console.log(element);
             }
 
             var texture = gl.createTexture();
@@ -294,7 +295,7 @@ class RegularEffect extends DefaultEffect {
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-           // gl.generateMipmap(gl.TEXTURE_2D);
+            // gl.generateMipmap(gl.TEXTURE_2D);
 
             this.textureBuffer = texture;
             this.uniform = new UniformObject(gl, this.shaderProgram);

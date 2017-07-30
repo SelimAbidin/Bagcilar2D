@@ -64,4 +64,4 @@ class Transform2D {
 
 }
 
-export {Transform2D}
+export {Transform2D};
