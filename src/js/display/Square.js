@@ -38,19 +38,7 @@ import {WebGLRenderer} from "../renderer/WebGLRenderer";
                 } 
 
                 gl.clearColor(1, 1, 1, 1);
-               // gl.colorMask(false, false, false, true);
                 gl.clear(gl.COLOR_BUFFER_BIT);
-
-                //gl.colorMask(true, true, true, false);
-
-                // var instanced = gl.getExtension('ANGLE_instanced_arrays');
-                
-
-                // if(!instanced) {
-                //     alert("Instanced doesn't work");
-                // }
-
-
 
                 this.renderDom = canvas;
                 if(gl.hasOwnProperty("rawgl")){

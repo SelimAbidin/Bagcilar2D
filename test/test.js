@@ -10,8 +10,7 @@
 })();
 
 
-
-describe('Canvas Test', function() {
+describe('Canvas Test', () => {
 
    
     var d = document.getElementById("testCanvas");
@@ -22,19 +21,48 @@ describe('Canvas Test', function() {
 });
 
 
+var bagcilar;
+var testSprite;
 describe('Basic Scene', () => {
-
 
    it("Should be sucessfully created", function (){
 
         try {
-            var bagcilar = new Bagcilar.Square("testCanvas");
+            bagcilar = new Bagcilar.Square("testCanvas");
+            var camera = new Bagcilar.Camera();
+            bagcilar.camera = camera;
+            // testSprite = new Bagcilar.NormalSprite();
+            // bagcilar.addChild(testSprite);
             expect(1).toBe(1);
         } catch (e) {
             console.log(e.message);
             expect(false).toBe(true);
-        
         } 
    });
-    
+
 });
+
+
+
+// describe('Sprite Update', () => {
+
+//    it("Sh", function (){
+
+//         try {
+            
+//             testSprite.x = 100;
+//             testSprite.y = 150;
+//             expect(1).toBe(1);
+//         } catch (e) {
+//             console.log(e.message);
+//             expect(false).toBe(true);
+//         } 
+//    });
+
+// });
+
+
+
+
+
+

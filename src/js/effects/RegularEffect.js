@@ -186,9 +186,37 @@ class RegularEffect extends DefaultEffect {
         
 
         if(!this.isUploaded){
+
+
+          var vertexShaderSRC =  `
+                uniform mat3 projectionMatrix; 
+                uniform mat3 viewMatrix;
+                attribute vec2 position;
+                attribute vec2 uv;
+                attribute vec3 color;
+                varying vec3 colorVar;
+                varying vec2 uvData;
+                void main() {
+                    uvData = uv;
+                    colorVar = color;
+                    vec3 newPos = vec3(position.x, position.y, 1.0 ) * (projectionMatrix * viewMatrix);
+                    gl_Position = vec4(newPos , 1.0);
+                }
+            `;
+
+            var fragmentShaderSRC = `
+                precision lowp float;
+                uniform sampler2D uSampler;
+                varying vec2 uvData;
+                varying vec3 colorVar;
+                void main() { 
+                    vec4 c = texture2D(uSampler,uvData) * vec4(colorVar, 1.0);
+                    gl_FragColor = c;
+                }
+            `;
             
-            var vertexShaderSRC =  document.getElementById( 'vertexShader' ).textContent;
-            var fragmentShaderSRC = document.getElementById( 'fragmentShader' ).textContent;
+            //var vertexShaderSRC =  document.getElementById( 'vertexShader' ).textContent;
+            //var fragmentShaderSRC = document.getElementById( 'fragmentShader' ).textContent;
             
             this.fragmentShaderBuffer = gl.createShader(gl.FRAGMENT_SHADER);
             gl.shaderSource( this.fragmentShaderBuffer, fragmentShaderSRC );

@@ -1,4 +1,4 @@
-
+import {Transform2D} from "../math/Transform2D"
 import {ObjectContainer2D} from "./ObjectContainer2D.js"
 
 
@@ -8,6 +8,10 @@ class NormalSprite extends ObjectContainer2D {
         
         super();
 
+        this.translate = new Transform2D();
+        this.width = 10;
+        this.height = 30;
+        
         var f = 16;
 
       
@@ -46,24 +50,26 @@ class NormalSprite extends ObjectContainer2D {
 
 
     update () {
+
         //super.update();
         //console.log(this.positionMatrix.matrixArray);
         //this.updateWorldMatrix();
-    //  this.updateScale();
-    //         this.updateRotation();
-      //  this.updatePosition();  
+        //this.updateScale();
+        //this.updateRotation();
+        //this.updatePosition();
+        //this.translate
+
         var f = 16;
-        
+
         var bh = 18;
         var bw = 15;
-
 
         var mm00 = Math.cos(this.rotation);
         var mm01 = Math.sin(this.rotation);
         var mm10 = -mm01;
         var mm11 =  mm00;
 
-
+        
 
 
         var w = bw * this.scaleX;
@@ -132,6 +138,8 @@ class NormalSprite extends ObjectContainer2D {
         // this.vertices[7] =  -f + this.yPos; 
 
     }
+
+
 
 
 
