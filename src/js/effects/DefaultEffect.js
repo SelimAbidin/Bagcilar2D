@@ -68,6 +68,7 @@ class DefaultEffect {
         this.uniform.update(gl);
     }
 
+    
 }
 
 
