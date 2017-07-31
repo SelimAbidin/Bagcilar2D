@@ -1,7 +1,6 @@
 
 import {ObjectContainer2D} from "./ObjectContainer2D";
 import {DefaultEffect} from "../effects/DefaultEffect";
-import {Matrix3} from "../Math/Matrix3";
 
 
 
@@ -61,7 +60,7 @@ class Quad extends ObjectContainer2D {
             this.upload(gl);
         }
         
-         gl.enable(gl.DEPTH_TEST);
+        gl.enable(gl.DEPTH_TEST);
          
         this.updateMaterial(gl);
         

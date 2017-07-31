@@ -9,7 +9,7 @@ class DefaultEffect {
     }
 
     upload (gl) {
-          var vertexShaderSRC =  "uniform mat3 modelMatrix;"+
+        var vertexShaderSRC =  "uniform mat3 modelMatrix;"+
                                "uniform mat3 projectionMatrix;"+
                                "uniform mat3 viewMatrix;"+
                                 "attribute vec2 position;"+      
@@ -68,6 +68,7 @@ class DefaultEffect {
         this.uniform.update(gl);
     }
 
+    
 }
 
 

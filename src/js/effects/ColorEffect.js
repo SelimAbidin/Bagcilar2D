@@ -1,5 +1,4 @@
 import {DefaultEffect} from "./DefaultEffect";
-import {Color} from "../math/Color";
 import {UniformObject} from "../core/UniformObject";
 var cccc = 0;
 class ColorEffect extends DefaultEffect {
@@ -25,7 +24,7 @@ class ColorEffect extends DefaultEffect {
                                 "   gl_PointSize = 10.0;"+     
                                 "}";
 
-          var fragmentShaderSRC =   "precision mediump float;"+
+        var fragmentShaderSRC =   "precision mediump float;"+
                                     "uniform vec4 color;"+
                                     "void main() {"+        
                                     "   gl_FragColor = color;"+     

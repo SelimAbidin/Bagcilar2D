@@ -1,8 +1,5 @@
 
 import {ObjectContainer2D} from "./ObjectContainer2D";
-import {DefaultEffect} from "../effects/DefaultEffect";
-import {InstancedMaterial} from "../effects/InstancedMaterial";
-import {Matrix3} from "../Math/Matrix3";
 
 
 
@@ -19,7 +16,6 @@ class DenemeSprite extends ObjectContainer2D {
         this.indices = [];
 
         var size = 10000;
-        var vSize = 30 * 8;
         var trans;
         var transX;
         var indexCounter = 0;
@@ -93,33 +89,14 @@ class DenemeSprite extends ObjectContainer2D {
 
     }
 
-    updateMaterial (gl) {
+    // updateMaterial (gl) {
         
-        if(!this.material.isUploaded){
-            this.material.upload(gl);
-        }
-    }
+    //     if(!this.material.isUploaded){
+    //         this.material.upload(gl);
+    //     }
+    // }
 
-    upload (gl, material) {
-        
-
-        return;
-        if(!Sprite._indexBuffer){
-            
-            console.log("Sprite > Create Buffer");
-           
-
-        
-            Sprite._indexBuffer = this.indexBuffer;
-            Sprite._vertexBuffer = this.buffer;
-            Sprite._uvBuffer = this.uvBuffer;
-           
-        } else {
-
-            this.buffer = Sprite._vertexBuffer;
-            this.uvBuffer = Sprite._uvBuffer;
-            this.indexBuffer = Sprite._indexBuffer;
-        }
+    upload () {
         
     }
 
@@ -127,7 +104,7 @@ class DenemeSprite extends ObjectContainer2D {
         //super.update();   
     }
 
-    draw  (gl, camera){
+    draw  (){
 
         
     }
@@ -136,8 +113,8 @@ class DenemeSprite extends ObjectContainer2D {
 
         if(!this.isUploaded) {
 
-            var vertexShaderSRC =  document.getElementById( 'vertexShader' ).textContent;
-            var fragmentShaderSRC = document.getElementById( 'fragmentShader' ).textContent;
+            var vertexShaderSRC =  document.getElementById( "vertexShader" ).textContent;
+            var fragmentShaderSRC = document.getElementById( "fragmentShader" ).textContent;
 
 
             this.fragmentShaderBuffer = gl.createShader(gl.FRAGMENT_SHADER);
@@ -165,7 +142,7 @@ class DenemeSprite extends ObjectContainer2D {
 
 
             this.positionLocation = gl.getAttribLocation(this.shaderProgram,"position");
-          //  this.uvLocation = gl.getAttribLocation(this.shaderProgram,"uv");
+            //  this.uvLocation = gl.getAttribLocation(this.shaderProgram,"uv");
 
 
             this.vertexBuffer =  gl.createBuffer();

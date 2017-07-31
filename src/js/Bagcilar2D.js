@@ -7,6 +7,7 @@ export {EventableObject} from "./core/EventableObject";
 export {UniformObject} from "./core/UniformObject";
 
 export {Vector2} from "./math/Vector2";
+export {Vector3} from "./math/Vector3";
 export {Matrix3} from "./math/Matrix3";
 export {Color} from "./math/Color";
 

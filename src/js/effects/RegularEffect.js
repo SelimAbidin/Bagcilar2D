@@ -1,28 +1,26 @@
 import {DefaultEffect} from "./DefaultEffect";
-import {Color} from "../math/Color";
 import {UniformObject} from "../core/UniformObject";
 var cccc = 0;
 var MAX_INSTANCE = 14000;
 
 
 var _currentEmptyInstance;
-var _materialInstance;
 var _instancedMaterials = [];
 class RegularEffect extends DefaultEffect {
     
-    constructor (color) {
+    constructor () {
         super();
         this.count = 0;
         this.id = "id_"+cccc++;
         this.isUploaded = false;
 
         var f = 20;
-        var vv  = [
-            -f,  f, // left - top
-            -f, -f, // left - bottom
-            f,  f, // right - top
-            f, -f, // right - bottom
-        ];
+        // var vv  = [
+        //     -f,  f, // left - top
+        //     -f, -f, // left - bottom
+        //     f,  f, // right - top
+        //     f, -f, // right - bottom
+        // ];
 
         var index = 0;
         var indexCounter    = 0;
@@ -33,7 +31,8 @@ class RegularEffect extends DefaultEffect {
         this.indices        = new Uint16Array(6 * MAX_INSTANCE);
 
         var r,g,b;
-        for (var i = 0; i < this.colors.length; i+=12) {
+        var i;
+        for (i = 0; i < this.colors.length; i+=12) {
             
             r = Math.random();
             g = Math.random();
@@ -61,11 +60,12 @@ class RegularEffect extends DefaultEffect {
             
         }
         
-        for (var i = 0; i < this.vertices.length; i+=8) {
-          this.vertices[i] = 0;
+        
+        for (i = 0; i < this.vertices.length; i+=8) {
+            this.vertices[i] = 0;
         }
 
-        for (var i = 0; i < this.vertices.length; i+=8) {
+        for (i = 0; i < this.vertices.length; i+=8) {
             
             this.vertices[i]     = -f; this.vertices[i + 1] = f;
             this.vertices[i + 2] = -f; this.vertices[i + 3] = -f;
@@ -151,14 +151,14 @@ class RegularEffect extends DefaultEffect {
                 var element = _instancedMaterials[i];
 
                 if(element.hasRoom()) {
-                   _currentEmptyInstance = element;
+                    _currentEmptyInstance = element;
                     return _currentEmptyInstance;
                 }
                 
             }
             
             
-           _currentEmptyInstance = new RegularEffect();
+            _currentEmptyInstance = new RegularEffect();
             _instancedMaterials.push(_currentEmptyInstance);
         }
         
@@ -186,9 +186,37 @@ class RegularEffect extends DefaultEffect {
         
 
         if(!this.isUploaded){
+
+
+            var vertexShaderSRC =  `
+                uniform mat3 projectionMatrix; 
+                uniform mat3 viewMatrix;
+                attribute vec2 position;
+                attribute vec2 uv;
+                attribute vec3 color;
+                varying vec3 colorVar;
+                varying vec2 uvData;
+                void main() {
+                    uvData = uv;
+                    colorVar = color;
+                    vec3 newPos = vec3(position.x, position.y, 1.0 ) * (projectionMatrix * viewMatrix);
+                    gl_Position = vec4(newPos , 1.0);
+                }
+            `;
+
+            var fragmentShaderSRC = `
+                precision lowp float;
+                uniform sampler2D uSampler;
+                varying vec2 uvData;
+                varying vec3 colorVar;
+                void main() { 
+                    vec4 c = texture2D(uSampler,uvData) * vec4(colorVar, 1.0);
+                    gl_FragColor = c;
+                }
+            `;
             
-            var vertexShaderSRC =  document.getElementById( 'vertexShader' ).textContent;
-            var fragmentShaderSRC = document.getElementById( 'fragmentShader' ).textContent;
+            //var vertexShaderSRC =  document.getElementById( 'vertexShader' ).textContent;
+            //var fragmentShaderSRC = document.getElementById( 'fragmentShader' ).textContent;
             
             this.fragmentShaderBuffer = gl.createShader(gl.FRAGMENT_SHADER);
             gl.shaderSource( this.fragmentShaderBuffer, fragmentShaderSRC );
@@ -243,12 +271,10 @@ class RegularEffect extends DefaultEffect {
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indices, gl.STATIC_DRAW);
 
 
-            var n = gl.getProgramParameter(this.shaderProgram, gl.ACTIVE_ATTRIBUTES);
-
-            for (var i = 0; i < n; i++) {
-                var element = gl.getActiveAttrib(this.shaderProgram, i);
-                console.log(element);
-            }
+            // var n = gl.getProgramParameter(this.shaderProgram, gl.ACTIVE_ATTRIBUTES);
+            // for (var i = 0; i < n; i++) {
+            //     gl.getActiveAttrib(this.shaderProgram, i);
+            // }
 
             var texture = gl.createTexture();
             var image = window.flame;
@@ -266,7 +292,7 @@ class RegularEffect extends DefaultEffect {
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-           // gl.generateMipmap(gl.TEXTURE_2D);
+            // gl.generateMipmap(gl.TEXTURE_2D);
 
             this.textureBuffer = texture;
             this.uniform = new UniformObject(gl, this.shaderProgram);
@@ -277,7 +303,7 @@ class RegularEffect extends DefaultEffect {
    
 
 
-    draw (gl){
+    draw (){
 
        
 

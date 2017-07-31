@@ -2,15 +2,15 @@ import {EventableObject} from "./EventableObject";
 
 
 function matrix3Fv(gl, uniObject){
-     gl.uniformMatrix3fv(uniObject.location , false , uniObject.value);
+    gl.uniformMatrix3fv(uniObject.location , false , uniObject.value);
 }
 
 function vector3Fv(gl, uniObject){
-     gl.uniform4fv(uniObject.location , uniObject.value);
+    gl.uniform4fv(uniObject.location , uniObject.value);
 }
 
 function uniform1i(gl, uniObject){
-     gl.uniform1i(uniObject.location , uniObject.value);
+    gl.uniform1i(uniObject.location , uniObject.value);
 }
 
 
@@ -34,17 +34,14 @@ class UniformObject extends EventableObject {
     getSetter (type) {
         
         switch (type) {
-            case 35675: // matrix3
-                return matrix3Fv;
-            case 35666:
-                return vector3Fv;
-            case 35678: 
-                return uniform1i;
-            default:
-                console.log("yoktipi");
-                break;
+        case 35675: // matrix3
+            return matrix3Fv;
+        case 35666:
+            return vector3Fv;
+        case 35678: 
+            return uniform1i;
         }
-        return 
+        return; 
     }
 
     addUniform (location,uniformInfo) {
@@ -66,9 +63,9 @@ class UniformObject extends EventableObject {
     update (gl) {
 
         for (var key in this.uniMaps) {
-                var element = this.uniMaps[key];
-                  element.effect = this.effect;
-                element.setter(gl, element);
+            var element = this.uniMaps[key];
+            element.effect = this.effect;
+            element.setter(gl, element);
         }
     }
 

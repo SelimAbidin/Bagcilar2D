@@ -1,5 +1,4 @@
 import {DefaultEffect} from "./DefaultEffect";
-import {Color} from "../math/Color";
 import {UniformObject} from "../core/UniformObject";
 var cccc = 0;
 var MAX_INSTANCE = 350000;
@@ -88,9 +87,9 @@ class InstancedMaterial extends DefaultEffect {
 
         if(!this.isUploaded)
         {
-             var vertexShaderSRC =  document.getElementById( 'vertexShaderInstanced' ).textContent;
+            var vertexShaderSRC =  document.getElementById( "vertexShaderInstanced" ).textContent;
 
-            var fragmentShaderSRC = document.getElementById( 'fragmentShaderInstanced' ).textContent;
+            var fragmentShaderSRC = document.getElementById( "fragmentShaderInstanced" ).textContent;
             
             this.fragmentShaderBuffer = gl.createShader(gl.FRAGMENT_SHADER);
             gl.shaderSource( this.fragmentShaderBuffer, fragmentShaderSRC );
@@ -124,7 +123,7 @@ class InstancedMaterial extends DefaultEffect {
             this.colorLocation = gl.getAttribLocation(this.shaderProgram,"color");
             this.positionLocation =  gl.getAttribLocation(this.shaderProgram,"position");
             this.uvLocation =  gl.getAttribLocation(this.shaderProgram,"uv");
-          //  this.texture0Location =  gl.getUniformLocation(this.shaderProgram,"uSampler");
+            //  this.texture0Location =  gl.getUniformLocation(this.shaderProgram,"uSampler");
 
             this.rotateBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, this.rotateBuffer);
@@ -194,7 +193,7 @@ class InstancedMaterial extends DefaultEffect {
     }
 
 
-    draw (gl){
+    draw (){
 
 
         // if(!this.shaderProgram){
