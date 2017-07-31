@@ -1,9 +1,9 @@
 language: node_js
 node_js:
-    - "0.10"
+    - "iojs"
 script: 
     - node_modules/karma/bin/karma start --single-run
-    - eslint src/js/*/*.js
+    - node_modules/eslint/bin/eslint src/js/*/*.js
 before_install:
     - export DISPLAY=:99.0
     - sh -e /etc/init.d/xvfb start
