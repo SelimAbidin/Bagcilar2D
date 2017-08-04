@@ -77,14 +77,15 @@
         var minY = -300;
 
         var isPressed = false;
-        document.addEventListener("mousedown", function (){
+        document.getElementById("renderCanvas").addEventListener("mousedown", function (){
              isPressed = true;
         });
 
-        document.addEventListener("mouseup", function (){
+        document.getElementById("renderCanvas").addEventListener("mouseup", function (){
            isPressed = false;
         });
         
+        cokDataEkle();
 
         function enterFrame(event) {
             
@@ -99,8 +100,9 @@
             {
                 var sp = sprites[i];
                 //bunny.rotation += 0.1
-
-                sp.x += sp.speedX;
+                
+                
+                   sp.x += sp.speedX;
                 sp.y += sp.speedY;
                 sp.rotation += sp.rotationSpeed;
                 sp.speedY += gravity;
@@ -126,54 +128,17 @@
                     {
                         sp.speedY -= Math.random() * 6;
                     }
-                }
-                else if (sp.y < minY)
-                {
+                } else if (sp.y < minY) {
                     sp.speedY = 0;
                     sp.y = minY;
                 }
-
             }
-
-            //var start = new Date().getTime();
-            /*
-              for(var i = 0 ; i < sprites.length; i++){
-
-                sp = sprites[i];
-                
-                sp.yPos += sp.vy;
-                sp.xPos += sp.vx;
-                sp.rotation += sp.rv;
-                
-                if(sp.xPos >= 300){
-                    sp.xPos = 300;
-                    sp.vx *= -1;
-                } else if(sp.xPos <= -300) {
-                    sp.xPos = -300;
-                    sp.vx *= -1;
-                } else if(sp.yPos >= 300){
-                    sp.yPos = 300;
-                    sp.vy *= -1;
-                    sp.rv = sp.vy * .01;
-                } else if(sp.yPos <= -300) {
-                    sp.yPos = -300;
-                    sp.vy *= -1;
-                    sp.rv = sp.vy * .01;
-                }
-            }
-
-           // var elapsed = new Date().getTime() - start;
-           */
         }
-        
-
          requestAnimationFrame(updateScreen);
-
-         
     }
 
 
-    var texture = new Bagcilar.ImageObject("bunny2.png");
+    var texture = new Bagcilar.ImageObject("bunny.png");
     var texture2 = new Bagcilar.ImageObject("face.png");
 
     var txts = [texture, texture2];
@@ -182,7 +147,6 @@
     function dataEkle(m) {
         
         var sp;
-
         var m = Math.floor(Math.random() * txts.length);
 
        if(h) {
@@ -201,8 +165,8 @@
         sp.rv = Math.random() * 0.1;
         */
 
-        sp.speedX = Math.random() * 1;
-        sp.speedY = (Math.random() * 1) - 5;
+        sp.speedX = Math.random() * 5;
+        sp.speedY = (Math.random() * 5) - 5;
         
         sp.rotationSpeed = Math.random() * 0.1;
 
@@ -226,7 +190,7 @@
         say +=1;
 
         h = !h;
-        for (var i = 0; i < 300; i++) {
+        for (var i = 0; i < 100; i++) {
             dataEkle();
         }
 
@@ -237,10 +201,16 @@
         
     }
 
+
+    var last = 0;
     var say = 0;
     function updateScreen() {
-        meydan.update2();
-        requestAnimationFrame(updateScreen);
+
+         requestAnimationFrame(updateScreen);
+
+         meydan.update2();
+
+       
     }
 
 

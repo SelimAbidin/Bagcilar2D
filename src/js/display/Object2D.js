@@ -17,8 +17,14 @@ class Object2D  extends EventableObject{
         this.isPositionDirty = true;
         this.scaleX = 1; 
         this.scaleY = 1;
-        this.xPos = 0;
-        this.yPos = 0;
+        // this.xPos = 0;
+        // this.yPos = 0;
+
+
+        this.x = 0;
+        this.y = 0;
+
+
         this.needsCalculation = true;
         this.rotationMatrix = new Matrix3();
         this.scaleMatrix = new Matrix3();
@@ -75,23 +81,23 @@ class Object2D  extends EventableObject{
         return this.scaleX;
     }
 
-    set x (x) {
-        this.xPos = x;
-        this.isPositionDirty = true;
-    }
+    // set x (x) {
+    //     this.xPos = x;
+    //     this.isPositionDirty = true;
+    // }
 
-    set y (y) {
-        this.yPos = y;
-        this.isPositionDirty = true;
-    }
+    // set y (y) {
+    //     this.yPos = y;
+    //     this.isPositionDirty = true;
+    // }
 
-    get x () {
-        return this.xPos;
-    }
+    // get x () {
+    //     return this.xPos;
+    // }
 
-    get y () {
-        return this.yPos;
-    }
+    // get y () {
+    //     return this.yPos;
+    // }
         
 
     updateWorldMatrix (){

@@ -19,9 +19,6 @@ class Transform2D {
         this._tx = 0;
         this._ty = 0;
 
-        
-
-        
 
         this._scaleMatrix = new Matrix3();
         this._translateMatrix = new Matrix3();
@@ -29,9 +26,7 @@ class Transform2D {
 
         this.worldMatrix = new Matrix3();
 
-        // this.position = new Vector3();
-        // this.scale  =  new Vector3(1,1,1);
-        // this.rotation = 0;
+      
 
         if(array === undefined) {
             array = [

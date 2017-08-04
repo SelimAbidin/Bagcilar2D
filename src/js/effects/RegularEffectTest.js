@@ -6,7 +6,7 @@ var MAX_INSTANCE = 14000;
 
 var _currentEmptyInstance;
 var _instancedMaterials = [];
-class RegularEffect extends DefaultEffect {
+class RegularEffectTest extends DefaultEffect {
     
     constructor () {
         super();
@@ -21,119 +21,111 @@ class RegularEffect extends DefaultEffect {
         var index = 0;
         var indexCounter    = 0;
         var uvCounter       = 0;
-        this.vertices       = new Float32Array(8 * MAX_INSTANCE);
-        this.textureIds       = new Float32Array(4 * MAX_INSTANCE);
-        this.uvs            = new Float32Array(8 * MAX_INSTANCE);
-        this.colors         = new Float32Array(12 * MAX_INSTANCE);
-        this.indices        = new Uint16Array(6 * MAX_INSTANCE);
 
+
+        // 3 + 2 + 1 + 2
+        var vertexDataCount = 8 + 4 + 8 + 12;
+        this.vertexDataCount = vertexDataCount;
+        this.vertices       = new Float32Array(vertexDataCount * MAX_INSTANCE);
+
+        // this.vertices       = new Float32Array(8 * MAX_INSTANCE);
+        // this.textureIds     = new Float32Array(4 * MAX_INSTANCE);
+        // this.uvs            = new Float32Array(8 * MAX_INSTANCE);
+        // this.colors         = new Float32Array(12 * MAX_INSTANCE);
+        
+        this.indices        = new Uint16Array(6 * MAX_INSTANCE);
         var r,g,b;
-        var i;
-        for (i = 0; i < this.colors.length; i+=12) {
+
+        console.log("Buffer : ", this.vertices.length);
+        for (var i = 0; i < this.vertices.length; i+=vertexDataCount) {
             
+
+            var tId = Math.floor(Math.random() * 4);
+            this.vertices[i]     = -f; this.vertices[i + 1] = f;  // Vertex 1
+            
+            
+            this.vertices[i + 2] = tId;  // Texture 1
+
+
+            this.vertices[i + 3] =  0; //  UV 1
+            this.vertices[i + 4] =  1;//  UV 1
+            
+
             r = Math.random();
             g = Math.random();
             b = Math.random();
 
-            this.colors[i] = r;
-            this.colors[i + 1] = g;
-            this.colors[i + 2] = b;
-
-
-            this.colors[i + 3] = r;
-            this.colors[i + 4] = g;
-            this.colors[i + 5] = b;
-
-
-            this.colors[i + 6] = r;
-            this.colors[i + 7] = g;
-            this.colors[i + 8] = b;
-
-
-            this.colors[i + 9] = r;
-            this.colors[i + 10] = g;
-            this.colors[i + 11] = b;
-        }
-        
-        
-        for (i = 0; i < this.vertices.length; i+=8) {
-            this.vertices[i] = 0;
-        }
-
-        for (i = 0; i < this.vertices.length; i+=8) {
+            this.vertices[i + 5] =  r; //  Color 1
+            this.vertices[i + 6] =  g;//  Color 1
+            this.vertices[i + 7] =  b;//  Color 1
             
-            this.vertices[i]     = -f; this.vertices[i + 1] = f;
-            this.vertices[i + 2] = -f; this.vertices[i + 3] = -f;
-            this.vertices[i + 4] =  f; this.vertices[i + 5] = f;
-            this.vertices[i + 6] =  f; this.vertices[i + 7] = -f;
 
-            this.uvs[uvCounter]     = 0;
-            this.uvs[uvCounter + 1] = 1;
 
-            this.uvs[uvCounter + 2] = 0;
-            this.uvs[uvCounter + 3] = 0;
+            this.vertices[i + 8] = -f; this.vertices[i + 9] = -f;  // Vertex 2
 
-            this.uvs[uvCounter + 4] = 1;
-            this.uvs[uvCounter + 5] = 1;
+            this.vertices[i + 10] = tId;  // Texture 2
+           
+            this.vertices[i + 11] = 0;  // UV 2
+            this.vertices[i + 12] = 0;  // UV 2
 
-            this.uvs[uvCounter + 6] = 1;
-            this.uvs[uvCounter + 7] = 0;
 
-            uvCounter += 8; 
+            this.vertices[i + 13] = r;  // COLOR 2 
+            this.vertices[i + 14] = g; // COLOR 2 
+            this.vertices[i + 15] = b;// COLOR 2 
+
             
-            this.indices[indexCounter    ] = index;
-            this.indices[indexCounter + 1] = index + 1;
-            this.indices[indexCounter + 2] = index + 2;
+            this.vertices[i + 16] =  f; this.vertices[i + 17] = f;  // Vectex 3
 
-            this.indices[indexCounter + 3] = index + 1;
-            this.indices[indexCounter + 4] = index + 3;
-            this.indices[indexCounter + 5] = index + 2;
+            this.vertices[i + 18] = tId;  // Texture 3
 
+
+            this.vertices[i + 19] = 1;   // UV 3
+            this.vertices[i + 20] = 1;   // UV 3
+
+            this.vertices[i + 21] = r;  // COLOR 3 
+            this.vertices[i + 22] = g; // COLOR 3
+            this.vertices[i + 23] = b; // COLOR 3 
+            
+
+
+            this.vertices[i + 24] =  f; this.vertices[i + 25] = -f; // Vertex 4
+        
+            this.vertices[i + 26] = tId;  // Texture 4
+
+
+            this.vertices[i + 27] = 1;  // UV 4
+            this.vertices[i + 28] = 0;  // UV 4
+
+
+            
+            this.vertices[i + 29] = r;  // COLOR 3 
+            this.vertices[i + 30] = g; // COLOR 3
+            this.vertices[i + 31] = b; // COLOR 3 
+            
+        }
+
+        
+        for (var i = 0; i < this.indices.length; i+=6) {
+            
+            this.indices[i    ] = index;
+            this.indices[i + 1] = index + 1;
+            this.indices[i + 2] = index + 2;
+
+            this.indices[i + 3] = index + 1;
+            this.indices[i + 4] = index + 3;
+            this.indices[i + 5] = index + 2;
             index += 4;
-            indexCounter += 6;
         }
-        
 
     }
 
 
-    appendVerices (vertices) {
-        var vertexIndex = this.count * 8;
+
+    
+    appendVerices2 (vertices, textureID , colors) {
+
         
-        this.vertices[vertexIndex] = vertices[0];
-        this.vertices[vertexIndex + 1] = vertices[1];
-        this.vertices[vertexIndex + 2] = vertices[2];
-        this.vertices[vertexIndex + 3] = vertices[3];
-        this.vertices[vertexIndex + 4] = vertices[4];
-        this.vertices[vertexIndex + 5] = vertices[5];
-        this.vertices[vertexIndex + 6] = vertices[6];
-        this.vertices[vertexIndex + 7] = vertices[7];
-
-    }
-
-
-    appendColors (colors) {
-
-        var vertexIndex = this.count * 12;
-        this.colors[vertexIndex] = colors[0];
-        this.colors[vertexIndex + 1] = colors[1];
-        this.colors[vertexIndex + 2] = colors[2];
-        this.colors[vertexIndex + 3] = colors[3];
-        this.colors[vertexIndex + 4] = colors[4];
-        this.colors[vertexIndex + 5] = colors[5];
-        this.colors[vertexIndex + 6] = colors[6];
-        this.colors[vertexIndex + 7] = colors[7];
-        this.colors[vertexIndex + 8] = colors[8];
-        this.colors[vertexIndex + 9] = colors[9];
-        this.colors[vertexIndex + 10] = colors[10];
-        this.colors[vertexIndex + 11] = colors[11];
-    }
-
-    appendTextureID (textureID, sprite) {
-        
-        var idIndex = this.count * 4;
-        
-        var i = 0;
+         var i = 0;
        
         if(this.textureIDHolder[textureID.id] !== undefined) {
             i = this.textureIDHolder[textureID.id];
@@ -143,12 +135,71 @@ class RegularEffect extends DefaultEffect {
         }
 
 
-        this.textureIds[idIndex    ] = i; 
-        this.textureIds[idIndex + 1] = i; 
-        this.textureIds[idIndex + 2] = i; 
-        this.textureIds[idIndex + 3] = i; 
+        var vertexIndex = this.count * this.vertexDataCount;
+        
 
+        // Vertex 1
+        this.vertices[vertexIndex]     =  vertices[0];
+        this.vertices[vertexIndex + 1] =  vertices[1];
+
+        // Texture 1
+        this.vertices[vertexIndex + 2] =  i;
+        
+        // UV  + 3   + 4
+
+        // COLOR
+        this.vertices[vertexIndex + 5] = colors[0];
+        this.vertices[vertexIndex + 6] = colors[1];
+        this.vertices[vertexIndex + 7] = colors[2];
+
+
+
+          // Vertex 2
+        this.vertices[vertexIndex + 8] =  vertices[2];
+        this.vertices[vertexIndex + 9] =  vertices[3];
+
+        // Texture 2
+        this.vertices[vertexIndex + 10] =  i;
+
+        // UV  +11   +12
+
+        // COLOR 2
+        this.vertices[vertexIndex + 13] = colors[3];
+        this.vertices[vertexIndex + 14] = colors[4];
+        this.vertices[vertexIndex + 15] = colors[5];
+
+        
+
+            // Vertex 3
+        this.vertices[vertexIndex + 16] =  vertices[4];
+        this.vertices[vertexIndex + 17] =  vertices[5];
+
+        // Texture 3
+        this.vertices[vertexIndex + 18] =  i;
+
+        // UV  +19   +20
+
+        // COLOR 3
+        this.vertices[vertexIndex + 21] = colors[6];
+        this.vertices[vertexIndex + 22] = colors[7];
+        this.vertices[vertexIndex + 23] = colors[8];
+
+
+        // Vertex 4
+        this.vertices[vertexIndex + 24] =  vertices[6];
+        this.vertices[vertexIndex + 25] =  vertices[7];
+
+        // Texture 4
+        this.vertices[vertexIndex + 26] =  i;
+
+        // UV  +27   +28
+
+        // COLOR 4
+        this.vertices[vertexIndex + 29] = colors[9];
+        this.vertices[vertexIndex + 30] = colors[10];
+        this.vertices[vertexIndex + 31] = colors[11];
     }
+
 
     hasRoom () {
 
@@ -268,24 +319,64 @@ class RegularEffect extends DefaultEffect {
 
             this.shaderProgram = gl.createProgram();
 
-            gl.attachShader(this.shaderProgram, this.vertexShaderBuffer);
-            gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
-            gl.linkProgram(this.shaderProgram);
+         
 
 
-            this.positionLocation = gl.getAttribLocation(this.shaderProgram,"position");
-            this.uvLocation = gl.getAttribLocation(this.shaderProgram,"uv");
-            this.colorLocation = gl.getAttribLocation(this.shaderProgram,"color");
-            this.textureIDLocation = gl.getAttribLocation(this.shaderProgram,"textureID");
+          
+      
 
   
             this.vertexBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.STREAM_DRAW);
+            
+            
+            this.positionLocation = 0;
+            this.textureIDLocation = 1;
+            this.uvLocation = 2;
+            this.colorLocation = 3;
+
+
+            var totalByte = 8 * 4;
+            gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false,  32, 0);
             gl.enableVertexAttribArray(this.positionLocation);
-            gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+            gl.vertexAttribPointer(this.textureIDLocation, 1, gl.FLOAT, false, 32, 8);
+            gl.enableVertexAttribArray(this.textureIDLocation);
+
+            gl.vertexAttribPointer(this.uvLocation, 2, gl.FLOAT, false, 32, 12);
+            gl.enableVertexAttribArray(this.uvLocation);
+
+            gl.vertexAttribPointer(this.colorLocation, 3, gl.FLOAT, false, 32, 20);
+            gl.enableVertexAttribArray(this.colorLocation);
 
 
+            
+
+            gl.bindAttribLocation(this.shaderProgram, 0, "position");
+            gl.bindAttribLocation(this.shaderProgram, 1, "textureID");
+            gl.bindAttribLocation(this.shaderProgram, 2, "uv");
+            gl.bindAttribLocation(this.shaderProgram, 3, "color");
+            
+
+            gl.attachShader(this.shaderProgram, this.vertexShaderBuffer);
+            gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
+            gl.linkProgram(this.shaderProgram);
+
+
+
+
+            this.positionLocation = gl.getAttribLocation(this.shaderProgram,"position");
+            this.textureIDLocation = gl.getAttribLocation(this.shaderProgram,"textureID");
+            this.uvLocation = gl.getAttribLocation(this.shaderProgram,"uv");
+            this.colorLocation = gl.getAttribLocation(this.shaderProgram,"color");
+
+
+
+            /*
+            this.textureIdsBuffer = gl.createBuffer();
+            this.textureIdsBuffer = gl.createBuffer();
+            this.textureIdsBuffer = gl.createBuffer();
             this.textureIdsBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, this.textureIdsBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, this.textureIds, gl.STREAM_DRAW);
@@ -307,21 +398,15 @@ class RegularEffect extends DefaultEffect {
             gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STREAM_DRAW);
             gl.vertexAttribPointer(this.colorLocation, 3, gl.FLOAT, false, 0, 0);
             gl.enableVertexAttribArray(this.colorLocation);
+            */
+
 
             this.indexBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indices, gl.STATIC_DRAW);
 
             var image = window.flame;
-            // var texture = gl.createTexture();
-            // gl.bindTexture(gl.TEXTURE_2D, texture);
-            // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
-            // this.textureBuffer = texture;
+         
 
 
             this.uniform = new UniformObject(gl, this.shaderProgram);
@@ -341,4 +426,4 @@ class RegularEffect extends DefaultEffect {
 }
 
 
-export {RegularEffect};
+export {RegularEffectTest};

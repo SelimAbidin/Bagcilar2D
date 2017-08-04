@@ -1,6 +1,5 @@
 
 import {ObjectContainer2D} from "../display/ObjectContainer2D";
-import {Sprite} from "../display/Sprite";
 import {WebGLRenderer} from "../renderer/WebGLRenderer";
     
 class Square extends ObjectContainer2D {
@@ -26,10 +25,10 @@ class Square extends ObjectContainer2D {
             };
 
 
-            var canvas =  document.getElementById(canvasID, cAttributes);
+            var canvas =  document.getElementById(canvasID);
                 
             //var  gl = canvas.getContext("webgl2") || canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-            var  gl = canvas.getContext("webgl");// || canvas.getContext("experimental-webgl", {stencil:true});  // webgl2 disabled for now
+            var  gl = canvas.getContext("webgl",cAttributes);// || canvas.getContext("experimental-webgl", {stencil:true});  // webgl2 disabled for now
             if(!gl){
                     
                 var error = "WebGL isn't supported on device";
@@ -111,7 +110,7 @@ class Square extends ObjectContainer2D {
 
         this.renderer.prepareForRender();
         this.renderEachChildren();
-        this.renderer.present2(this.camera);
+        this.renderer.present3(this.camera);
          
 
         //  
