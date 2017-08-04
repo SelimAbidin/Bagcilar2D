@@ -4,7 +4,7 @@ import {ObjectContainer2D} from "./ObjectContainer2D.js";
 
 class NormalSprite extends ObjectContainer2D {
 
-    constructor () {
+    constructor (texture) {
         
         super();
 
@@ -14,6 +14,7 @@ class NormalSprite extends ObjectContainer2D {
         
         var f = 16;
 
+        this.texture = texture;
       
         this.vertices  = [
             -f,  f, // left - top

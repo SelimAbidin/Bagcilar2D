@@ -126,44 +126,11 @@
                     {
                         sp.speedY -= Math.random() * 6;
                     }
-                }
-                else if (sp.y < minY)
-                {
+                } else if (sp.y < minY) {
                     sp.speedY = 0;
                     sp.y = minY;
                 }
-
             }
-
-            //var start = new Date().getTime();
-            /*
-              for(var i = 0 ; i < sprites.length; i++){
-
-                sp = sprites[i];
-                
-                sp.yPos += sp.vy;
-                sp.xPos += sp.vx;
-                sp.rotation += sp.rv;
-                
-                if(sp.xPos >= 300){
-                    sp.xPos = 300;
-                    sp.vx *= -1;
-                } else if(sp.xPos <= -300) {
-                    sp.xPos = -300;
-                    sp.vx *= -1;
-                } else if(sp.yPos >= 300){
-                    sp.yPos = 300;
-                    sp.vy *= -1;
-                    sp.rv = sp.vy * .01;
-                } else if(sp.yPos <= -300) {
-                    sp.yPos = -300;
-                    sp.vy *= -1;
-                    sp.rv = sp.vy * .01;
-                }
-            }
-
-           // var elapsed = new Date().getTime() - start;
-           */
         }
         
 
@@ -173,7 +140,7 @@
     }
 
 
-    var texture = new Bagcilar.ImageObject("bunny2.png");
+    var texture = new Bagcilar.ImageObject("bunny.png");
     var texture2 = new Bagcilar.ImageObject("face.png");
 
     var txts = [texture, texture2];

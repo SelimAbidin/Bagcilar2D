@@ -14,6 +14,7 @@ class RegularEffect extends DefaultEffect {
         this.id = "id_"+cccc++;
         this.isUploaded = false;
 
+        this.textures = [];
         var f = 20;
         // var vv  = [
         //     -f,  f, // left - top
@@ -26,6 +27,7 @@ class RegularEffect extends DefaultEffect {
         var indexCounter    = 0;
         var uvCounter       = 0;
         this.vertices       = new Float32Array(8 * MAX_INSTANCE);
+        this.textureIds       = new Float32Array(4 * MAX_INSTANCE);
         this.uvs            = new Float32Array(8 * MAX_INSTANCE);
         this.colors         = new Float32Array(12 * MAX_INSTANCE);
         this.indices        = new Uint16Array(6 * MAX_INSTANCE);
@@ -134,6 +136,27 @@ class RegularEffect extends DefaultEffect {
         this.colors[vertexIndex + 11] = colors[11];
     }
 
+    appendTextureID (textureID, sprite) {
+        
+        var idIndex = this.count * 4;
+        
+        var i = 0;
+       
+        if(this.textureIDHolder[textureID.id] !== undefined) {
+            i = this.textureIDHolder[textureID.id];
+        } else {
+            this.textureIDHolder[textureID.id] = this.textures.length;
+            this.textures.push(textureID);
+        }
+
+
+        this.textureIds[idIndex    ] = i; 
+        this.textureIds[idIndex + 1] = i; 
+        this.textureIds[idIndex + 2] = i; 
+        this.textureIds[idIndex + 3] = i; 
+
+    }
+
     hasRoom () {
 
         return this.getLenght() < MAX_INSTANCE;
@@ -154,10 +177,9 @@ class RegularEffect extends DefaultEffect {
                     _currentEmptyInstance = element;
                     return _currentEmptyInstance;
                 }
-                
+    
             }
-            
-            
+
             _currentEmptyInstance = new RegularEffect();
             _instancedMaterials.push(_currentEmptyInstance);
         }
@@ -168,8 +190,9 @@ class RegularEffect extends DefaultEffect {
     
     reset () {
         this.count = -1;
+        this.textureIDHolder = {};
+        this.textures.length = 0;
 
-       
     }
    
     next () {
@@ -194,11 +217,14 @@ class RegularEffect extends DefaultEffect {
                 attribute vec2 position;
                 attribute vec2 uv;
                 attribute vec3 color;
+                attribute float textureID;
                 varying vec3 colorVar;
                 varying vec2 uvData;
+                varying float textureIDVar;
                 void main() {
                     uvData = uv;
                     colorVar = color;
+                    textureIDVar = textureID;
                     vec3 newPos = vec3(position.x, position.y, 1.0 ) * (projectionMatrix * viewMatrix);
                     gl_Position = vec4(newPos , 1.0);
                 }
@@ -206,11 +232,24 @@ class RegularEffect extends DefaultEffect {
 
             var fragmentShaderSRC = `
                 precision lowp float;
-                uniform sampler2D uSampler;
+                uniform sampler2D uSampler[16];
                 varying vec2 uvData;
                 varying vec3 colorVar;
+                varying float textureIDVar;
                 void main() { 
-                    vec4 c = texture2D(uSampler,uvData) * vec4(colorVar, 1.0);
+                    
+                    vec4 c;
+                    int f = int(textureIDVar);
+                    if(f == 0) {
+                        c = texture2D(uSampler[0],uvData);
+                    } else if(f == 1) {
+                        c = texture2D(uSampler[1],uvData);
+                    } else if(f == 2) {
+                        c = vec4(1,1,0,1);
+                    } else if(f == 3) {
+                        c = vec4(0,1,0,1);
+                    } 
+
                     gl_FragColor = c;
                 }
             `;
@@ -244,6 +283,7 @@ class RegularEffect extends DefaultEffect {
             this.positionLocation = gl.getAttribLocation(this.shaderProgram,"position");
             this.uvLocation = gl.getAttribLocation(this.shaderProgram,"uv");
             this.colorLocation = gl.getAttribLocation(this.shaderProgram,"color");
+            this.textureIDLocation = gl.getAttribLocation(this.shaderProgram,"textureID");
 
   
             this.vertexBuffer = gl.createBuffer();
@@ -251,6 +291,15 @@ class RegularEffect extends DefaultEffect {
             gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.STREAM_DRAW);
             gl.enableVertexAttribArray(this.positionLocation);
             gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+
+            this.textureIdsBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.textureIdsBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, this.textureIds, gl.STREAM_DRAW);
+            gl.enableVertexAttribArray(this.textureIDLocation);
+            gl.vertexAttribPointer(this.textureIDLocation, 1, gl.FLOAT, false, 0, 0);
+
+            
 
 
             this.uvBuffer = gl.createBuffer();
@@ -270,31 +319,18 @@ class RegularEffect extends DefaultEffect {
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indices, gl.STATIC_DRAW);
 
-
-            // var n = gl.getProgramParameter(this.shaderProgram, gl.ACTIVE_ATTRIBUTES);
-            // for (var i = 0; i < n; i++) {
-            //     gl.getActiveAttrib(this.shaderProgram, i);
-            // }
-
-            var texture = gl.createTexture();
             var image = window.flame;
+            // var texture = gl.createTexture();
             // gl.bindTexture(gl.TEXTURE_2D, texture);
             // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
             // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
             // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
             // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-            // gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
 
-            gl.bindTexture(gl.TEXTURE_2D, texture);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-            // gl.generateMipmap(gl.TEXTURE_2D);
+            // this.textureBuffer = texture;
 
-            this.textureBuffer = texture;
+
             this.uniform = new UniformObject(gl, this.shaderProgram);
             this.isUploaded = true;
         }

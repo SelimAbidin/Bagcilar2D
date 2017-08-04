@@ -1,6 +1,5 @@
 
 import {ObjectContainer2D} from "../display/ObjectContainer2D";
-import {Sprite} from "../display/Sprite";
 import {WebGLRenderer} from "../renderer/WebGLRenderer";
     
 class Square extends ObjectContainer2D {
@@ -111,7 +110,7 @@ class Square extends ObjectContainer2D {
 
         this.renderer.prepareForRender();
         this.renderEachChildren();
-        this.renderer.present2(this.camera);
+        this.renderer.present3(this.camera);
          
 
         //  

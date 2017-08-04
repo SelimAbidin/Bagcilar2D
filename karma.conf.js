@@ -18,6 +18,8 @@ module.exports = function(config) {
       'build/Bagcilar2d.js',
       'build/TestJS.js',
       'test/*.js',
+      {pattern: 'test/*.png', watched: false, included: false, served: true},
+
     ],
 
 
@@ -59,7 +61,6 @@ module.exports = function(config) {
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
     browsers: ['Chrome'],
-
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits

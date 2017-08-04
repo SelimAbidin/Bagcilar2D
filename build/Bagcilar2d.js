@@ -6,8 +6,10 @@
 
 	var CoreObject = (function(){
 
+	    CoreObject.__indexCounter = 0;
 	    function CoreObject() {
 	        
+	        this.id = "id_" + (CoreObject.__indexCounter++);
 	    }
 
 	    Object.assign(CoreObject.prototype, {
@@ -97,7 +99,13 @@
 	}
 
 	function uniform1i(gl, uniObject){
-	    gl.uniform1i(uniObject.location , uniObject.value);
+
+	    if(uniObject.value instanceof Int32Array){ 
+	        gl.uniform1iv(uniObject.location , uniObject.value);
+	    } else {
+	        gl.uniform1i(uniObject.location , uniObject.value);
+	    }
+	    
 	}
 
 
@@ -408,6 +416,7 @@
 	        this.uniform.update(gl);
 	    }
 
+	    
 	}
 
 	var cccc = 0;
@@ -424,6 +433,7 @@
 	        this.id = "id_"+cccc++;
 	        this.isUploaded = false;
 
+	        this.textures = [];
 	        var f = 20;
 	        // var vv  = [
 	        //     -f,  f, // left - top
@@ -436,6 +446,7 @@
 	        var indexCounter    = 0;
 	        var uvCounter       = 0;
 	        this.vertices       = new Float32Array(8 * MAX_INSTANCE);
+	        this.textureIds       = new Float32Array(4 * MAX_INSTANCE);
 	        this.uvs            = new Float32Array(8 * MAX_INSTANCE);
 	        this.colors         = new Float32Array(12 * MAX_INSTANCE);
 	        this.indices        = new Uint16Array(6 * MAX_INSTANCE);
@@ -544,6 +555,27 @@
 	        this.colors[vertexIndex + 11] = colors[11];
 	    }
 
+	    appendTextureID (textureID, sprite) {
+	        
+	        var idIndex = this.count * 4;
+	        
+	        var i = 0;
+	       
+	        if(this.textureIDHolder[textureID.id] !== undefined) {
+	            i = this.textureIDHolder[textureID.id];
+	        } else {
+	            this.textureIDHolder[textureID.id] = this.textures.length;
+	            this.textures.push(textureID);
+	        }
+
+
+	        this.textureIds[idIndex    ] = i; 
+	        this.textureIds[idIndex + 1] = i; 
+	        this.textureIds[idIndex + 2] = i; 
+	        this.textureIds[idIndex + 3] = i; 
+
+	    }
+
 	    hasRoom () {
 
 	        return this.getLenght() < MAX_INSTANCE;
@@ -564,10 +596,9 @@
 	                    _currentEmptyInstance = element;
 	                    return _currentEmptyInstance;
 	                }
-	                
+	    
 	            }
-	            
-	            
+
 	            _currentEmptyInstance = new RegularEffect();
 	            _instancedMaterials.push(_currentEmptyInstance);
 	        }
@@ -578,8 +609,9 @@
 	    
 	    reset () {
 	        this.count = -1;
+	        this.textureIDHolder = {};
+	        this.textures.length = 0;
 
-	       
 	    }
 	   
 	    next () {
@@ -604,11 +636,14 @@
                 attribute vec2 position;
                 attribute vec2 uv;
                 attribute vec3 color;
+                attribute float textureID;
                 varying vec3 colorVar;
                 varying vec2 uvData;
+                varying float textureIDVar;
                 void main() {
                     uvData = uv;
                     colorVar = color;
+                    textureIDVar = textureID;
                     vec3 newPos = vec3(position.x, position.y, 1.0 ) * (projectionMatrix * viewMatrix);
                     gl_Position = vec4(newPos , 1.0);
                 }
@@ -616,11 +651,24 @@
 
 	            var fragmentShaderSRC = `
                 precision lowp float;
-                uniform sampler2D uSampler;
+                uniform sampler2D uSampler[16];
                 varying vec2 uvData;
                 varying vec3 colorVar;
+                varying float textureIDVar;
                 void main() { 
-                    vec4 c = texture2D(uSampler,uvData) * vec4(colorVar, 1.0);
+                    
+                    vec4 c;
+                    int f = int(textureIDVar);
+                    if(f == 0) {
+                        c = texture2D(uSampler[0],uvData);
+                    } else if(f == 1) {
+                        c = texture2D(uSampler[1],uvData);
+                    } else if(f == 2) {
+                        c = vec4(1,1,0,1);
+                    } else if(f == 3) {
+                        c = vec4(0,1,0,1);
+                    } 
+
                     gl_FragColor = c;
                 }
             `;
@@ -654,6 +702,7 @@
 	            this.positionLocation = gl.getAttribLocation(this.shaderProgram,"position");
 	            this.uvLocation = gl.getAttribLocation(this.shaderProgram,"uv");
 	            this.colorLocation = gl.getAttribLocation(this.shaderProgram,"color");
+	            this.textureIDLocation = gl.getAttribLocation(this.shaderProgram,"textureID");
 
 	  
 	            this.vertexBuffer = gl.createBuffer();
@@ -661,6 +710,15 @@
 	            gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.STREAM_DRAW);
 	            gl.enableVertexAttribArray(this.positionLocation);
 	            gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+
+	            this.textureIdsBuffer = gl.createBuffer();
+	            gl.bindBuffer(gl.ARRAY_BUFFER, this.textureIdsBuffer);
+	            gl.bufferData(gl.ARRAY_BUFFER, this.textureIds, gl.STREAM_DRAW);
+	            gl.enableVertexAttribArray(this.textureIDLocation);
+	            gl.vertexAttribPointer(this.textureIDLocation, 1, gl.FLOAT, false, 0, 0);
+
+	            
 
 
 	            this.uvBuffer = gl.createBuffer();
@@ -680,31 +738,18 @@
 	            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
 	            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indices, gl.STATIC_DRAW);
 
-
-	            // var n = gl.getProgramParameter(this.shaderProgram, gl.ACTIVE_ATTRIBUTES);
-	            // for (var i = 0; i < n; i++) {
-	            //     gl.getActiveAttrib(this.shaderProgram, i);
-	            // }
-
-	            var texture = gl.createTexture();
 	            var image = window.flame;
+	            // var texture = gl.createTexture();
 	            // gl.bindTexture(gl.TEXTURE_2D, texture);
 	            // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
 	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-	            // gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
 
-	            gl.bindTexture(gl.TEXTURE_2D, texture);
-	            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-	            // gl.generateMipmap(gl.TEXTURE_2D);
+	            // this.textureBuffer = texture;
 
-	            this.textureBuffer = texture;
+
 	            this.uniform = new UniformObject(gl, this.shaderProgram);
 	            this.isUploaded = true;
 	        }
@@ -735,31 +780,139 @@
 	        gl.disable(gl.DEPTH_TEST);
 	        gl.enable(gl.BLEND);
 	        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+	        
+	        this._deadEffects = [];
+	        this._activeEffects = [];
+
+	        for (var i = 0; i < 10; i++) {
+
+	            var effect = new RegularEffect();
+	            effect.reset();
+	            this._deadEffects.push(effect);
+	        }
+
 	    }
 
 	    prepareForRender () {
+
+	        this.currentMaterial = undefined;
+
+	        for (var i = 0; i < this._activeEffects.length; i++) {
+	            this._deadEffects.push(this._activeEffects[i]);
+	            this._activeEffects[i].reset();
+	        }
+
+	        
+	        this._activeEffects.length = 0;
 	        this._materials.length = 0;
 	        this.infoID++;
 	    }
 
 	    renderSprite (sprite) {
+	        
 
-	        var material = RegularEffect.getEmptyInstance();
+	        //var material = RegularEffect.getEmptyInstance();
 
-	        if(this.infoID != material.renderID) {
-	            this._materials.push(material);
-	            material.upload(this.gl);
+	        if(this.currentMaterial === undefined || !this.currentMaterial.hasRoom()) {
+	            
+	            this.present3(meydan.camera);
+	            this.currentMaterial = this._deadEffects[0];
+	            this.currentMaterial.upload(this.gl);
+	            this._activeEffects.push(this.currentMaterial);
+	            this._deadEffects.splice(0,1);
 	        }
+	        
+	        // if(this.infoID != material.renderID) {
+	        //     this._materials.push(material);
+	        //     material.upload(this.gl);
+	        // }
 
+	        this.currentMaterial.renderID = this.infoID;
+	        this.currentMaterial.next();
 
-	        material.renderID = this.infoID;
-	        material.next();
-
+	    
 
 	        
-	        material.appendVerices(sprite.vertices);
-	        material.appendColors(sprite.colors);
+	        this.currentMaterial.appendVerices(sprite.vertices);
+	        this.currentMaterial.appendColors(sprite.colors);
+	        this.currentMaterial.appendTextureID(sprite.texture);
+	        
 	    }
+
+	     present3 (camera) {
+
+	        var gl = this.gl;
+
+	        if(this.currentMaterial !== undefined) {
+	            
+	            var material = this.currentMaterial;
+	            
+	            var uniform = material.uniform;
+
+
+	            gl.useProgram(material.shaderProgram);
+	           
+	            uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
+	            uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
+	          
+	            
+	            var ar = [];
+	            var txts = this.currentMaterial.textures;
+
+	            for (var i = 0; i < txts.length; i++) {
+
+	                var element = txts[i];
+	                element.upload(gl);
+	                gl.activeTexture(gl.TEXTURE0 + i);
+	               // console.log(element.url,gl.TEXTURE0 + i);
+	                gl.bindTexture(gl.TEXTURE_2D, element.textureBuffer);
+	                ar[i] = i;
+	            
+	            }
+	            
+	            uniform.setValue("uSampler[0]", new Int32Array(ar) );
+	            uniform.update(this.gl);
+	            
+	            //gl.activeTexture(gl.TEXTURE0);
+	           // gl.bindTexture(gl.TEXTURE_2D, material.textureBuffer);
+	            
+	            gl.bindBuffer(gl.ARRAY_BUFFER, material.vertexBuffer);
+	            gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.vertices);
+	            gl.vertexAttribPointer(material.positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+
+	            gl.bindBuffer(gl.ARRAY_BUFFER, material.colorBuffer);
+	            gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.colors);
+	            gl.vertexAttribPointer(material.colorLocation, 3, gl.FLOAT, false, 0, 0);
+
+
+	            gl.bindBuffer(gl.ARRAY_BUFFER, material.textureIdsBuffer);
+	            gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.textureIds);
+	            gl.vertexAttribPointer(material.textureIDLocation, 1, gl.FLOAT, false, 0, 0);
+
+	            gl.bindBuffer(gl.ARRAY_BUFFER, material.uvBuffer);
+	            gl.vertexAttribPointer(material.uvLocation, 2, gl.FLOAT, false, 0,   0);
+
+	            // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, material.indexBuffer);
+	            var nsize = material.getLenght() * 6;
+
+	            
+	            gl.drawElements(gl.TRIANGLES, nsize, gl.UNSIGNED_SHORT, 0);
+
+	            this.currentMaterial = undefined;
+
+	        }
+
+	            
+	    }
+
+
+
+
+
+
+
 
 
 	    present2 (camera) {
@@ -770,8 +923,6 @@
 	            return;
 	        }
 
-
-	    
 
 	        for (var i = 0; i < this._materials.length; i++) {
 
@@ -807,12 +958,7 @@
 	            gl.drawElements(gl.TRIANGLES, nsize, gl.UNSIGNED_SHORT, 0);
 
 	            material.reset();
-
-
 	        }
-
-	        
-	      
 	    }
 
 
@@ -1252,65 +1398,6 @@
 	    }
 	}
 
-	class Sprite extends ObjectContainer2D {
-
-	    constructor (params) {
-	        super();
-	        
-	        var f = 20;
-	        this.vertices = [
-	            -f,  f, // left - top
-	            -f, -f, // left - bottom
-	            f,  f, // right - top
-	            f, -f, // right - bottom
-	        ];
-
-	        this.uv = [
-	            0,1,
-	            0,0,
-	            1,1,
-	            1,0
-	        ];
-	        
-	        this.indices = [0,1,2,  1,3,2];
-	        this.color = [Math.random(), Math.random(), Math.random(),1];
-	        
-	        for(var str in params){
-	            var param = str;
-	            this[param] = params[str];        
-	        }
-	        
-
-	        if(!this.material){
-	            this.material = InstancedMaterial.getInstance();
-	        }
-	        
-	    }
-
-	    updateMaterial (gl) {
-	        
-	       
-	        
-	        if(!this.material.isUploaded){
-	            this.material.upload(gl);
-	        }
-	    }
-
-	    upload () {
-	        
-
-	    }
-
-	    update  () {
-	        //super.update();   
-	    }
-
-	    draw  (){
-
-	        
-	    }
-	}
-
 	class Square extends ObjectContainer2D {
 	        
 	    static get ENTER_FRAME () { return "enterFrame"; }
@@ -1419,7 +1506,7 @@
 
 	        this.renderer.prepareForRender();
 	        this.renderEachChildren();
-	        this.renderer.present2(this.camera);
+	        this.renderer.present3(this.camera);
 	         
 
 	        //  
@@ -1641,6 +1728,69 @@
 	        gl.drawElements(gl.TRIANGLES , size , gl.UNSIGNED_SHORT , 0);
 	    }
 	}
+
+	class ImageObject extends EventableObject {
+
+	    constructor (url) {
+
+	        super();
+
+	        if(url !== undefined) {
+	            
+	            this.setImageUrl(url);
+	        }
+	         
+	    }
+
+	    setImageUrl (url) {
+	        this.url = url;
+	        this._srcImage = new Image();
+	        this._srcImage.onload = this.onLoadImage.bind(this);
+	        this._srcImage.onerror = this.onErrorImage.bind(this);
+	        this._srcImage.src = url;
+
+	    }
+
+	    onLoadImage (event) {
+
+	        if(this.textureBuffer) {
+	            gl.bindTexture(gl.TEXTURE_2D, this.textureBuffer);
+	            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this._srcImage);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	        }
+	        this.dispacthEvent(ImageObject.COMPLETE, {rawEvent:event});
+	    }
+
+	    onErrorImage (event) {
+	        this.dispacthEvent(ImageObject.ERROR, {rawEvent:event});
+	    }
+
+	    upload (gl) {
+
+	        if(!this.textureBuffer) {
+	            
+	            this.textureBuffer = gl.createTexture();
+	            this.textureBuffer.url = this.url;
+	            gl.bindTexture(gl.TEXTURE_2D, this.textureBuffer);
+
+	            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this._srcImage);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+	            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	        }
+	        
+	    }
+	    
+
+
+	}
+
+	ImageObject.COMPLETE = "onImageComplete";
+	ImageObject.ERROR = "onImageError";
 
 	class TestSprite extends ObjectContainer2D {
 
@@ -1996,7 +2146,7 @@
 
 	class NormalSprite extends ObjectContainer2D {
 
-	    constructor () {
+	    constructor (texture) {
 	        
 	        super();
 
@@ -2006,6 +2156,7 @@
 	        
 	        var f = 16;
 
+	        this.texture = texture;
 	      
 	        this.vertices  = [
 	            -f,  f, // left - top
@@ -2365,10 +2516,10 @@
 	exports.ObjectContainer2D = ObjectContainer2D;
 	exports.Sprite2D = Sprite2D;
 	exports.Quad = Quad;
+	exports.ImageObject = ImageObject;
 	exports.TestSprite = TestSprite;
 	exports.NormalSprite = NormalSprite;
 	exports.DenemeSprite = DenemeSprite;
-	exports.Sprite = Sprite;
 	exports.Camera = Camera;
 
 	Object.defineProperty(exports, '__esModule', { value: true });
