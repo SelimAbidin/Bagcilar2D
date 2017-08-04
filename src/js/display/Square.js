@@ -25,10 +25,10 @@ class Square extends ObjectContainer2D {
             };
 
 
-            var canvas =  document.getElementById(canvasID, cAttributes);
+            var canvas =  document.getElementById(canvasID);
                 
             //var  gl = canvas.getContext("webgl2") || canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-            var  gl = canvas.getContext("webgl");// || canvas.getContext("experimental-webgl", {stencil:true});  // webgl2 disabled for now
+            var  gl = canvas.getContext("webgl",cAttributes);// || canvas.getContext("experimental-webgl", {stencil:true});  // webgl2 disabled for now
             if(!gl){
                     
                 var error = "WebGL isn't supported on device";

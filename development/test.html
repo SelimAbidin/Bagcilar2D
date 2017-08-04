@@ -77,14 +77,15 @@
         var minY = -300;
 
         var isPressed = false;
-        document.addEventListener("mousedown", function (){
+        document.getElementById("renderCanvas").addEventListener("mousedown", function (){
              isPressed = true;
         });
 
-        document.addEventListener("mouseup", function (){
+        document.getElementById("renderCanvas").addEventListener("mouseup", function (){
            isPressed = false;
         });
         
+        cokDataEkle();
 
         function enterFrame(event) {
             
@@ -99,8 +100,9 @@
             {
                 var sp = sprites[i];
                 //bunny.rotation += 0.1
-
-                sp.x += sp.speedX;
+                
+                
+                   sp.x += sp.speedX;
                 sp.y += sp.speedY;
                 sp.rotation += sp.rotationSpeed;
                 sp.speedY += gravity;
@@ -132,11 +134,7 @@
                 }
             }
         }
-        
-
          requestAnimationFrame(updateScreen);
-
-         
     }
 
 
@@ -149,7 +147,6 @@
     function dataEkle(m) {
         
         var sp;
-
         var m = Math.floor(Math.random() * txts.length);
 
        if(h) {
@@ -168,8 +165,8 @@
         sp.rv = Math.random() * 0.1;
         */
 
-        sp.speedX = Math.random() * 1;
-        sp.speedY = (Math.random() * 1) - 5;
+        sp.speedX = Math.random() * 5;
+        sp.speedY = (Math.random() * 5) - 5;
         
         sp.rotationSpeed = Math.random() * 0.1;
 
@@ -193,7 +190,7 @@
         say +=1;
 
         h = !h;
-        for (var i = 0; i < 300; i++) {
+        for (var i = 0; i < 100; i++) {
             dataEkle();
         }
 
@@ -204,10 +201,16 @@
         
     }
 
+
+    var last = 0;
     var say = 0;
     function updateScreen() {
-        meydan.update2();
-        requestAnimationFrame(updateScreen);
+
+         requestAnimationFrame(updateScreen);
+
+         meydan.update2();
+
+       
     }
 
 

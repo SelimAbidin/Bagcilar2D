@@ -425,7 +425,7 @@
 
 	var _currentEmptyInstance;
 	var _instancedMaterials = [];
-	class RegularEffect extends DefaultEffect {
+	class RegularEffectTest extends DefaultEffect {
 	    
 	    constructor () {
 	        super();
@@ -435,131 +435,116 @@
 
 	        this.textures = [];
 	        var f = 20;
-	        // var vv  = [
-	        //     -f,  f, // left - top
-	        //     -f, -f, // left - bottom
-	        //     f,  f, // right - top
-	        //     f, -f, // right - bottom
-	        // ];
+	  
 
 	        var index = 0;
 	        var indexCounter    = 0;
 	        var uvCounter       = 0;
-	        this.vertices       = new Float32Array(8 * MAX_INSTANCE);
-	        this.textureIds       = new Float32Array(4 * MAX_INSTANCE);
-	        this.uvs            = new Float32Array(8 * MAX_INSTANCE);
-	        this.colors         = new Float32Array(12 * MAX_INSTANCE);
-	        this.indices        = new Uint16Array(6 * MAX_INSTANCE);
 
+
+	        // 3 + 2 + 1 + 2
+	        var vertexDataCount = 8 + 4 + 8 + 12;
+	        this.vertexDataCount = vertexDataCount;
+	        this.vertices       = new Float32Array(vertexDataCount * MAX_INSTANCE);
+
+	        // this.vertices       = new Float32Array(8 * MAX_INSTANCE);
+	        // this.textureIds     = new Float32Array(4 * MAX_INSTANCE);
+	        // this.uvs            = new Float32Array(8 * MAX_INSTANCE);
+	        // this.colors         = new Float32Array(12 * MAX_INSTANCE);
+	        
+	        this.indices        = new Uint16Array(6 * MAX_INSTANCE);
 	        var r,g,b;
-	        var i;
-	        for (i = 0; i < this.colors.length; i+=12) {
+
+	        console.log("Buffer : ", this.vertices.length);
+	        for (var i = 0; i < this.vertices.length; i+=vertexDataCount) {
 	            
+
+	            var tId = Math.floor(Math.random() * 4);
+	            this.vertices[i]     = -f; this.vertices[i + 1] = f;  // Vertex 1
+	            
+	            
+	            this.vertices[i + 2] = tId;  // Texture 1
+
+
+	            this.vertices[i + 3] =  0; //  UV 1
+	            this.vertices[i + 4] =  1;//  UV 1
+	            
+
 	            r = Math.random();
 	            g = Math.random();
 	            b = Math.random();
 
-	            this.colors[i] = r;
-	            this.colors[i + 1] = g;
-	            this.colors[i + 2] = b;
+	            this.vertices[i + 5] =  r; //  Color 1
+	            this.vertices[i + 6] =  g;//  Color 1
+	            this.vertices[i + 7] =  b;//  Color 1
+	            
 
 
-	            this.colors[i + 3] = r;
-	            this.colors[i + 4] = g;
-	            this.colors[i + 5] = b;
+	            this.vertices[i + 8] = -f; this.vertices[i + 9] = -f;  // Vertex 2
+
+	            this.vertices[i + 10] = tId;  // Texture 2
+	           
+	            this.vertices[i + 11] = 0;  // UV 2
+	            this.vertices[i + 12] = 0;  // UV 2
 
 
-	            this.colors[i + 6] = r;
-	            this.colors[i + 7] = g;
-	            this.colors[i + 8] = b;
+	            this.vertices[i + 13] = r;  // COLOR 2 
+	            this.vertices[i + 14] = g; // COLOR 2 
+	            this.vertices[i + 15] = b;// COLOR 2 
+
+	            
+	            this.vertices[i + 16] =  f; this.vertices[i + 17] = f;  // Vectex 3
+
+	            this.vertices[i + 18] = tId;  // Texture 3
 
 
-	            this.colors[i + 9] = r;
-	            this.colors[i + 10] = g;
-	            this.colors[i + 11] = b;
+	            this.vertices[i + 19] = 1;   // UV 3
+	            this.vertices[i + 20] = 1;   // UV 3
 
+	            this.vertices[i + 21] = r;  // COLOR 3 
+	            this.vertices[i + 22] = g; // COLOR 3
+	            this.vertices[i + 23] = b; // COLOR 3 
+	            
+
+
+	            this.vertices[i + 24] =  f; this.vertices[i + 25] = -f; // Vertex 4
+	        
+	            this.vertices[i + 26] = tId;  // Texture 4
+
+
+	            this.vertices[i + 27] = 1;  // UV 4
+	            this.vertices[i + 28] = 0;  // UV 4
+
+
+	            
+	            this.vertices[i + 29] = r;  // COLOR 3 
+	            this.vertices[i + 30] = g; // COLOR 3
+	            this.vertices[i + 31] = b; // COLOR 3 
 	            
 	        }
+
 	        
-	        
-	        for (i = 0; i < this.vertices.length; i+=8) {
-	            this.vertices[i] = 0;
-	        }
-
-	        for (i = 0; i < this.vertices.length; i+=8) {
+	        for (var i = 0; i < this.indices.length; i+=6) {
 	            
-	            this.vertices[i]     = -f; this.vertices[i + 1] = f;
-	            this.vertices[i + 2] = -f; this.vertices[i + 3] = -f;
-	            this.vertices[i + 4] =  f; this.vertices[i + 5] = f;
-	            this.vertices[i + 6] =  f; this.vertices[i + 7] = -f;
+	            this.indices[i    ] = index;
+	            this.indices[i + 1] = index + 1;
+	            this.indices[i + 2] = index + 2;
 
-	            this.uvs[uvCounter]     = 0;
-	            this.uvs[uvCounter + 1] = 1;
-
-	            this.uvs[uvCounter + 2] = 0;
-	            this.uvs[uvCounter + 3] = 0;
-
-	            this.uvs[uvCounter + 4] = 1;
-	            this.uvs[uvCounter + 5] = 1;
-
-	            this.uvs[uvCounter + 6] = 1;
-	            this.uvs[uvCounter + 7] = 0;
-
-	            uvCounter += 8; 
-	            
-	            this.indices[indexCounter    ] = index;
-	            this.indices[indexCounter + 1] = index + 1;
-	            this.indices[indexCounter + 2] = index + 2;
-
-	            this.indices[indexCounter + 3] = index + 1;
-	            this.indices[indexCounter + 4] = index + 3;
-	            this.indices[indexCounter + 5] = index + 2;
-
+	            this.indices[i + 3] = index + 1;
+	            this.indices[i + 4] = index + 3;
+	            this.indices[i + 5] = index + 2;
 	            index += 4;
-	            indexCounter += 6;
 	        }
-	        
 
 	    }
 
 
-	    appendVerices (vertices) {
-	        var vertexIndex = this.count * 8;
+
+	    
+	    appendVerices2 (vertices, textureID , colors) {
+
 	        
-	        this.vertices[vertexIndex] = vertices[0];
-	        this.vertices[vertexIndex + 1] = vertices[1];
-	        this.vertices[vertexIndex + 2] = vertices[2];
-	        this.vertices[vertexIndex + 3] = vertices[3];
-	        this.vertices[vertexIndex + 4] = vertices[4];
-	        this.vertices[vertexIndex + 5] = vertices[5];
-	        this.vertices[vertexIndex + 6] = vertices[6];
-	        this.vertices[vertexIndex + 7] = vertices[7];
-
-	    }
-
-
-	    appendColors (colors) {
-
-	        var vertexIndex = this.count * 12;
-	        this.colors[vertexIndex] = colors[0];
-	        this.colors[vertexIndex + 1] = colors[1];
-	        this.colors[vertexIndex + 2] = colors[2];
-	        this.colors[vertexIndex + 3] = colors[3];
-	        this.colors[vertexIndex + 4] = colors[4];
-	        this.colors[vertexIndex + 5] = colors[5];
-	        this.colors[vertexIndex + 6] = colors[6];
-	        this.colors[vertexIndex + 7] = colors[7];
-	        this.colors[vertexIndex + 8] = colors[8];
-	        this.colors[vertexIndex + 9] = colors[9];
-	        this.colors[vertexIndex + 10] = colors[10];
-	        this.colors[vertexIndex + 11] = colors[11];
-	    }
-
-	    appendTextureID (textureID, sprite) {
-	        
-	        var idIndex = this.count * 4;
-	        
-	        var i = 0;
+	         var i = 0;
 	       
 	        if(this.textureIDHolder[textureID.id] !== undefined) {
 	            i = this.textureIDHolder[textureID.id];
@@ -569,12 +554,71 @@
 	        }
 
 
-	        this.textureIds[idIndex    ] = i; 
-	        this.textureIds[idIndex + 1] = i; 
-	        this.textureIds[idIndex + 2] = i; 
-	        this.textureIds[idIndex + 3] = i; 
+	        var vertexIndex = this.count * this.vertexDataCount;
+	        
 
+	        // Vertex 1
+	        this.vertices[vertexIndex]     =  vertices[0];
+	        this.vertices[vertexIndex + 1] =  vertices[1];
+
+	        // Texture 1
+	        this.vertices[vertexIndex + 2] =  i;
+	        
+	        // UV  + 3   + 4
+
+	        // COLOR
+	        this.vertices[vertexIndex + 5] = colors[0];
+	        this.vertices[vertexIndex + 6] = colors[1];
+	        this.vertices[vertexIndex + 7] = colors[2];
+
+
+
+	          // Vertex 2
+	        this.vertices[vertexIndex + 8] =  vertices[2];
+	        this.vertices[vertexIndex + 9] =  vertices[3];
+
+	        // Texture 2
+	        this.vertices[vertexIndex + 10] =  i;
+
+	        // UV  +11   +12
+
+	        // COLOR 2
+	        this.vertices[vertexIndex + 13] = colors[3];
+	        this.vertices[vertexIndex + 14] = colors[4];
+	        this.vertices[vertexIndex + 15] = colors[5];
+
+	        
+
+	            // Vertex 3
+	        this.vertices[vertexIndex + 16] =  vertices[4];
+	        this.vertices[vertexIndex + 17] =  vertices[5];
+
+	        // Texture 3
+	        this.vertices[vertexIndex + 18] =  i;
+
+	        // UV  +19   +20
+
+	        // COLOR 3
+	        this.vertices[vertexIndex + 21] = colors[6];
+	        this.vertices[vertexIndex + 22] = colors[7];
+	        this.vertices[vertexIndex + 23] = colors[8];
+
+
+	        // Vertex 4
+	        this.vertices[vertexIndex + 24] =  vertices[6];
+	        this.vertices[vertexIndex + 25] =  vertices[7];
+
+	        // Texture 4
+	        this.vertices[vertexIndex + 26] =  i;
+
+	        // UV  +27   +28
+
+	        // COLOR 4
+	        this.vertices[vertexIndex + 29] = colors[9];
+	        this.vertices[vertexIndex + 30] = colors[10];
+	        this.vertices[vertexIndex + 31] = colors[11];
 	    }
+
 
 	    hasRoom () {
 
@@ -694,24 +738,64 @@
 
 	            this.shaderProgram = gl.createProgram();
 
-	            gl.attachShader(this.shaderProgram, this.vertexShaderBuffer);
-	            gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
-	            gl.linkProgram(this.shaderProgram);
+	         
 
 
-	            this.positionLocation = gl.getAttribLocation(this.shaderProgram,"position");
-	            this.uvLocation = gl.getAttribLocation(this.shaderProgram,"uv");
-	            this.colorLocation = gl.getAttribLocation(this.shaderProgram,"color");
-	            this.textureIDLocation = gl.getAttribLocation(this.shaderProgram,"textureID");
+	          
+	      
 
 	  
 	            this.vertexBuffer = gl.createBuffer();
 	            gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
 	            gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.STREAM_DRAW);
+	            
+	            
+	            this.positionLocation = 0;
+	            this.textureIDLocation = 1;
+	            this.uvLocation = 2;
+	            this.colorLocation = 3;
+
+
+	            var totalByte = 8 * 4;
+	            gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false,  32, 0);
 	            gl.enableVertexAttribArray(this.positionLocation);
-	            gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+	            gl.vertexAttribPointer(this.textureIDLocation, 1, gl.FLOAT, false, 32, 8);
+	            gl.enableVertexAttribArray(this.textureIDLocation);
+
+	            gl.vertexAttribPointer(this.uvLocation, 2, gl.FLOAT, false, 32, 12);
+	            gl.enableVertexAttribArray(this.uvLocation);
+
+	            gl.vertexAttribPointer(this.colorLocation, 3, gl.FLOAT, false, 32, 20);
+	            gl.enableVertexAttribArray(this.colorLocation);
 
 
+	            
+
+	            gl.bindAttribLocation(this.shaderProgram, 0, "position");
+	            gl.bindAttribLocation(this.shaderProgram, 1, "textureID");
+	            gl.bindAttribLocation(this.shaderProgram, 2, "uv");
+	            gl.bindAttribLocation(this.shaderProgram, 3, "color");
+	            
+
+	            gl.attachShader(this.shaderProgram, this.vertexShaderBuffer);
+	            gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
+	            gl.linkProgram(this.shaderProgram);
+
+
+
+
+	            this.positionLocation = gl.getAttribLocation(this.shaderProgram,"position");
+	            this.textureIDLocation = gl.getAttribLocation(this.shaderProgram,"textureID");
+	            this.uvLocation = gl.getAttribLocation(this.shaderProgram,"uv");
+	            this.colorLocation = gl.getAttribLocation(this.shaderProgram,"color");
+
+
+
+	            /*
+	            this.textureIdsBuffer = gl.createBuffer();
+	            this.textureIdsBuffer = gl.createBuffer();
+	            this.textureIdsBuffer = gl.createBuffer();
 	            this.textureIdsBuffer = gl.createBuffer();
 	            gl.bindBuffer(gl.ARRAY_BUFFER, this.textureIdsBuffer);
 	            gl.bufferData(gl.ARRAY_BUFFER, this.textureIds, gl.STREAM_DRAW);
@@ -733,21 +817,15 @@
 	            gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STREAM_DRAW);
 	            gl.vertexAttribPointer(this.colorLocation, 3, gl.FLOAT, false, 0, 0);
 	            gl.enableVertexAttribArray(this.colorLocation);
+	            */
+
 
 	            this.indexBuffer = gl.createBuffer();
 	            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
 	            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indices, gl.STATIC_DRAW);
 
 	            var image = window.flame;
-	            // var texture = gl.createTexture();
-	            // gl.bindTexture(gl.TEXTURE_2D, texture);
-	            // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-	            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
-	            // this.textureBuffer = texture;
+	         
 
 
 	            this.uniform = new UniformObject(gl, this.shaderProgram);
@@ -775,7 +853,7 @@
 	        this._materials = [];
 	        this.square = square;
 
-	        this.material = new RegularEffect();
+	        this.typedArray = new Int32Array(16);
 	        gl.disable(gl.STENCIL_TEST);
 	        gl.disable(gl.DEPTH_TEST);
 	        gl.enable(gl.BLEND);
@@ -785,9 +863,11 @@
 	        this._deadEffects = [];
 	        this._activeEffects = [];
 
-	        for (var i = 0; i < 10; i++) {
+	        
 
-	            var effect = new RegularEffect();
+	        for (var i = 0; i < 50; i++) {
+
+	            var effect = new RegularEffectTest();
 	            effect.reset();
 	            this._deadEffects.push(effect);
 	        }
@@ -802,7 +882,6 @@
 	            this._deadEffects.push(this._activeEffects[i]);
 	            this._activeEffects[i].reset();
 	        }
-
 	        
 	        this._activeEffects.length = 0;
 	        this._materials.length = 0;
@@ -810,13 +889,13 @@
 	    }
 
 	    renderSprite (sprite) {
-	        
 
 	        //var material = RegularEffect.getEmptyInstance();
 
 	        if(this.currentMaterial === undefined || !this.currentMaterial.hasRoom()) {
 	            
-	            this.present3(meydan.camera);
+	           // this.present3(meydan.camera);
+
 	            this.currentMaterial = this._deadEffects[0];
 	            this.currentMaterial.upload(this.gl);
 	            this._activeEffects.push(this.currentMaterial);
@@ -831,12 +910,10 @@
 	        this.currentMaterial.renderID = this.infoID;
 	        this.currentMaterial.next();
 
-	    
-
-	        
-	        this.currentMaterial.appendVerices(sprite.vertices);
-	        this.currentMaterial.appendColors(sprite.colors);
-	        this.currentMaterial.appendTextureID(sprite.texture);
+	        this.currentMaterial.appendVerices2(sprite.vertices, sprite.texture,  sprite.colors);
+	        // this.currentMaterial.appendVerices(sprite.vertices);
+	        // this.currentMaterial.appendColors(sprite.colors);
+	        // this.currentMaterial.appendTextureID(sprite.texture);
 	        
 	    }
 
@@ -844,12 +921,10 @@
 
 	        var gl = this.gl;
 
-	        if(this.currentMaterial !== undefined) {
+	        for (var i = 0; i < this._activeEffects.length; i++) {
 	            
-	            var material = this.currentMaterial;
-	            
+	             var material = this._activeEffects[i];
 	            var uniform = material.uniform;
-
 
 	            gl.useProgram(material.shaderProgram);
 	           
@@ -857,50 +932,49 @@
 	            uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
 	          
 	            
-	            var ar = [];
-	            var txts = this.currentMaterial.textures;
+	            var txts = material.textures;
 
-	            for (var i = 0; i < txts.length; i++) {
+	            for (var j = 0; j < txts.length; j++) {
 
-	                var element = txts[i];
+	                var element = txts[j];
 	                element.upload(gl);
-	                gl.activeTexture(gl.TEXTURE0 + i);
-	               // console.log(element.url,gl.TEXTURE0 + i);
+	                gl.activeTexture(gl.TEXTURE0 + j);
 	                gl.bindTexture(gl.TEXTURE_2D, element.textureBuffer);
-	                ar[i] = i;
-	            
+	                this.typedArray[j] = j;
 	            }
 	            
-	            uniform.setValue("uSampler[0]", new Int32Array(ar) );
+	            uniform.setValue("uSampler[0]", this.typedArray );
 	            uniform.update(this.gl);
-	            
-	            //gl.activeTexture(gl.TEXTURE0);
-	           // gl.bindTexture(gl.TEXTURE_2D, material.textureBuffer);
 	            
 	            gl.bindBuffer(gl.ARRAY_BUFFER, material.vertexBuffer);
 	            gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.vertices);
-	            gl.vertexAttribPointer(material.positionLocation, 2, gl.FLOAT, false, 0, 0);
 
+	            //console.log(material.id,  material.vertices[0], material.vertices[1]);
 
-	            gl.bindBuffer(gl.ARRAY_BUFFER, material.colorBuffer);
-	            gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.colors);
-	            gl.vertexAttribPointer(material.colorLocation, 3, gl.FLOAT, false, 0, 0);
+	            gl.vertexAttribPointer(material.positionLocation, 2, gl.FLOAT, false,  32, 0);
+	            gl.enableVertexAttribArray(material.positionLocation);
 
+	            gl.vertexAttribPointer(material.textureIDLocation, 1, gl.FLOAT, false, 32, 8);
+	            gl.enableVertexAttribArray(material.textureIDLocation);
 
-	            gl.bindBuffer(gl.ARRAY_BUFFER, material.textureIdsBuffer);
-	            gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.textureIds);
-	            gl.vertexAttribPointer(material.textureIDLocation, 1, gl.FLOAT, false, 0, 0);
+	            gl.vertexAttribPointer(material.uvLocation, 2, gl.FLOAT, false, 32, 12);
+	            gl.enableVertexAttribArray(material.uvLocation);
 
-	            gl.bindBuffer(gl.ARRAY_BUFFER, material.uvBuffer);
-	            gl.vertexAttribPointer(material.uvLocation, 2, gl.FLOAT, false, 0,   0);
+	            gl.vertexAttribPointer(material.colorLocation, 3, gl.FLOAT, false, 32, 20);
+	            gl.enableVertexAttribArray(material.colorLocation);
 
-	            // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, material.indexBuffer);
+	            //gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, material.indexBuffer);
 	            var nsize = material.getLenght() * 6;
 
-	            
 	            gl.drawElements(gl.TRIANGLES, nsize, gl.UNSIGNED_SHORT, 0);
 
-	            this.currentMaterial = undefined;
+	        }
+
+	        this.currentMaterial = undefined;
+
+	        if(this.currentMaterial !== undefined) {
+	            
+	           
 
 	        }
 
@@ -1269,8 +1343,14 @@
 	        this.isPositionDirty = true;
 	        this.scaleX = 1; 
 	        this.scaleY = 1;
-	        this.xPos = 0;
-	        this.yPos = 0;
+	        // this.xPos = 0;
+	        // this.yPos = 0;
+
+
+	        this.x = 0;
+	        this.y = 0;
+
+
 	        this.needsCalculation = true;
 	        this.rotationMatrix = new Matrix3();
 	        this.scaleMatrix = new Matrix3();
@@ -1327,23 +1407,23 @@
 	        return this.scaleX;
 	    }
 
-	    set x (x) {
-	        this.xPos = x;
-	        this.isPositionDirty = true;
-	    }
+	    // set x (x) {
+	    //     this.xPos = x;
+	    //     this.isPositionDirty = true;
+	    // }
 
-	    set y (y) {
-	        this.yPos = y;
-	        this.isPositionDirty = true;
-	    }
+	    // set y (y) {
+	    //     this.yPos = y;
+	    //     this.isPositionDirty = true;
+	    // }
 
-	    get x () {
-	        return this.xPos;
-	    }
+	    // get x () {
+	    //     return this.xPos;
+	    // }
 
-	    get y () {
-	        return this.yPos;
-	    }
+	    // get y () {
+	    //     return this.yPos;
+	    // }
 	        
 
 	    updateWorldMatrix (){
@@ -1421,10 +1501,10 @@
 	            };
 
 
-	            var canvas =  document.getElementById(canvasID, cAttributes);
+	            var canvas =  document.getElementById(canvasID);
 	                
 	            //var  gl = canvas.getContext("webgl2") || canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-	            var  gl = canvas.getContext("webgl");// || canvas.getContext("experimental-webgl", {stencil:true});  // webgl2 disabled for now
+	            var  gl = canvas.getContext("webgl",cAttributes);// || canvas.getContext("experimental-webgl", {stencil:true});  // webgl2 disabled for now
 	            if(!gl){
 	                    
 	                var error = "WebGL isn't supported on device";
@@ -2100,9 +2180,6 @@
 	        this._tx = 0;
 	        this._ty = 0;
 
-	        
-
-	        
 
 	        this._scaleMatrix = new Matrix3();
 	        this._translateMatrix = new Matrix3();
@@ -2110,9 +2187,7 @@
 
 	        this.worldMatrix = new Matrix3();
 
-	        // this.position = new Vector3();
-	        // this.scale  =  new Vector3(1,1,1);
-	        // this.rotation = 0;
+	      
 
 	        if(array === undefined) {
 	            array = [
@@ -2165,6 +2240,8 @@
 	            f, -f, // right - bottom
 	        ];
 	        
+	       // this.vertices = new Float32Array(this.vertices);
+
 	        this.colors = [];
 	        var r,g,b;
 	        r = Math.random();
@@ -2193,16 +2270,7 @@
 
 
 	    update () {
-
-	        //super.update();
-	        //console.log(this.positionMatrix.matrixArray);
-	        //this.updateWorldMatrix();
-	        //this.updateScale();
-	        //this.updateRotation();
-	        //this.updatePosition();
-	        //this.translate
-
-
+	        
 	        var bh = 18;
 	        var bw = 15;
 
@@ -2211,48 +2279,35 @@
 	        var mm10 = -mm01;
 	        var mm11 =  mm00;
 
-	        
-
 
 	        var w = bw * this.scaleX;
 	        var h = bh * this.scaleY;
 
-
-
 	        var p1x = -w; 
 	        var p1y = h;
 
-	        p1x = this.xPos + (p1x * mm00) + (mm10 * p1y); 
-	        p1y = this.yPos +  (-w * mm01) + (mm11 * p1y); 
-	        
+
 	        var p2x = -w;
 	        var p2y = -h;
 
-	        p2x = this.xPos + (p2x * mm00) + (mm10 * p2y); 
-	        p2y = this.yPos + (-w * mm01) + (mm11 * p2y); 
-
 	        var p3x = w; 
 	        var p3y = h;
-	        
-	        p3x = this.xPos +  (p3x * mm00) + (mm10 * p3y); 
-	        p3y = this.yPos + (w * mm01) + (mm11 * p3y); 
-	        
 
 	        var p4x = w; 
 	        var p4y = -h;
 
-	        p4x = this.xPos + (p4x * mm00) + (mm10 * p4y); 
-	        p4y = this.yPos + (w * mm01) + (mm11 * p4y); 
+	        p1x = this.x + (p1x * mm00) + (mm10 * p1y); 
+	        p1y = this.y +  (-w * mm01) + (mm11 * p1y); 
+	        
+	        p2x = this.x + (p2x * mm00) + (mm10 * p2y); 
+	        p2y = this.y + (-w * mm01) + (mm11 * p2y); 
 
-	        // this.p1x = p1x;
-	        // this.p2x = p2x;
-	        // this.p3x = p3x;
-	        // this.p4x = p4x;
-
-	        // this.p1y = p1y;
-	        // this.p2y = p2y;
-	        // this.p3y = p3y;
-	        // this.p4y = p4y;
+	        p3x = this.x +  (p3x * mm00) + (mm10 * p3y); 
+	        p3y = this.y + (w * mm01) + (mm11 * p3y); 
+	        
+	        p4x = this.x + (p4x * mm00) + (mm10 * p4y); 
+	        p4y = this.y + (w * mm01) + (mm11 * p4y); 
+	       
 
 	        this.vertices[0] = p1x; 
 	        this.vertices[1] = p1y; 
@@ -2266,25 +2321,7 @@
 	        this.vertices[6] = p4x;
 	        this.vertices[7] = p4y; 
 
-	        
-	        // this.vertices[0] = -f + this.xPos; 
-	        // this.vertices[1] =  f + this.yPos; 
-
-	        // this.vertices[2] = -f + this.xPos; 
-	        // this.vertices[3] =  -f + this.yPos;
-
-	        // this.vertices[4] = f + this.xPos; 
-	        // this.vertices[5] =  f + this.yPos; 
-
-	        // this.vertices[6] = f + this.xPos; 
-	        // this.vertices[7] =  -f + this.yPos; 
-
 	    }
-
-
-
-
-
 
 	}
 
