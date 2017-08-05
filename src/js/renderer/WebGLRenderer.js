@@ -16,126 +16,89 @@ class WebGLRenderer extends EventableObject
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-        
-        this._deadEffects = [];
-        this._activeEffects = [];
+     
 
-        
+        this.regularEffect = new RegularEffectTest();
 
-        for (var i = 0; i < 50; i++) {
-
-            var effect = new RegularEffectTest();
-            effect.reset();
-            this._deadEffects.push(effect);
-        }
+       
 
     }
 
-    prepareForRender () {
+    prepareForRender (camera) {
 
+        this.currentCamera = camera;
         this.currentMaterial = undefined;
-
-        for (var i = 0; i < this._activeEffects.length; i++) {
-            this._deadEffects.push(this._activeEffects[i]);
-            this._activeEffects[i].reset();
-        }
-        
-        this._activeEffects.length = 0;
-        this._materials.length = 0;
+        this.regularEffect.reset();
         this.infoID++;
     }
 
     renderSprite (sprite) {
 
-        //var material = RegularEffect.getEmptyInstance();
-
-        if(this.currentMaterial === undefined || !this.currentMaterial.hasRoom()) {
-            
-           // this.present3(meydan.camera);
-
-            this.currentMaterial = this._deadEffects[0];
-            this.currentMaterial.upload(this.gl);
-            this._activeEffects.push(this.currentMaterial);
-            this._deadEffects.splice(0,1);
+        if(!this.regularEffect.hasRoom()) {
+            this.present3(this.currentCamera);
+            this.regularEffect.reset();
         }
         
-        // if(this.infoID != material.renderID) {
-        //     this._materials.push(material);
-        //     material.upload(this.gl);
-        // }
-
-        this.currentMaterial.renderID = this.infoID;
-        this.currentMaterial.next();
-
-        this.currentMaterial.appendVerices2(sprite.vertices, sprite.texture,  sprite.colors);
-        // this.currentMaterial.appendVerices(sprite.vertices);
-        // this.currentMaterial.appendColors(sprite.colors);
-        // this.currentMaterial.appendTextureID(sprite.texture);
-        
+        this.regularEffect.upload(this.gl);
+        this.regularEffect.next();
+        this.regularEffect.appendVerices2(sprite.vertices, sprite.texture,  sprite.colors);
     }
 
-     present3 (camera) {
-
+    present3 (camera) {
+            
         var gl = this.gl;
+        var material = this.regularEffect;
 
-        for (var i = 0; i < this._activeEffects.length; i++) {
-            
-             var material = this._activeEffects[i];
-            var uniform = material.uniform;
+        if(material.getLenght() <= 0) return;
 
-            gl.useProgram(material.shaderProgram);
-           
-            uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
-            uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
-          
-            
-            var txts = material.textures;
 
-            for (var j = 0; j < txts.length; j++) {
+        var uniform = material.uniform;
 
-                var element = txts[j];
-                element.upload(gl);
-                gl.activeTexture(gl.TEXTURE0 + j);
-                gl.bindTexture(gl.TEXTURE_2D, element.textureBuffer);
-                this.typedArray[j] = j;
-            }
-            
-            uniform.setValue("uSampler[0]", this.typedArray );
-            uniform.update(this.gl);
-            
-            gl.bindBuffer(gl.ARRAY_BUFFER, material.vertexBuffer);
-            gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.vertices);
+        
 
-            //console.log(material.id,  material.vertices[0], material.vertices[1]);
+        gl.useProgram(material.shaderProgram);
 
-            gl.vertexAttribPointer(material.positionLocation, 2, gl.FLOAT, false,  32, 0);
-            gl.enableVertexAttribArray(material.positionLocation);
+        uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
+        uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
 
-            gl.vertexAttribPointer(material.textureIDLocation, 1, gl.FLOAT, false, 32, 8);
-            gl.enableVertexAttribArray(material.textureIDLocation);
 
-            gl.vertexAttribPointer(material.uvLocation, 2, gl.FLOAT, false, 32, 12);
-            gl.enableVertexAttribArray(material.uvLocation);
+        var txts = material.textures;
 
-            gl.vertexAttribPointer(material.colorLocation, 3, gl.FLOAT, false, 32, 20);
-            gl.enableVertexAttribArray(material.colorLocation);
+        for (var j = 0; j < txts.length; j++) {
 
-            //gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, material.indexBuffer);
-            var nsize = material.getLenght() * 6;
-
-            gl.drawElements(gl.TRIANGLES, nsize, gl.UNSIGNED_SHORT, 0);
-
+            var element = txts[j];
+            element.upload(gl);
+            gl.activeTexture(gl.TEXTURE0 + j);
+            gl.bindTexture(gl.TEXTURE_2D, element.textureBuffer);
+            this.typedArray[j] = j;
         }
+
+        uniform.setValue("uSampler[0]", this.typedArray );
+        uniform.update(this.gl);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, material.vertexBuffer);
+        gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.vertices);
+
+        //console.log(material.id,  material.vertices[0], material.vertices[1]);
+
+        gl.vertexAttribPointer(material.positionLocation, 2, gl.FLOAT, false,  32, 0);
+        gl.enableVertexAttribArray(material.positionLocation);
+
+        gl.vertexAttribPointer(material.textureIDLocation, 1, gl.FLOAT, false, 32, 8);
+        gl.enableVertexAttribArray(material.textureIDLocation);
+
+        gl.vertexAttribPointer(material.uvLocation, 2, gl.FLOAT, false, 32, 12);
+        gl.enableVertexAttribArray(material.uvLocation);
+
+        gl.vertexAttribPointer(material.colorLocation, 3, gl.FLOAT, false, 32, 20);
+        gl.enableVertexAttribArray(material.colorLocation);
+
+        //gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, material.indexBuffer);
+        var nsize = material.getLenght() * 6;
+
+        gl.drawElements(gl.TRIANGLES, nsize, gl.UNSIGNED_SHORT, 0);
 
         this.currentMaterial = undefined;
-
-        if(this.currentMaterial !== undefined) {
-            
-           
-
-        }
-
-            
     }
 
 

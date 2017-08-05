@@ -3,9 +3,6 @@ import {UniformObject} from "../core/UniformObject";
 var cccc = 0;
 var MAX_INSTANCE = 14000;
 
-
-var _currentEmptyInstance;
-var _instancedMaterials = [];
 class RegularEffectTest extends DefaultEffect {
     
     constructor () {
@@ -19,8 +16,6 @@ class RegularEffectTest extends DefaultEffect {
   
 
         var index = 0;
-        var indexCounter    = 0;
-        var uvCounter       = 0;
 
 
         // 3 + 2 + 1 + 2
@@ -36,8 +31,7 @@ class RegularEffectTest extends DefaultEffect {
         this.indices        = new Uint16Array(6 * MAX_INSTANCE);
         var r,g,b;
 
-        console.log("Buffer : ", this.vertices.length);
-        for (var i = 0; i < this.vertices.length; i+=vertexDataCount) {
+        for (let i = 0; i < this.vertices.length; i+=vertexDataCount) {
             
 
             var tId = Math.floor(Math.random() * 4);
@@ -105,7 +99,7 @@ class RegularEffectTest extends DefaultEffect {
         }
 
         
-        for (var i = 0; i < this.indices.length; i+=6) {
+        for (let i = 0; i < this.indices.length; i+=6) {
             
             this.indices[i    ] = index;
             this.indices[i + 1] = index + 1;
@@ -124,8 +118,7 @@ class RegularEffectTest extends DefaultEffect {
     
     appendVerices2 (vertices, textureID , colors) {
 
-        
-         var i = 0;
+        var i = 0;
        
         if(this.textureIDHolder[textureID.id] !== undefined) {
             i = this.textureIDHolder[textureID.id];
@@ -154,7 +147,7 @@ class RegularEffectTest extends DefaultEffect {
 
 
 
-          // Vertex 2
+        // Vertex 2
         this.vertices[vertexIndex + 8] =  vertices[2];
         this.vertices[vertexIndex + 9] =  vertices[3];
 
@@ -170,7 +163,7 @@ class RegularEffectTest extends DefaultEffect {
 
         
 
-            // Vertex 3
+        // Vertex 3
         this.vertices[vertexIndex + 16] =  vertices[4];
         this.vertices[vertexIndex + 17] =  vertices[5];
 
@@ -206,31 +199,6 @@ class RegularEffectTest extends DefaultEffect {
         return this.getLenght() < MAX_INSTANCE;
 
     }
-
-
-
-
-    static getEmptyInstance () {
-        
-        if(_currentEmptyInstance === undefined || !_currentEmptyInstance.hasRoom()) {
-
-            for (var i = 0; i < _instancedMaterials.length; i++) {
-                var element = _instancedMaterials[i];
-
-                if(element.hasRoom()) {
-                    _currentEmptyInstance = element;
-                    return _currentEmptyInstance;
-                }
-    
-            }
-
-            _currentEmptyInstance = new RegularEffect();
-            _instancedMaterials.push(_currentEmptyInstance);
-        }
-        
-        return _currentEmptyInstance;
-    }
-
     
     reset () {
         this.count = -1;
@@ -293,7 +261,8 @@ class RegularEffectTest extends DefaultEffect {
                     } else if(f == 3) {
                         c = vec4(0,1,0,1);
                     } 
-
+                    
+                    c.xyz *= colorVar;
                     gl_FragColor = c;
                 }
             `;
@@ -330,14 +299,11 @@ class RegularEffectTest extends DefaultEffect {
             gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.STREAM_DRAW);
             
-            
             this.positionLocation = 0;
             this.textureIDLocation = 1;
             this.uvLocation = 2;
             this.colorLocation = 3;
 
-
-            var totalByte = 8 * 4;
             gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false,  32, 0);
             gl.enableVertexAttribArray(this.positionLocation);
 
@@ -363,51 +329,14 @@ class RegularEffectTest extends DefaultEffect {
             gl.attachShader(this.shaderProgram, this.fragmentShaderBuffer);
             gl.linkProgram(this.shaderProgram);
 
-
-
-
             this.positionLocation = gl.getAttribLocation(this.shaderProgram,"position");
             this.textureIDLocation = gl.getAttribLocation(this.shaderProgram,"textureID");
             this.uvLocation = gl.getAttribLocation(this.shaderProgram,"uv");
             this.colorLocation = gl.getAttribLocation(this.shaderProgram,"color");
 
-
-
-            /*
-            this.textureIdsBuffer = gl.createBuffer();
-            this.textureIdsBuffer = gl.createBuffer();
-            this.textureIdsBuffer = gl.createBuffer();
-            this.textureIdsBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, this.textureIdsBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, this.textureIds, gl.STREAM_DRAW);
-            gl.enableVertexAttribArray(this.textureIDLocation);
-            gl.vertexAttribPointer(this.textureIDLocation, 1, gl.FLOAT, false, 0, 0);
-
-            
-
-
-            this.uvBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, this.uvs, gl.STATIC_DRAW);
-            gl.enableVertexAttribArray(this.uvLocation);
-            gl.vertexAttribPointer(this.uvLocation, 2, gl.FLOAT, false, 0, 0);
-           
-
-            this.colorBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STREAM_DRAW);
-            gl.vertexAttribPointer(this.colorLocation, 3, gl.FLOAT, false, 0, 0);
-            gl.enableVertexAttribArray(this.colorLocation);
-            */
-
-
             this.indexBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indices, gl.STATIC_DRAW);
-
-            var image = window.flame;
-         
-
 
             this.uniform = new UniformObject(gl, this.shaderProgram);
             this.isUploaded = true;

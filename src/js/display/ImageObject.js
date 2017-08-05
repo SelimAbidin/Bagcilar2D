@@ -23,15 +23,6 @@ class ImageObject extends EventableObject {
     }
 
     onLoadImage (event) {
-
-        if(this.textureBuffer) {
-            gl.bindTexture(gl.TEXTURE_2D, this.textureBuffer);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this._srcImage);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        }
         this.dispacthEvent(ImageObject.COMPLETE, {rawEvent:event});
     }
 
@@ -46,7 +37,6 @@ class ImageObject extends EventableObject {
             this.textureBuffer = gl.createTexture();
             this.textureBuffer.url = this.url;
             gl.bindTexture(gl.TEXTURE_2D, this.textureBuffer);
-
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this._srcImage);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);

@@ -24,8 +24,6 @@ class NormalSprite extends ObjectContainer2D {
             f, -f, // right - bottom
         ];
         
-       // this.vertices = new Float32Array(this.vertices);
-
         this.colors = [];
         var r,g,b;
         r = Math.random();

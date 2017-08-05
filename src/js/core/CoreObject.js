@@ -4,8 +4,7 @@ var CoreObject = (function(){
 
     CoreObject.__indexCounter = 0;
     function CoreObject() {
-        
-        this.id = "id_" + (CoreObject.__indexCounter++)
+        this.id = "id_" + (CoreObject.__indexCounter++);
     }
 
     Object.assign(CoreObject.prototype, {

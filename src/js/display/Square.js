@@ -108,7 +108,7 @@ class Square extends ObjectContainer2D {
         gl.clear(gl.COLOR_BUFFER_BIT);
             
 
-        this.renderer.prepareForRender();
+        this.renderer.prepareForRender(this.camera);
         this.renderEachChildren();
         this.renderer.present3(this.camera);
          
@@ -141,25 +141,7 @@ class Square extends ObjectContainer2D {
     }
 
 
-    renderRecursively (o) {
-
-        if(o instanceof Sprite) {
-
-            this.renderer.renderSingleObject(o);
-        }
-
-        if(o.children.length > 0) {
-            
-            for (var i = 0; i < o.children.length; i++) {
-                
-                this.renderRecursively(o.children[i]);
-                
-            }
-        }
-
-          
-
-    }
+    
 
 
     renderOtherObjects () {
@@ -175,32 +157,6 @@ class Square extends ObjectContainer2D {
         this.renderer.renderObjects(this._spriteRenderObjects, this.camera);
     }
         
-    collectObjects (children) {
-
-            
-        for (var i = 0; i < children.length; i++) {
-                
-            var a = children[i];
-                
-            if(a instanceof Sprite){
-                    
-                this._spriteRenderObjects.push(a);
-
-            } else {
-
-                if(!this._renObjects.hasOwnProperty(a.material.id)){
-                    this._renObjects[a.material.id] = [];
-                }
-
-                var ar = this._renObjects[a.material.id];
-                ar.push(a);
-
-            }
-
-        }
-
-    }
-
 }
 
 

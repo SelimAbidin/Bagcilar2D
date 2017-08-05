@@ -11,7 +11,7 @@ function vector3Fv(gl, uniObject){
 
 function uniform1i(gl, uniObject){
 
-    if(uniObject.value instanceof Int32Array){ 
+    if(uniObject.value instanceof Int32Array) {
         gl.uniform1iv(uniObject.location , uniObject.value);
     } else {
         gl.uniform1i(uniObject.location , uniObject.value);
