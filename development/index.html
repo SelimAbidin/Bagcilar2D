@@ -2,350 +2,88 @@
 <head>
   <meta charset="utf-8">
   <title>Empty</title>
-</head>
-
-<script id="vertexShader" type="x-shader/x-vertex">
-
-    uniform mat3 modelMatrix;  
-    uniform mat3 projectionMatrix;  
-    uniform mat3 viewMatrix;  
-    uniform mat3 ppMatrix;  
-    attribute vec2 position;     
-    attribute vec2 offset;
-    attribute vec4 color;
-    attribute float rotation;
-    attribute float order;
-    varying vec4 colorVar;
-    varying mat3 testVar;
-    varying vec3 posVar;
-
-    mat3 getPositionMatrix (float posX, float posY){ 
-        
-        mat3 translateMat = mat3( 
-                                    1.0,  0.0,  0.0,
-                                    0.0,  1.0,  0.0, 
-                                    posX,  posY,  1.0 
-                                    ); 
-        return translateMat;
-    } 
-
-    mat3 getRotationMatrix(float r){
-
-        mat3 rotationM = mat3( 
-                            cos(r),   sin(r), 0.0, 
-                            -sin(r),   cos(r), 0.0, 
-                            0.0,         0.0,      1.0 
-                            );
 
 
-        return rotationM;   
-    }  
-
-
-    void main() {
-
-        vec3 pos3V = vec3(position.x ,position.y, 1.0);
-
-        mat3 positionMatrix = getPositionMatrix(offset.x, offset.y);
-        mat3 rotationMatrix = getRotationMatrix(rotation);
-        float temp = offset.x;
-        mat3 modelMat3 =  positionMatrix * rotationMatrix;
-        mat3 m =  projectionMatrix * (modelMat3 * viewMatrix);
-        vec3 pm = m * pos3V;
-        colorVar = vec4(color.x , rotation, order, 1.0);
-        testVar = m;
-        posVar = vec3(abs(cos(rotation)), abs(cos(rotation + 0.1)), abs(cos(rotation + 0.7))) ;
-        gl_Position = vec4(pm.x, pm.y, order, 1.0);
-
+<style>
+    body, html { margin: 0px; padding: 0px; height: 100%; background: #F8ECC2; font-family: Arial, Helvetica, sans-serif;}
+    #leftBar{ width: 250px; height: 100%; position:fixed; background: #E2D09C; color: #9597B1;}
+    h3{color: #51445F; margin: 10px 0px;}
+    .navLink {
+        margin-left: 10px;
+        color:  #9597B1;
+        text-decoration-line: none;
     }
-</script>
 
-
-<script id="vertexShaderInstanced" type="x-shader/x-vertex">
-
-    uniform mat3 projectionMatrix; 
-    uniform mat3 viewMatrix;
-    attribute vec2 position;
-    attribute vec2 offset;
-    attribute float rotation;
-    attribute vec3 color;
-    varying vec3 colorVar;
-
-    mat3 getRotationMatrix(float r){
-        mat3 rotationM = mat3(
-                            cos(r),   sin(r),       0.0,
-                            -sin(r),   cos(r),      0.0,
-                            0.0,         0.0,       1.0
-                            );
-
-
-        return rotationM;
-    } 
-
-    mat3 getPositionMatrix (float posX, float posY){ 
-
-        mat3 translateMat = mat3(
-                                    1.0,  0.0,  0.0,
-                                    0.0,  1.0,  0.0,
-                                    posX,  posY,  1.0
-                                    );
-        return translateMat;
-    } 
-
-    void main() {
+    #content {
+        width: calc(100% - 250px);
+        height: 100%;
+        position: fixed;
+        right: 0px;
+        background: #ccc;
         
-        colorVar = color;
-        vec3 pos3V = vec3(position.x, position.y, 1.0);
-        mat3 modelMatrix = getPositionMatrix(offset.x, offset.y) * getRotationMatrix(rotation);
-        mat3 modeViewProjection =  projectionMatrix * viewMatrix * modelMatrix;
-
-        mat3 mm = mat3(
-            1,0,0,
-            0,1,0,
-            0,0,1
-        );
-        
-        float xx = offset.x + rotation;
-        vec3 worlPosition = modeViewProjection * pos3V;
-        gl_Position = vec4(worlPosition.x, worlPosition.y, -0.1, 1.0);
-
     }
-</script>
+</style>
 
-<script id="fragmentShaderInstanced" type="x-shader/x-fragment">
-    precision mediump float;
-    varying vec3 colorVar;
-    void main() {        
-        gl_FragColor = vec4(colorVar,1.0);
-    }
-</script>
+<script src="data.js" ></script>
 
-
-
-<script src="../libs/stats.min.js" ></script>
-<script src="../build/Bagcilar2d.js" ></script>
 
 <script>
 
-    // 0.00392156863      0                 0
-    // 0                  0.00392156863     0
-    // 0                  0                 1
-
-
-
-    // 0.00392156863      0                 0
-    // 0                  0.00392156863     0
-    // 0.00392156863      0                 1
-    
-
-    //var tar = new Float32Array(300000);
-    var tar = [];
-
-    // for (var i = 0; i < 300000; i++) {
-    //     tar[i] = 0;
+    window.onload = function () {
         
-    // }
-
-    // function typedArrayTest() {
-
-
-    //     for (var i = 0; i < tar.length; i++) {
+        var navContent = document.getElementById('navContent');
+        for (var key in data) {
             
-    //         //tar.set([12], i);
-    //         tar[i] = 12;
-    //     }
+            var header = document.createElement('h3');
+            header.innerHTML = key;
+            navContent.appendChild(header);
+            var contents = data[key];
 
-    //     var test =  new Float32Array(tar)
-    //     requestAnimationFrame(typedArrayTest);
+            for (var i = 0; i < contents.length; i++) {
 
-    // }
+                let dataName = contents[i];
+                let link = document.createElement("a");
+                link.innerHTML = dataName;
+                link.href = "#";
+                link.className = "navLink";
+                link.addEventListener('click', function(event){
 
+                    if(event.button == 0) {
+                        showContent(dataName);
+                    }
 
-    // typedArrayTest();
-
-    function init(){
-
-
-        window.stats = new Stats();
-	document.body.appendChild( stats.domElement );
-	stats.domElement.style.position = "absolute";
-    stats.domElement.style.top = "0px";
-    
-
-        window.b = new Bagcilar.EventableObject();
-
-      
-
-        window.meydan = new Bagcilar.Square("renderCanvas");
-        window.meydan.addEventListener(Bagcilar.Square.ENTER_FRAME, this, enterFrame);
-        meydan.camera = new Bagcilar.Camera();
-       // meydan.setAutoUpdate(false);
-        //var a =  new Bagcilar.TestSprite();
-        //meydan.addChild(a);
-        
-        // setInterval(function(){
-
-        //     meydan.update();
-
-        // },1000);
-        // var b =  new Bagcilar.TestSprite();
-        // b.g = 1;
-        // meydan.addChild(b);
-        // a.zv = 200;
-        // b.zv = 100;
-        var color2 = new Bagcilar.Color(0,1,0,1);
-        
-    //     window.quad = new Bagcilar.Sprite({material:new Bagcilar.InstancedMaterial()});
-    //    //  window.quad = new Bagcilar.Quad({material:new Bagcilar.ColorEffect(color2)});
-    //     quad.name = "quad";
-    //     quad.x = 110;
-    //     quad.rotation = Math.PI / 0.3;
-       // meydan.addChild(quad);
-
-        
-        // 
-        // window.quad2 = new Bagcilar.Quad({material:new Bagcilar.ColorEffect(color2)});
-        // meydan.addChild(quad2);
-        // quad2.name = "quad2";
-        
-        window.sprites = [];
-        window.ekle = function (){
-
-            var sprite212 = new Bagcilar.Sprite();
-
-            // sprite.x = (Math.random() * 600) - 300;;
-            // sprite.y = (Math.random() * 600) - 300;
-            sprite212.x = 0;
-            sprite212.y = 0;
-            sprite212.name = "id_"+sprite212.length;
-            sprite212.speed = Math.random() * 33;
-            sprite212.vx = Math.sin(Math.random() * (Math.PI * 2)) * 10;
-            sprite212.vy = Math.sin(Math.random() * (Math.PI * 2)) * 10;
-            sprite212.rv = sprite212.vy * .2; 
-            meydan.addChild(sprite212);
-            sprites.push(sprite212);
-        }
-
-        ekle();
-        var sp;
-        var rad = 0;
-        function enterFrame(event) {
-           
-            var start = new Date().getTime();
-
-            // for(var i = 0 ; i < sprites.length; i++){
-
-            //     sp = sprites[i];
-                
-            //     sp.y += sp.vy;
-            //     sp.x += sp.vx;
-            //     sp.rotation += sp.rv;
-                
-            //     if(sp.x >= 300){
-            //         sp.x = 300;
-            //         sp.vx *= -1;
-            //     } else if(sp.x <= -300) {
-            //         sp.x = -300;
-            //         sp.vx *= -1;
-            //     } else if(sp.y >= 300){
-            //         sp.y = 300;
-            //         sp.vy *= -1;
-            //         sp.rv = sp.vy * .2;
-            //     } else if(sp.y <= -300) {
-            //         sp.y = -300;
-            //         sp.vy *= -1;
-            //         sp.rv = sp.vy * .2;
-            //     }
-
-              for(var i = 0 ; i < sprites.length; i++){
-
-                sp = sprites[i];
-                    
-                sp.yPos += sp.vy;
-                sp.xPos += sp.vx;
-                sp.rotation += sp.rv;
-                
-                if(sp.xPos >= 300){
-                    sp.xPos = 300;
-                    sp.vx *= -1;
-                } else if(sp.xPos <= -300) {
-                    sp.xPos = -300;
-                    sp.vx *= -1;
-                } else if(sp.yPos >= 300){
-                    sp.yPos = 300;
-                    sp.vy *= -1;
-                    sp.rv = sp.vy * .2;
-                } else if(sp.yPos <= -300) {
-                    sp.yPos = -300;
-                    sp.vy *= -1;
-                    sp.rv = sp.vy * .2;
-                }
+                })
+                navContent.appendChild(link);
             }
-
-            var elapsed = new Date().getTime() - start;
-
-
-            // quad.setScaleX(Math.cos(rad) * 5);
-            //quad.x = Math.cos(rad) * 200; 
-            // quad.y = rad;
-            // quad.setRotation(quad.getRotation() + 0.01);
-            // quad2.x =(Math.sin(rad) * 100);
-        }
-        
-
-
-
-        window.m3x3 = new Bagcilar.Matrix3();
-    }
-    
-
-
-    function test(){
-
-         var start = new Date().getTime();
-
-         for (var i = 0; i < 151000; i++) {
-             
-             var a = {};
-             a.x = Math.random() * 100;
-         }
-
-         var elapsed = new Date().getTime() - start;
-         console.log(elapsed);
-    };
-
-
-    function step() {
-        meydan.update2();
-    }
-
-    function dataEkle(){
-
-        for (var i = 0; i < 60000; i++) {
-            ekle();            
         }
 
-        document.getElementById('btn').innerHTML = "Kare Ekle (" + sprites.length + ")";
-
     }
 
 
+    function showContent(dataName) {
 
-
-
-
-
-
-    
+        conte
+    }
 
 </script>
-<body onload="init()">
 
-<canvas id="renderCanvas" width="600" height="600" ></canvas>
 
-<div id="framef"></div>
-<div id="frameMax"></div>
-<button id="btn" onclick="dataEkle()"> Kare Ekle </button>
-<button id="btn" onclick="step()"> Step </button>
+</head>
+
+<body>
+
+
+    <div id="leftBar">
+        <div id="navContent">
+
+        </div>
+    </div>
+
+    <iframe id="content">
+
+
+    </iframe>
+
+
 </body>
 </html>

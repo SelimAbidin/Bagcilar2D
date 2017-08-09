@@ -33,7 +33,6 @@ describe('Matrix3->setMatrix', () => {
 
 describe('Matrix3->makeIdentity', () => {
     
-
     it('passes if equal', function() {
 
         var matrix = new Bagcilar.Matrix3();
