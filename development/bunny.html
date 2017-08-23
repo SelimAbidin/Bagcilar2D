@@ -100,70 +100,40 @@
                 var sp = sprites[i];
                 //bunny.rotation += 0.1
 
-                sp.x += sp.speedX;
-                sp.y += sp.speedY;
+                sp.position.x += sp.speedX;
+                sp.position.y += sp.speedY;
                 sp.rotation += sp.rotationSpeed;
                 sp.speedY += gravity;
 
                 
-                if (sp.x > maxX)
+                if (sp.position.x > maxX)
                 {
                     sp.speedX *= -1;
-                    sp.x = maxX;
+                    sp.position.x = maxX;
                 }
-                else if (sp.x < minX)
+                else if (sp.position.x < minX)
                 {
                     sp.speedX *= -1;
-                    sp.x = minX;
+                    sp.position.x = minX;
                 }
 
-                if (sp.y > maxY)
+                if (sp.position.y > maxY)
                 {
                     sp.speedY *= -0.85;
-                    sp.y = maxY;
+                    sp.position.y = maxY;
                     
                     if (Math.random() > 0.5)
                     {
                         sp.speedY -= Math.random() * 6;
                     }
                 }
-                else if (sp.y < minY)
+                else if (sp.position.y < minY)
                 {
                     sp.speedY = 0;
-                    sp.y = minY;
+                    sp.position.y = minY;
                 }
 
             }
-
-            //var start = new Date().getTime();
-            /*
-              for(var i = 0 ; i < sprites.length; i++){
-
-                sp = sprites[i];
-                
-                sp.yPos += sp.vy;
-                sp.xPos += sp.vx;
-                sp.rotation += sp.rv;
-                
-                if(sp.xPos >= 300){
-                    sp.xPos = 300;
-                    sp.vx *= -1;
-                } else if(sp.xPos <= -300) {
-                    sp.xPos = -300;
-                    sp.vx *= -1;
-                } else if(sp.yPos >= 300){
-                    sp.yPos = 300;
-                    sp.vy *= -1;
-                    sp.rv = sp.vy * .01;
-                } else if(sp.yPos <= -300) {
-                    sp.yPos = -300;
-                    sp.vy *= -1;
-                    sp.rv = sp.vy * .01;
-                }
-            }
-
-           // var elapsed = new Date().getTime() - start;
-           */
         }
         
 
@@ -207,9 +177,9 @@
         sp.rotationSpeed = Math.random() * 0.1;
 
         if(isLeft) {
-            sp.x = -300;
+            sp.position.x = -300;
         } else {
-            sp.x = 300;
+            sp.position.y = 300;
         }
         isLeft = !isLeft;
         sp.y = -300;

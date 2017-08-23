@@ -1,0 +1,90 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Empty</title>
+</head>
+
+
+
+
+<script src="../libs/stats.min.js" ></script>
+<script src="../build/Bagcilar2d.js" ></script>
+
+<script>
+
+    var face = new Bagcilar.ImageObject("assets/face.png");
+    var bunny = new Bagcilar.ImageObject("assets/bunny.png");
+    var xtranslateSprite;
+    var ytranslateSprite;
+    var rotateSprite;
+    var parentSprite;
+    var childSprite;
+    var childSprite2;
+    var childSprite3;
+    var meydan;
+
+    var angle = 0;
+    function enterFrame(e){
+
+        xtranslateSprite.position.x = -200 + Math.cos(angle) * 100;
+        ytranslateSprite.position.y = -200 + Math.cos(angle) * 100;
+        rotateSprite.rotation = angle;
+        parentSprite.rotation = angle;
+
+        childSprite.rotation = angle;
+
+        childSprite3.scaleX = Math.cos(angle);
+
+        angle += 0.05;
+    }
+
+    function init() {
+
+        meydan = new Bagcilar.Square("renderCanvas");
+        meydan.camera = new Bagcilar.Camera();
+
+        xtranslateSprite = new Bagcilar.NormalSprite(face);
+        meydan.addChild(xtranslateSprite);
+
+        ytranslateSprite = new Bagcilar.NormalSprite(face);
+        meydan.addChild(ytranslateSprite);
+
+        rotateSprite = new Bagcilar.NormalSprite(face);
+        rotateSprite.position.x = -100;
+        rotateSprite.position.y = -100;
+        meydan.addChild(rotateSprite);
+
+        parentSprite = new Bagcilar.NormalSprite(face);
+        parentSprite.position.x = 100;
+        parentSprite.position.y = 100;
+        meydan.addChild(parentSprite);
+        
+        
+
+        childSprite = new Bagcilar.NormalSprite(face);
+        childSprite.position.x = 100;
+        parentSprite.addChild(childSprite);
+
+        childSprite2 = new Bagcilar.NormalSprite(face);
+        childSprite2.position.x = -100;
+        parentSprite.addChild(childSprite2);
+
+        childSprite3 = new Bagcilar.NormalSprite(face);
+        childSprite3.position.y = -100;
+        parentSprite.addChild(childSprite3);
+
+        meydan.addEventListener(Bagcilar.Square.ENTER_FRAME, this, enterFrame);
+
+    }
+
+
+</script>
+
+<body onload="init()" style="">
+
+<canvas id="renderCanvas" width="600" height="600" ></canvas>
+
+<div id="bunnyCount"></div>
+
+</body>
+</html>

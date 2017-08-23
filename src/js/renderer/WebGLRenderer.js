@@ -16,11 +16,7 @@ class WebGLRenderer extends EventableObject
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-     
-
         this.regularEffect = new RegularEffectTest();
-
-       
 
     }
 
@@ -41,7 +37,7 @@ class WebGLRenderer extends EventableObject
         
         this.regularEffect.upload(this.gl);
         this.regularEffect.next();
-        this.regularEffect.appendVerices2(sprite.vertices, sprite.texture,  sprite.colors);
+        this.regularEffect.appendVec2Verices(sprite.vertices, sprite.texture,  sprite.colors);
     }
 
     present3 (camera) {
@@ -53,8 +49,6 @@ class WebGLRenderer extends EventableObject
 
 
         var uniform = material.uniform;
-
-        
 
         gl.useProgram(material.shaderProgram);
 
@@ -93,17 +87,12 @@ class WebGLRenderer extends EventableObject
         gl.vertexAttribPointer(material.colorLocation, 3, gl.FLOAT, false, 32, 20);
         gl.enableVertexAttribArray(material.colorLocation);
 
-        //gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, material.indexBuffer);
         var nsize = material.getLenght() * 6;
 
         gl.drawElements(gl.TRIANGLES, nsize, gl.UNSIGNED_SHORT, 0);
 
         this.currentMaterial = undefined;
     }
-
-
-
-
 
 
 

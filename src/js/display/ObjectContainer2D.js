@@ -14,6 +14,7 @@ class ObjectContainer2D extends Object2D {
 
         if(child instanceof Object2D) {
             child.stage = this.stage;
+            child.parent = this;
             child.context = this.context;
             this.children.push(child);
         
@@ -25,12 +26,7 @@ class ObjectContainer2D extends Object2D {
     }
 
     update (){
-        
         super.update();
-        for (var i = 0; i < this.children.length; i++) {
-            this.children[i].update();
-        }
-
     }
 }
 

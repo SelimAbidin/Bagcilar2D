@@ -1,6 +1,7 @@
 
 import {EventableObject} from "../core/EventableObject.js";
 import {Matrix3} from "../math/Matrix3";
+import {Vector3} from "../math/Vector3";
 
 
 class Object2D  extends EventableObject{
@@ -20,10 +21,8 @@ class Object2D  extends EventableObject{
         // this.xPos = 0;
         // this.yPos = 0;
 
-
-        this.x = 0;
-        this.y = 0;
-
+        this.position = new Vector3(0,0,1);
+      
 
         this.needsCalculation = true;
         this.rotationMatrix = new Matrix3();
@@ -53,7 +52,7 @@ class Object2D  extends EventableObject{
     }
 
     updatePosition (){
-        this.positionMatrix.translate(this.xPos, this.yPos);
+        this.positionMatrix.translate(this.position.x, this.position.y);
         this.isPositionDirty = false;
     }
 
@@ -80,26 +79,7 @@ class Object2D  extends EventableObject{
     getScaleX (){
         return this.scaleX;
     }
-
-    // set x (x) {
-    //     this.xPos = x;
-    //     this.isPositionDirty = true;
-    // }
-
-    // set y (y) {
-    //     this.yPos = y;
-    //     this.isPositionDirty = true;
-    // }
-
-    // get x () {
-    //     return this.xPos;
-    // }
-
-    // get y () {
-    //     return this.yPos;
-    // }
-        
-
+    
     updateWorldMatrix (){
             
         this.worldMatrix.makeIdentity();
@@ -108,10 +88,15 @@ class Object2D  extends EventableObject{
         this.updateRotation();
         this.updatePosition();
 
+
         this.worldMatrix.multiplyMatrix(this.positionMatrix);
+
+                                  //  console.log(this.this.positionMatrix.matrixArray);
+
         this.worldMatrix.multiplyMatrix(this.rotationMatrix);
         this.worldMatrix.multiplyMatrix(this.scaleMatrix); 
             
+
     }
 
     update  () {

@@ -43,31 +43,13 @@
 <script>
 
 
+    function init() {
 
-
-    function init(){
-
-        window.flame = new Image();
-        window.flame.onload = function() {
-            
-            baslat();
-        }
-
-        flame.src = "bunny.png"; 
-    }
-
-
-
-    function baslat() {
-    
-       
         window.meydan = new Bagcilar.Square("renderCanvas");
         window.meydan.addEventListener(Bagcilar.Square.ENTER_FRAME, this, enterFrame);
         meydan.camera = new Bagcilar.Camera();
         meydan.setAutoUpdate(false);
         window.sprites = [];
-
-        dataEkle();
 
         var sp;
         var gravity = 0.1;
@@ -85,16 +67,13 @@
            isPressed = false;
         });
         
-        cokDataEkle();
+        addSprites();
 
         function enterFrame(event) {
-            
 
             if(isPressed) {
-                cokDataEkle();
+                addSprites();
             }
-
-
 
             for (var i = 0; i < sprites.length; i++)
             {
@@ -102,27 +81,27 @@
                 //bunny.rotation += 0.1
                 
                 
-                   sp.x += sp.speedX;
-                sp.y += sp.speedY;
+                sp.position.x += sp.speedX;
+                sp.position.y += sp.speedY;
                 sp.rotation += sp.rotationSpeed;
                 sp.speedY += gravity;
 
                 
-                if (sp.x > maxX)
+                if (sp.position.x > maxX)
                 {
                     sp.speedX *= -1;
-                    sp.x = maxX;
+                    sp.position.x = maxX;
                 }
-                else if (sp.x < minX)
+                else if (sp.position.x < minX)
                 {
                     sp.speedX *= -1;
-                    sp.x = minX;
+                    sp.position.x = minX;
                 }
 
-                if (sp.y > maxY)
+                if (sp.position.y > maxY)
                 {
                     sp.speedY *= -0.85;
-                    sp.y = maxY;
+                    sp.position.y = maxY;
                     
                     if (Math.random() > 0.5)
                     {
@@ -130,7 +109,7 @@
                     }
                 } else if (sp.y < minY) {
                     sp.speedY = 0;
-                    sp.y = minY;
+                    sp.position.y = minY;
                 }
             }
         }
@@ -138,32 +117,24 @@
     }
 
 
-    var texture = new Bagcilar.ImageObject("bunny.png");
-    var texture2 = new Bagcilar.ImageObject("face.png");
-
+    var texture = new Bagcilar.ImageObject("assets/bunny.png");
+    var texture2 = new Bagcilar.ImageObject("assets/face.png");
     var txts = [texture, texture2];
 
     var isLeft = true;
-    function dataEkle(m) {
+    function addSprite(m) {
         
         var sp;
         var m = Math.floor(Math.random() * txts.length);
 
-       if(h) {
+       if(m) {
             sp = new Bagcilar.NormalSprite(txts[0]);
-       } else 
-        {   
+       } else {   
              sp = new Bagcilar.NormalSprite(txts[1]);
         }
         
         sp.id = "id_" + sprites.length;
         meydan.addChild(sp);
-
-        /*
-        sp.vx = 1 + Math.random() * 2;
-        sp.vy = 1 + Math.random() * 2;
-        sp.rv = Math.random() * 0.1;
-        */
 
         sp.speedX = Math.random() * 5;
         sp.speedY = (Math.random() * 5) - 5;
@@ -171,12 +142,12 @@
         sp.rotationSpeed = Math.random() * 0.1;
 
         if(isLeft) {
-            sp.x = -300;
+            sp.position.x = -300;
         } else {
-            sp.x = 300;
+            sp.position.x = 300;
         }
         isLeft = !isLeft;
-        sp.y = -300;
+        sp.position.y = -300;
         //sp.scaleY = sp.scaleX = 0.1 + Math.random();
 
         sprites.push(sp);
@@ -186,12 +157,12 @@
     var h = true;
     var say = 1;
     var lastBunnyCount = 0;
-    function cokDataEkle() {
+    function addSprites() {
         say +=1;
 
         h = !h;
         for (var i = 0; i < 100; i++) {
-            dataEkle();
+            addSprite();
         }
 
         if(lastBunnyCount != sprites.length) {
@@ -201,26 +172,17 @@
         
     }
 
-
     var last = 0;
     var say = 0;
     function updateScreen() {
 
          requestAnimationFrame(updateScreen);
 
-         meydan.update2();
-
-       
-    }
-
-
-
-
-
-
-    
+         meydan.update2();  
+    }    
 
 </script>
+
 <body onload="init()" style="background-color: #cc0000">
 
 <canvas id="renderCanvas" width="600" height="600" ></canvas>

@@ -6,10 +6,12 @@
 
 <style>
     body, html { margin: 0px; padding: 0px; height: 100%; background: #F8ECC2; font-family: Arial, Helvetica, sans-serif;}
+    iframe {border: none;}
     #leftBar{ width: 250px; height: 100%; position:fixed; background: #E2D09C; color: #9597B1;}
     h3{color: #51445F; margin: 10px 0px;}
     .navLink {
         margin-left: 10px;
+        cursor: pointer;
         color:  #9597B1;
         text-decoration-line: none;
     }
@@ -20,7 +22,6 @@
         position: fixed;
         right: 0px;
         background: #ccc;
-        
     }
 </style>
 
@@ -44,7 +45,6 @@
                 let dataName = contents[i];
                 let link = document.createElement("a");
                 link.innerHTML = dataName;
-                link.href = "#";
                 link.className = "navLink";
                 link.addEventListener('click', function(event){
 
@@ -55,6 +55,7 @@
                 })
                 navContent.appendChild(link);
             }
+
         }
 
     }
@@ -62,8 +63,12 @@
 
     function showContent(dataName) {
 
-        conte
+            window.location.hash = dataName;
+            
+          document.getElementById('content').src = dataName + ".html";
+        
     }
+
 
 </script>
 

@@ -116,7 +116,7 @@ class RegularEffectTest extends DefaultEffect {
 
 
     
-    appendVerices2 (vertices, textureID , colors) {
+    appendVec2Verices (vertices, textureID , colors) {
 
         var i = 0;
        
@@ -132,8 +132,8 @@ class RegularEffectTest extends DefaultEffect {
         
 
         // Vertex 1
-        this.vertices[vertexIndex]     =  vertices[0];
-        this.vertices[vertexIndex + 1] =  vertices[1];
+        this.vertices[vertexIndex]     =  vertices[0].x;
+        this.vertices[vertexIndex + 1] =  vertices[0].y;
 
         // Texture 1
         this.vertices[vertexIndex + 2] =  i;
@@ -148,8 +148,8 @@ class RegularEffectTest extends DefaultEffect {
 
 
         // Vertex 2
-        this.vertices[vertexIndex + 8] =  vertices[2];
-        this.vertices[vertexIndex + 9] =  vertices[3];
+        this.vertices[vertexIndex + 8] =  vertices[1].x;
+        this.vertices[vertexIndex + 9] =  vertices[1].y;
 
         // Texture 2
         this.vertices[vertexIndex + 10] =  i;
@@ -164,8 +164,8 @@ class RegularEffectTest extends DefaultEffect {
         
 
         // Vertex 3
-        this.vertices[vertexIndex + 16] =  vertices[4];
-        this.vertices[vertexIndex + 17] =  vertices[5];
+        this.vertices[vertexIndex + 16] =  vertices[2].x;
+        this.vertices[vertexIndex + 17] =  vertices[2].y;
 
         // Texture 3
         this.vertices[vertexIndex + 18] =  i;
@@ -179,8 +179,8 @@ class RegularEffectTest extends DefaultEffect {
 
 
         // Vertex 4
-        this.vertices[vertexIndex + 24] =  vertices[6];
-        this.vertices[vertexIndex + 25] =  vertices[7];
+        this.vertices[vertexIndex + 24] =  vertices[3].x;
+        this.vertices[vertexIndex + 25] =  vertices[3].y;
 
         // Texture 4
         this.vertices[vertexIndex + 26] =  i;

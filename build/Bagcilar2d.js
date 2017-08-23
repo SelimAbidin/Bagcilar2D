@@ -172,6 +172,19 @@
 	        this.y = y;
 	    }
 	    
+
+	    mulMatrix3 (matrix3) {
+
+	        var v1 = this.x;
+	        var v2 = this.y;
+	        
+	        var ma = matrix3.matrixArray;
+
+	        this.x = ma[0] * v1 + ma[3] * v2 + ma[6];
+	        this.y = ma[1] * v1 + ma[4] * v2 + ma[7];
+	        this.w = ma[2] * v1 + ma[5] * v2 + ma[8];
+
+	    }
 	}
 
 	class Vector3 {
@@ -182,6 +195,21 @@
 	        this.y = y === undefined ? 0 : y;
 	        this.w = w === undefined ? 0 : w;
 	        
+	    }
+
+	    multiplyMat3 (matrix3){
+
+	        var v1 = this.x;
+	        var v2 = this.y;
+	        var v3 = this.w;
+	        
+	        var ma = matrix3.matrixArray;
+
+	        this.x = ma[0] * this.x + ma[3] * this.y + ma[6] * this.w;
+	        this.y = ma[1] * this.x + ma[4] * this.y + ma[7] * this.w;
+	        this.w = ma[2] * this.x + ma[5] * this.y + ma[8] * this.w;
+
+	        return this;
 	    }
 	    
 	}
@@ -326,6 +354,8 @@
 	        this.matrixArray[8] = d02 * c20 + d12 * c21 + d22 * c22;
 	    }
 
+
+	    
 
 
 
@@ -534,7 +564,7 @@
 
 
 	    
-	    appendVerices2 (vertices, textureID , colors) {
+	    appendVec2Verices (vertices, textureID , colors) {
 
 	        var i = 0;
 	       
@@ -550,8 +580,8 @@
 	        
 
 	        // Vertex 1
-	        this.vertices[vertexIndex]     =  vertices[0];
-	        this.vertices[vertexIndex + 1] =  vertices[1];
+	        this.vertices[vertexIndex]     =  vertices[0].x;
+	        this.vertices[vertexIndex + 1] =  vertices[0].y;
 
 	        // Texture 1
 	        this.vertices[vertexIndex + 2] =  i;
@@ -566,8 +596,8 @@
 
 
 	        // Vertex 2
-	        this.vertices[vertexIndex + 8] =  vertices[2];
-	        this.vertices[vertexIndex + 9] =  vertices[3];
+	        this.vertices[vertexIndex + 8] =  vertices[1].x;
+	        this.vertices[vertexIndex + 9] =  vertices[1].y;
 
 	        // Texture 2
 	        this.vertices[vertexIndex + 10] =  i;
@@ -582,8 +612,8 @@
 	        
 
 	        // Vertex 3
-	        this.vertices[vertexIndex + 16] =  vertices[4];
-	        this.vertices[vertexIndex + 17] =  vertices[5];
+	        this.vertices[vertexIndex + 16] =  vertices[2].x;
+	        this.vertices[vertexIndex + 17] =  vertices[2].y;
 
 	        // Texture 3
 	        this.vertices[vertexIndex + 18] =  i;
@@ -597,8 +627,8 @@
 
 
 	        // Vertex 4
-	        this.vertices[vertexIndex + 24] =  vertices[6];
-	        this.vertices[vertexIndex + 25] =  vertices[7];
+	        this.vertices[vertexIndex + 24] =  vertices[3].x;
+	        this.vertices[vertexIndex + 25] =  vertices[3].y;
 
 	        // Texture 4
 	        this.vertices[vertexIndex + 26] =  i;
@@ -787,11 +817,7 @@
 	        gl.enable(gl.BLEND);
 	        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-	     
-
 	        this.regularEffect = new RegularEffectTest();
-
-	       
 
 	    }
 
@@ -812,7 +838,7 @@
 	        
 	        this.regularEffect.upload(this.gl);
 	        this.regularEffect.next();
-	        this.regularEffect.appendVerices2(sprite.vertices, sprite.texture,  sprite.colors);
+	        this.regularEffect.appendVec2Verices(sprite.vertices, sprite.texture,  sprite.colors);
 	    }
 
 	    present3 (camera) {
@@ -824,8 +850,6 @@
 
 
 	        var uniform = material.uniform;
-
-	        
 
 	        gl.useProgram(material.shaderProgram);
 
@@ -864,17 +888,12 @@
 	        gl.vertexAttribPointer(material.colorLocation, 3, gl.FLOAT, false, 32, 20);
 	        gl.enableVertexAttribArray(material.colorLocation);
 
-	        //gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, material.indexBuffer);
 	        var nsize = material.getLenght() * 6;
 
 	        gl.drawElements(gl.TRIANGLES, nsize, gl.UNSIGNED_SHORT, 0);
 
 	        this.currentMaterial = undefined;
 	    }
-
-
-
-
 
 
 
@@ -1237,10 +1256,8 @@
 	        // this.xPos = 0;
 	        // this.yPos = 0;
 
-
-	        this.x = 0;
-	        this.y = 0;
-
+	        this.position = new Vector3(0,0,1);
+	      
 
 	        this.needsCalculation = true;
 	        this.rotationMatrix = new Matrix3();
@@ -1270,7 +1287,7 @@
 	    }
 
 	    updatePosition (){
-	        this.positionMatrix.translate(this.xPos, this.yPos);
+	        this.positionMatrix.translate(this.position.x, this.position.y);
 	        this.isPositionDirty = false;
 	    }
 
@@ -1297,26 +1314,7 @@
 	    getScaleX (){
 	        return this.scaleX;
 	    }
-
-	    // set x (x) {
-	    //     this.xPos = x;
-	    //     this.isPositionDirty = true;
-	    // }
-
-	    // set y (y) {
-	    //     this.yPos = y;
-	    //     this.isPositionDirty = true;
-	    // }
-
-	    // get x () {
-	    //     return this.xPos;
-	    // }
-
-	    // get y () {
-	    //     return this.yPos;
-	    // }
-	        
-
+	    
 	    updateWorldMatrix (){
 	            
 	        this.worldMatrix.makeIdentity();
@@ -1325,10 +1323,15 @@
 	        this.updateRotation();
 	        this.updatePosition();
 
+
 	        this.worldMatrix.multiplyMatrix(this.positionMatrix);
+
+	                                  //  console.log(this.this.positionMatrix.matrixArray);
+
 	        this.worldMatrix.multiplyMatrix(this.rotationMatrix);
 	        this.worldMatrix.multiplyMatrix(this.scaleMatrix); 
 	            
+
 	    }
 
 	    update  () {
@@ -1349,6 +1352,7 @@
 
 	        if(child instanceof Object2D) {
 	            child.stage = this.stage;
+	            child.parent = this;
 	            child.context = this.context;
 	            this.children.push(child);
 	        
@@ -1360,12 +1364,7 @@
 	    }
 
 	    update (){
-	        
 	        super.update();
-	        for (var i = 0; i < this.children.length; i++) {
-	            this.children[i].update();
-	        }
-
 	    }
 	}
 
@@ -1476,15 +1475,18 @@
 	            
 
 	        this.renderer.prepareForRender(this.camera);
-	        this.renderEachChildren();
+	        //this.renderEachChildren();
+	        this.renderReqursively(this.children);
 	        this.renderer.present3(this.camera);
-	         
+	    }
 
-	        //  
-	        //this.renderChild();
-	        //this.renderRecursively(this);
-	        //this.renderer.present(this.camera);
+	    renderReqursively (children) {
 
+	        for (var i = 0; i < children.length; i++) {
+	            children[i].update();
+	            this.renderReqursively(children[i].children);
+	            this.renderer.renderSprite(children[i]);
+	        }
 	    }
 
 	    renderEachChildren () {
@@ -1493,37 +1495,9 @@
 	            this.children[i].update();
 	            this.renderer.renderSprite(this.children[i]);
 	        }
-
-	    }
-
-	    renderChild () {    
-
-	        for (var i = 0; i < this.children.length; i++) {
-	                
-	            this.children[i].drawTest(this.context);
-	            // this.renderer.renderSingleObject(this.children[i], this.camera);
-	                
-	        }
-
 	    }
 
 
-	    
-
-
-	    renderOtherObjects () {
-	        for (var str in this._renObjects) {
-	                
-	            if (this._renObjects.hasOwnProperty(str)){
-	                this.renderer.renderObjects(this._renObjects[str], this.camera);
-	            }
-	        }
-	    }
-
-	    renderSprites () {
-	        this.renderer.renderObjects(this._spriteRenderObjects, this.camera);
-	    }
-	        
 	}
 
 
@@ -1637,14 +1611,14 @@
 	        this._tx = 0;
 	        this._ty = 0;
 
-
 	        this._scaleMatrix = new Matrix3();
 	        this._translateMatrix = new Matrix3();
 	        this._rotationMatrix = new Matrix3();
 
 	        this.worldMatrix = new Matrix3();
 
-	      
+
+	        this.a = 1;
 
 	        if(array === undefined) {
 	            array = [
@@ -1687,14 +1661,20 @@
 	        this.height = 30;
 	        
 	        var f = 16;
-
 	        this.texture = texture;
 	      
-	        this.vertices  = [
-	            -f,  f, // left - top
-	            -f, -f, // left - bottom
-	            f,  f, // right - top
-	            f, -f, // right - bottom
+	        // this.vertices  = [
+	        //     -f,  f, // left - top
+	        //     -f, -f, // left - bottom
+	        //     f,  f, // right - top
+	        //     f, -f, // right - bottom
+	        // ];
+
+	         this.vertices  = [
+	            new Vector2(-f,  f), // left - top
+	            new Vector2(-f, -f), // left - bottom
+	            new Vector2(f,  f), // right - top
+	            new Vector2(f, -f), // right - bottom
 	        ];
 	        
 	        this.colors = [];
@@ -1725,22 +1705,21 @@
 
 
 	    update () {
-	        
+
+	        super.update();
+	        var rotation = this.rotation;
+
 	        var bh = 18;
 	        var bw = 15;
-
-	        var mm00 = Math.cos(this.rotation);
-	        var mm01 = Math.sin(this.rotation);
-	        var mm10 = -mm01;
-	        var mm11 =  mm00;
-
-
+	        
 	        var w = bw * this.scaleX;
 	        var h = bh * this.scaleY;
 
+	        var posX = this.position.x;
+	        var posY = this.position.y;
+
 	        var p1x = -w; 
 	        var p1y = h;
-
 
 	        var p2x = -w;
 	        var p2y = -h;
@@ -1750,31 +1729,56 @@
 
 	        var p4x = w; 
 	        var p4y = -h;
-
-	        p1x = this.x + (p1x * mm00) + (mm10 * p1y); 
-	        p1y = this.y +  (-w * mm01) + (mm11 * p1y); 
 	        
-	        p2x = this.x + (p2x * mm00) + (mm10 * p2y); 
-	        p2y = this.y + (-w * mm01) + (mm11 * p2y); 
+	        var rot = this.rotation;
 
-	        p3x = this.x +  (p3x * mm00) + (mm10 * p3y); 
-	        p3y = this.y + (w * mm01) + (mm11 * p3y); 
 	        
-	        p4x = this.x + (p4x * mm00) + (mm10 * p4y); 
-	        p4y = this.y + (w * mm01) + (mm11 * p4y); 
+	        
+
+	        var mm00 = Math.cos(rot);
+	        var mm01 = Math.sin(rot);
+	        var mm10 = -mm01;
+	        var mm11 =  mm00;
+
+	        p1x = posX + (p1x * mm00) + (mm10 * p1y); 
+	        p1y = posY + (-w * mm01) + (mm11 * p1y); 
+	        
+	        p2x = posX + (p2x * mm00) + (mm10 * p2y); 
+	        p2y = posY + (-w * mm01) + (mm11 * p2y); 
+
+	        p3x = posX +  (p3x * mm00) + (mm10 * p3y); 
+	        p3y = posY + (w * mm01) + (mm11 * p3y); 
+	        
+	        p4x = posX + (p4x * mm00) + (mm10 * p4y); 
+	        p4y = posY + (w * mm01) + (mm11 * p4y); 
 	       
 
-	        this.vertices[0] = p1x; 
-	        this.vertices[1] = p1y; 
+	        var pv1 = this.vertices[0];
+	        var pv2 = this.vertices[1];
+	        var pv3 = this.vertices[2];
+	        var pv4 = this.vertices[3];
 
-	        this.vertices[2] = p2x;//p2x; 
-	        this.vertices[3] = p2y;
+	        pv1.x = p1x; 
+	        pv1.y = p1y; 
 
-	        this.vertices[4] = p3x; 
-	        this.vertices[5] = p3y;//p3y; 
+	        pv2.x = p2x;//p2x; 
+	        pv2.y = p2y;
 
-	        this.vertices[6] = p4x;
-	        this.vertices[7] = p4y; 
+	        pv3.x = p3x; 
+	        pv3.y = p3y;//p3y; 
+
+	        pv4.x = p4x;
+	        pv4.y = p4y;
+
+	        if(!(this.parent instanceof Square)) {
+
+	          // console.log(pv1);
+	            pv1.mulMatrix3(this.parent.worldMatrix);
+	            pv2.mulMatrix3(this.parent.worldMatrix);
+	            pv3.mulMatrix3(this.parent.worldMatrix);
+	            pv4.mulMatrix3(this.parent.worldMatrix);
+	            //console.log("______________",this.parent.worldMatrix.matrixArray);
+	        }
 
 	    }
 

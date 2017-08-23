@@ -109,15 +109,18 @@ class Square extends ObjectContainer2D {
             
 
         this.renderer.prepareForRender(this.camera);
-        this.renderEachChildren();
+        //this.renderEachChildren();
+        this.renderReqursively(this.children);
         this.renderer.present3(this.camera);
-         
+    }
 
-        //  
-        //this.renderChild();
-        //this.renderRecursively(this);
-        //this.renderer.present(this.camera);
+    renderReqursively (children) {
 
+        for (var i = 0; i < children.length; i++) {
+            children[i].update();
+            this.renderReqursively(children[i].children);
+            this.renderer.renderSprite(children[i]);
+        }
     }
 
     renderEachChildren () {
@@ -126,37 +129,9 @@ class Square extends ObjectContainer2D {
             this.children[i].update();
             this.renderer.renderSprite(this.children[i]);
         }
-
-    }
-
-    renderChild () {    
-
-        for (var i = 0; i < this.children.length; i++) {
-                
-            this.children[i].drawTest(this.context);
-            // this.renderer.renderSingleObject(this.children[i], this.camera);
-                
-        }
-
     }
 
 
-    
-
-
-    renderOtherObjects () {
-        for (var str in this._renObjects) {
-                
-            if (this._renObjects.hasOwnProperty(str)){
-                this.renderer.renderObjects(this._renObjects[str], this.camera);
-            }
-        }
-    }
-
-    renderSprites () {
-        this.renderer.renderObjects(this._spriteRenderObjects, this.camera);
-    }
-        
 }
 
 

@@ -19,14 +19,14 @@ class Transform2D {
         this._tx = 0;
         this._ty = 0;
 
-
         this._scaleMatrix = new Matrix3();
         this._translateMatrix = new Matrix3();
         this._rotationMatrix = new Matrix3();
 
         this.worldMatrix = new Matrix3();
 
-      
+
+        this.a = 1;
 
         if(array === undefined) {
             array = [
