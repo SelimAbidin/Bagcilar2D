@@ -126,12 +126,10 @@ class NormalSprite extends ObjectContainer2D {
 
         if(!(this.parent instanceof Square)) {
 
-          // console.log(pv1);
             pv1.mulMatrix3(this.parent.worldMatrix);
             pv2.mulMatrix3(this.parent.worldMatrix);
             pv3.mulMatrix3(this.parent.worldMatrix);
             pv4.mulMatrix3(this.parent.worldMatrix);
-            //console.log("______________",this.parent.worldMatrix.matrixArray);
         }
 
     }

@@ -18,9 +18,9 @@ class Vector3 {
         
         var ma = matrix3.matrixArray;
 
-        this.x = ma[0] * this.x + ma[3] * this.y + ma[6] * this.w;
-        this.y = ma[1] * this.x + ma[4] * this.y + ma[7] * this.w;
-        this.w = ma[2] * this.x + ma[5] * this.y + ma[8] * this.w;
+        this.x = ma[0] * v1 + ma[3] * v2 + ma[6] * v3;
+        this.y = ma[1] * v1 + ma[4] * v2 + ma[7] * v3;
+        this.w = ma[2] * v1 + ma[5] * v2 + ma[8] * v3;
 
         return this;
     }

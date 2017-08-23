@@ -32,6 +32,7 @@
 
     window.onload = function () {
         
+       
         var navContent = document.getElementById('navContent');
         for (var key in data) {
             
@@ -56,6 +57,11 @@
                 navContent.appendChild(link);
             }
 
+        }
+        
+        var hash = window.location.hash;
+        if(hash.indexOf("#") == 0) {
+            showContent(hash.substr(1, hash.length - 1));
         }
 
     }
