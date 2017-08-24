@@ -1662,13 +1662,6 @@
 	        
 	        var f = 16;
 	        this.texture = texture;
-	      
-	        // this.vertices  = [
-	        //     -f,  f, // left - top
-	        //     -f, -f, // left - bottom
-	        //     f,  f, // right - top
-	        //     f, -f, // right - bottom
-	        // ];
 
 	         this.vertices  = [
 	            new Vector2(-f,  f), // left - top
@@ -1678,31 +1671,39 @@
 	        ];
 	        
 	        this.colors = [];
-	        var r,g,b;
-	        r = Math.random();
-	        g = Math.random();
-	        b = Math.random();
 
-	        this.colors[0] = r;
-	        this.colors[1] = g;
-	        this.colors[2] = b;
+	        this.colors[0] = 1;
+	        this.colors[1] = 1;
+	        this.colors[2] = 1;
 
 
-	        this.colors[3] = r;
-	        this.colors[4] = g;
-	        this.colors[5] = b;
+	        this.colors[3] = 1;
+	        this.colors[4] = 1;
+	        this.colors[5] = 1;
 
 
-	        this.colors[6] = r;
-	        this.colors[7] = g;
-	        this.colors[8] = b;
+	        this.colors[6] = 1;
+	        this.colors[7] = 1;
+	        this.colors[8] = 1;
 
 
-	        this.colors[9] = r;
-	        this.colors[10] = g;
-	        this.colors[11] = b;
+	        this.colors[9]  = 1;
+	        this.colors[10] = 1;
+	        this.colors[11] = 1;
 	    }
 
+	    setTintColor (r,g,b) {
+
+	        for (var i = 0; i < this.colors.length; i+=3) {
+	            
+	            this.colors[i] = r;
+	            this.colors[i + 1] = g;
+	            this.colors[i + 2] = b;
+	            
+	        }
+
+
+	    }
 
 	    update () {
 

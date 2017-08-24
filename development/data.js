@@ -1,7 +1,8 @@
 var data =
 {
     "Basic Test" : [
-        "basic"
+        "basic",
+        "tints"
     ],
 
     "Performance Test" : [

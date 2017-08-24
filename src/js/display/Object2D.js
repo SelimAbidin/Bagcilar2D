@@ -88,14 +88,10 @@ class Object2D  extends EventableObject{
         this.updateRotation();
         this.updatePosition();
 
-
         this.worldMatrix.multiplyMatrix(this.positionMatrix);
-
-                                  //  console.log(this.this.positionMatrix.matrixArray);
 
         this.worldMatrix.multiplyMatrix(this.rotationMatrix);
         this.worldMatrix.multiplyMatrix(this.scaleMatrix); 
-            
 
     }
 

@@ -3,7 +3,6 @@
   <meta charset="utf-8">
   <title>Empty</title>
 
-
 <style>
     body, html { margin: 0px; padding: 0px; height: 100%; background: #F8ECC2; font-family: Arial, Helvetica, sans-serif;}
     iframe {border: none;}
@@ -12,6 +11,8 @@
     .navLink {
         margin-left: 10px;
         cursor: pointer;
+        height: 26px;
+        display: block;
         color:  #9597B1;
         text-decoration-line: none;
     }
@@ -31,7 +32,6 @@
 <script>
 
     window.onload = function () {
-        
        
         var navContent = document.getElementById('navContent');
         for (var key in data) {
@@ -69,9 +69,8 @@
 
     function showContent(dataName) {
 
-            window.location.hash = dataName;
-            
-          document.getElementById('content').src = dataName + ".html";
+        window.location.hash = dataName;
+        document.getElementById('content').src = dataName + ".html";
         
     }
 
