@@ -1,0 +1,77 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Empty</title>
+</head>
+
+
+
+<script src="../libs/stats.min.js" ></script>
+<script src="../build/Bagcilar2d.js" ></script>
+
+<script>
+
+    var face = new Bagcilar.ImageObject("assets/face.png");
+    var meydan;
+
+    var sprites = [];
+
+    var xCount = 20;
+    var yCount = 20;
+    var r = 0;
+    var g = 0.5;
+    var b = 1;
+    var offset = 0;
+    function enterFrame(event) {
+        
+
+        for (var i = 0; i < sprites.length; i++) {
+            
+            var sp = sprites[i];
+            
+            r = (((sp.position.x + 300) + offset) % 600) / 600;
+            g = (((sp.position.y + 300) + offset) % 600) / 600;
+            
+            sp.setTintColor( r, g,b);
+        }
+       
+        offset+=10;
+    }
+
+
+    function init() {
+
+        meydan = new Bagcilar.Square("renderCanvas");
+        meydan.userFrameBuffer = true;
+        meydan.camera = new Bagcilar.Camera();
+        
+        var xGap = 600 / xCount;
+        var yGap = 600 / yCount;
+        for (var i = 0; i < yCount; i++) {
+            
+            for (var j = 0; j < xCount; j++) {
+                
+                var sp = new Bagcilar.NormalSprite(face);
+                meydan.addChild(sp);
+                sp.position.x = (j * xGap) - (300 - xGap / 2);
+                sp.position.y = (i * yGap) - (300 - yGap / 2);
+               
+                sprites.push(sp);
+            }
+            
+        }
+
+        meydan.addEventListener(Bagcilar.Square.ENTER_FRAME, this, enterFrame);
+    }
+
+
+</script>
+
+<body onload="init()" style="">
+
+<canvas id="renderCanvas" width="600" height="600" ></canvas>
+
+<div id="bunnyCount"></div>
+
+</body>
+</html>

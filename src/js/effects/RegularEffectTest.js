@@ -40,7 +40,6 @@ class RegularEffectTest extends DefaultEffect {
             
             this.vertices[i + 2] = tId;  // Texture 1
 
-
             this.vertices[i + 3] =  0; //  UV 1
             this.vertices[i + 4] =  1;//  UV 1
             
@@ -53,7 +52,6 @@ class RegularEffectTest extends DefaultEffect {
             this.vertices[i + 6] =  g;//  Color 1
             this.vertices[i + 7] =  b;//  Color 1
             
-
 
             this.vertices[i + 8] = -f; this.vertices[i + 9] = -f;  // Vertex 2
 
@@ -287,12 +285,6 @@ class RegularEffectTest extends DefaultEffect {
             }
 
             this.shaderProgram = gl.createProgram();
-
-         
-
-
-          
-      
 
   
             this.vertexBuffer = gl.createBuffer();
