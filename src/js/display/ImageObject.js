@@ -2,13 +2,18 @@ import {EventableObject} from "../core/EventableObject.js";
 
 class ImageObject extends EventableObject {
 
-    constructor (url) {
+    constructor (param) {
 
         super();
+        if(param !== undefined) {
 
-        if(url !== undefined) {
+            if(param instanceof WebGLTexture) {
+                this.textureBuffer = param;
+            } else {
+                this.setImageUrl(param);
+            }
             
-            this.setImageUrl(url);
+            
         }
          
     }

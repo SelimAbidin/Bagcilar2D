@@ -208,7 +208,7 @@
 	        this.x = ma[0] * v1 + ma[3] * v2 + ma[6] * v3;
 	        this.y = ma[1] * v1 + ma[4] * v2 + ma[7] * v3;
 	        this.w = ma[2] * v1 + ma[5] * v2 + ma[8] * v3;
-
+	        
 	        return this;
 	    }
 	    
@@ -471,11 +471,6 @@
 	        this.vertexDataCount = vertexDataCount;
 	        this.vertices       = new Float32Array(vertexDataCount * MAX_INSTANCE);
 
-	        // this.vertices       = new Float32Array(8 * MAX_INSTANCE);
-	        // this.textureIds     = new Float32Array(4 * MAX_INSTANCE);
-	        // this.uvs            = new Float32Array(8 * MAX_INSTANCE);
-	        // this.colors         = new Float32Array(12 * MAX_INSTANCE);
-	        
 	        this.indices        = new Uint16Array(6 * MAX_INSTANCE);
 	        var r,g,b;
 
@@ -487,7 +482,6 @@
 	            
 	            
 	            this.vertices[i + 2] = tId;  // Texture 1
-
 
 	            this.vertices[i + 3] =  0; //  UV 1
 	            this.vertices[i + 4] =  1;//  UV 1
@@ -501,7 +495,6 @@
 	            this.vertices[i + 6] =  g;//  Color 1
 	            this.vertices[i + 7] =  b;//  Color 1
 	            
-
 
 	            this.vertices[i + 8] = -f; this.vertices[i + 9] = -f;  // Vertex 2
 
@@ -564,15 +557,15 @@
 
 
 	    
-	    appendVec2Verices (vertices, textureID , colors) {
+	    appendVec2Verices (vertices, texture , colors) {
 
 	        var i = 0;
 	       
-	        if(this.textureIDHolder[textureID.id] !== undefined) {
-	            i = this.textureIDHolder[textureID.id];
+	        if(this.textureIDHolder[texture.id] !== undefined) {
+	            i = this.textureIDHolder[texture.id];
 	        } else {
-	            this.textureIDHolder[textureID.id] = this.textures.length;
-	            this.textures.push(textureID);
+	            this.textureIDHolder[texture.id] = this.textures.length;
+	            this.textures.push(texture);
 	        }
 
 
@@ -691,7 +684,7 @@
             `;
 
 	            var fragmentShaderSRC = `
-                precision lowp float;
+                precision mediump float;
                 uniform sampler2D uSampler[16];
                 varying vec2 uvData;
                 varying vec3 colorVar;
@@ -735,12 +728,6 @@
 	            }
 
 	            this.shaderProgram = gl.createProgram();
-
-	         
-
-
-	          
-	      
 
 	  
 	            this.vertexBuffer = gl.createBuffer();
@@ -848,14 +835,12 @@
 
 	        if(material.getLenght() <= 0) return;
 
-
 	        var uniform = material.uniform;
 
 	        gl.useProgram(material.shaderProgram);
 
 	        uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
 	        uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
-
 
 	        var txts = material.textures;
 
@@ -871,6 +856,8 @@
 	        uniform.setValue("uSampler[0]", this.typedArray );
 	        uniform.update(this.gl);
 
+	        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, material.indexBuffer);
+	        
 	        gl.bindBuffer(gl.ARRAY_BUFFER, material.vertexBuffer);
 	        gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.vertices);
 
@@ -1323,14 +1310,10 @@
 	        this.updateRotation();
 	        this.updatePosition();
 
-
 	        this.worldMatrix.multiplyMatrix(this.positionMatrix);
-
-	                                  //  console.log(this.this.positionMatrix.matrixArray);
 
 	        this.worldMatrix.multiplyMatrix(this.rotationMatrix);
 	        this.worldMatrix.multiplyMatrix(this.scaleMatrix); 
-	            
 
 	    }
 
@@ -1368,187 +1351,20 @@
 	    }
 	}
 
-	class Square extends ObjectContainer2D {
-	        
-	    static get ENTER_FRAME () { return "enterFrame"; }
-
-	    constructor (canvasID) {
-	            
-	        super(canvasID);
-	        this.min = 500000;
-	        this.max = -500000;
-	        this.stage = this;
-	        if(canvasID !== undefined){
-
-	            var cAttributes = {
-	                alpha: false,
-	                antialias: false,
-	                depth: false,
-	                failIfMajorPerformanceCaveat: false,
-	                premultipliedAlpha: false,
-	                preserveDrawingBuffer: false,
-	                stencil: true
-	            };
-
-
-	            var canvas =  document.getElementById(canvasID);
-	                
-	            //var  gl = canvas.getContext("webgl2") || canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-	            var  gl = canvas.getContext("webgl",cAttributes);// || canvas.getContext("experimental-webgl", {stencil:true});  // webgl2 disabled for now
-	            if(!gl){
-	                    
-	                var error = "WebGL isn't supported on device";
-	                this.dispatchEvent(Square.ERROR , { message : error });
-	                throw error;
-	            } 
-
-	            gl.clearColor(1, 1, 1, 1);
-	            gl.clear(gl.COLOR_BUFFER_BIT);
-
-	            this.renderDom = canvas;
-	            if(gl.hasOwnProperty("rawgl")){
-	                gl = gl.rawgl;
-	            }
-	            this.setWebGLContext(gl);
-	            this.init();
-	        } else {
-
-	            throw "no canvas found";
-
-	        }
-
-	    }
-
-	    init () {
-	         
-	        this.setAutoUpdate(true);
-	        
-	    }
-	        
-	    setWebGLContext (gl) {
-	        this.context = gl;
-
-	        if(gl instanceof WebGLRenderingContext) {
-	            this.renderer = new WebGLRenderer(this,gl);
-
-	            // gl.enable(gl.DEPTH_TEST);
-	            gl.viewport(0, 0, this.renderDom.width, this.renderDom.height);
-	            gl.clearColor(0.6, 0.6, 0.6, 1.0);
-	        }
-	    }
-
-	    setAutoUpdate (b) {
-
-	        if(_autoUpdate !== b) {
-	            _autoUpdate = b;
-
-	            if(b){
-	                addMeydan(this);
-	            } else {
-	                removeMeydan(this);
-	            }
-	        }
-	    }
-
-	    // TODO silinecek. Testing method 
-	    // addQuadForTest (quad) {
-	    //     if(!this.testChilderen) {
-	    //         this.testChilderen = [];
-	    //     }
-	    //     this.testChilderen.push(quad);
-	    // }
-
-	    update2 () {
-	            
-	        // this.update();
-
-	            
-
-	        this.dispacthEvent(Square.ENTER_FRAME, undefined);
-	        var gl = this.context;
-
-	        //gl.DEPTH_BUFFER_BIT
-	        gl.clearColor(0.3,0.3,0.3,1);
-	            
-
-	        gl.clear(gl.COLOR_BUFFER_BIT);
-	            
-
-	        this.renderer.prepareForRender(this.camera);
-	        //this.renderEachChildren();
-	        this.renderReqursively(this.children);
-	        this.renderer.present3(this.camera);
-	    }
-
-	    renderReqursively (children) {
-
-	        for (var i = 0; i < children.length; i++) {
-	            children[i].update();
-	            this.renderReqursively(children[i].children);
-	            this.renderer.renderSprite(children[i]);
-	        }
-	    }
-
-	    renderEachChildren () {
-	            
-	        for (var i = 0; i < this.children.length; i++) {
-	            this.children[i].update();
-	            this.renderer.renderSprite(this.children[i]);
-	        }
-	    }
-
-
-	}
-
-
-	// function drawObjects(renderer, objects, context, camera) {
-
-	//     renderer.renderObject();
-
-	//     for (var i = 0; i < objects.length; i++) {
-	//         var element = objects[i];
-	//         this.list.push(element);
-	//         drawObjects(element.children, context, camera);
-	//     }
-	// }
-
-
-	var _autoUpdate;
-
-	var _meydanInstances = [];
-	function addMeydan(meydan){
-	    if(_meydanInstances.indexOf(meydan) == -1){
-	        _meydanInstances.push(meydan);
-	        requestAnimationFrame(updateMeydans);
-	    }
-	}
-
-	function removeMeydan(meydan){
-	    _meydanInstances.splice(_meydanInstances.indexOf(meydan), 1);
-	}
-
-	function updateMeydans(){
-
-
-	    for (var i = 0; i < _meydanInstances.length; i++) {
-	        _meydanInstances[i].update2();
-	    }
-	        
-	    if(_meydanInstances.length > 0){
-	        requestAnimationFrame(updateMeydans);
-	    }
-
-	}
-
 	class ImageObject extends EventableObject {
 
-	    constructor (url) {
+	    constructor (param) {
 
 	        super();
+	        if(param !== undefined) {
 
-	        if(url !== undefined) {
+	            if(param instanceof WebGLTexture) {
+	                this.textureBuffer = param;
+	            } else {
+	                this.setImageUrl(param);
+	            }
 	            
-	            this.setImageUrl(url);
+	            
 	        }
 	         
 	    }
@@ -1592,6 +1408,192 @@
 
 	ImageObject.COMPLETE = "onImageComplete";
 	ImageObject.ERROR = "onImageError";
+
+	class Square extends ObjectContainer2D {
+	        
+	    static get ENTER_FRAME () { return "enterFrame"; }
+
+	    constructor (canvasID) {
+	            
+	        super(canvasID);
+	        this.userFrameBuffer = false;
+	        this.min = 500000;
+	        this.max = -500000;
+	        this.stage = this;
+	        if(canvasID !== undefined){
+
+	            var cAttributes = {
+	                alpha: false,
+	                antialias: false,
+	                depth: false,
+	                failIfMajorPerformanceCaveat: false,
+	                premultipliedAlpha: false,
+	                preserveDrawingBuffer: false,
+	                stencil: true
+	            };
+
+
+	            var canvas =  document.getElementById(canvasID);
+	                
+	            //var  gl = canvas.getContext("webgl2") || canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+	            var  gl = canvas.getContext("webgl",cAttributes);// || canvas.getContext("experimental-webgl", {stencil:true});  // webgl2 disabled for now
+	            if(!gl){
+	                    
+	                var error = "WebGL isn't supported on device";
+	                this.dispatchEvent(Square.ERROR , { message : error });
+	                throw error;
+	            } 
+
+	            gl.clearColor(1, 1, 1, 1);
+	            gl.clear(gl.COLOR_BUFFER_BIT);
+
+	            this.renderDom = canvas;
+	            if(gl.hasOwnProperty("rawgl")){
+	                gl = gl.rawgl;
+	            }
+	            this.setWebGLContext(gl);
+
+	            
+	            this.init();
+	        } else {
+
+	            throw "no canvas found";
+
+	        }
+
+	    }
+
+	    init () {
+	        
+	        this.setAutoUpdate(true);
+	        
+	    }
+	        
+	    setWebGLContext (gl) {
+	        this.context = gl;
+
+	        if(gl instanceof WebGLRenderingContext) {
+	            this.renderer = new WebGLRenderer(this,gl);
+
+	            // gl.enable(gl.DEPTH_TEST);
+	            gl.viewport(0, 0, this.renderDom.width, this.renderDom.height);
+	            gl.clearColor(0.6, 0.6, 0.6, 1.0);
+	        }
+	    }
+
+	    setAutoUpdate (b) {
+	        if(this._autoUpdate !== b) {
+	           this._autoUpdate = b;
+
+	            if(b){
+	               
+	                addMeydan(this);
+	            } else {
+	                removeMeydan(this);
+	            }
+	        }
+	    }
+
+	    // TODO silinecek. Testing method 
+	    // addQuadForTest (quad) {
+	    //     if(!this.testChilderen) {
+	    //         this.testChilderen = [];
+	    //     }
+	    //     this.testChilderen.push(quad);
+	    // }
+
+	    createFrameBufferTexture () {
+
+	        var gl = this.context;
+	        var frameBuffer = gl.createFramebuffer();
+	        gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
+	        var frameBufferTexture  = gl.createTexture();
+	        gl.bindTexture(gl.TEXTURE_2D, frameBufferTexture);
+	        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+	        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+	        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+	        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 600, 600, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+	        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, frameBufferTexture, 0);
+	        
+	        this.frameBuffer = frameBuffer;
+	        return new ImageObject(frameBufferTexture);
+	    }
+
+	    clear () {
+
+	        var gl = this.context;
+	        gl.viewport(0,0,600,600);
+	        gl.clear(gl.COLOR_BUFFER_BIT);
+	    }
+
+	    update () {
+	            
+	        this.dispacthEvent(Square.ENTER_FRAME, undefined);
+	        var gl = this.context;
+	        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+	        if(this.frameBuffer) {
+	            gl.bindFramebuffer(gl.FRAMEBUFFER, this.frameBuffer);
+	        }
+	        
+	        this.renderer.prepareForRender(this.camera);
+	        this.renderReqursively(this.children);
+	        this.renderer.present3(this.camera);
+	    }
+
+	    renderReqursively (children) {
+
+	        for (var i = 0; i < children.length; i++) {
+	            children[i].update();
+	            this.renderReqursively(children[i].children);
+	            this.renderer.renderSprite(children[i]);
+	        }
+	    }
+
+	    renderEachChildren () {
+	            
+	        for (var i = 0; i < this.children.length; i++) {
+	            this.children[i].update();
+	            this.renderer.renderSprite(this.children[i]);
+	        }
+	    }
+
+
+	}
+
+	var isUpdateWorking = false;
+	var _meydanInstances = [];
+	function addMeydan(meydan){
+	    if(_meydanInstances.indexOf(meydan) == -1){
+	        _meydanInstances.push(meydan);
+
+	        if(!isUpdateWorking) {
+	            isUpdateWorking = true;
+	            requestAnimationFrame(updateMeydans);
+	        }
+	        
+	    }
+	}
+
+	function removeMeydan(meydan){
+	    _meydanInstances.splice(_meydanInstances.indexOf(meydan), 1);
+	}
+
+	function updateMeydans(){
+
+	    for (var i = 0; i < _meydanInstances.length; i++) {
+	        //_meydanInstances[i].clear();
+	        _meydanInstances[i].update();
+	    }
+	        
+	    if(_meydanInstances.length > 0){
+	        requestAnimationFrame(updateMeydans);
+	    } else {
+	        isUpdateWorking = false;
+	    }
+
+	}
 
 	class Transform2D {
 
@@ -1657,18 +1659,18 @@
 	        super();
 
 	        this.translate = new Transform2D();
-	        this.width = 10;
-	        this.height = 30;
 	        
 	        var f = 16;
 	        this.texture = texture;
 
-	         this.vertices  = [
+	        this.vertices  = [
 	            new Vector2(-f,  f), // left - top
 	            new Vector2(-f, -f), // left - bottom
 	            new Vector2(f,  f), // right - top
 	            new Vector2(f, -f), // right - bottom
 	        ];
+	        
+	        this.size = new Vector2(15,18);
 	        
 	        this.colors = [];
 
@@ -1701,17 +1703,23 @@
 	            this.colors[i + 2] = b;
 	            
 	        }
+	    }
 
+	    setSize (x, y) {
+	        this.size.x = x;
+	        this.size.y = y;
+	    }
 
+	    getSize () {
+	        return this.size;
 	    }
 
 	    update () {
 
 	        super.update();
-	        var rotation = this.rotation;
 
-	        var bh = 18;
-	        var bw = 15;
+	        var bh = this.size.y;
+	        var bw = this.size.x;
 	        
 	        var w = bw * this.scaleX;
 	        var h = bh * this.scaleY;
@@ -1731,10 +1739,7 @@
 	        var p4x = w; 
 	        var p4y = -h;
 	        
-	        var rot = this.rotation;
-
-	        
-	        
+	        var rot = this.rotation;        
 
 	        var mm00 = Math.cos(rot);
 	        var mm01 = Math.sin(rot);

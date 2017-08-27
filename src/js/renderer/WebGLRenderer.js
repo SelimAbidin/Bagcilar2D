@@ -47,14 +47,12 @@ class WebGLRenderer extends EventableObject
 
         if(material.getLenght() <= 0) return;
 
-
         var uniform = material.uniform;
 
         gl.useProgram(material.shaderProgram);
 
         uniform.setValue("projectionMatrix", camera.projectionMatrix.matrixArray);
         uniform.setValue("viewMatrix", camera.worldMatrix.matrixArray);
-
 
         var txts = material.textures;
 
@@ -70,6 +68,8 @@ class WebGLRenderer extends EventableObject
         uniform.setValue("uSampler[0]", this.typedArray );
         uniform.update(this.gl);
 
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, material.indexBuffer);
+        
         gl.bindBuffer(gl.ARRAY_BUFFER, material.vertexBuffer);
         gl.bufferSubData(gl.ARRAY_BUFFER, 0, material.vertices);
 

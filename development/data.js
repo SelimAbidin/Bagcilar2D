@@ -2,7 +2,8 @@ var data =
 {
     "Basic Test" : [
         "basic",
-        "tints"
+        "tints",
+        "frame_buffer",
     ],
 
     "Performance Test" : [

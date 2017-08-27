@@ -1,6 +1,7 @@
 
 import {ObjectContainer2D} from "../display/ObjectContainer2D";
 import {WebGLRenderer} from "../renderer/WebGLRenderer";
+import {ImageObject} from "../display/ImageObject";
     
 class Square extends ObjectContainer2D {
         
@@ -9,6 +10,8 @@ class Square extends ObjectContainer2D {
     constructor (canvasID) {
             
         super(canvasID);
+        this.allowAutoClear = true;
+        this.userFrameBuffer = false;
         this.min = 500000;
         this.max = -500000;
         this.stage = this;
@@ -44,6 +47,8 @@ class Square extends ObjectContainer2D {
                 gl = gl.rawgl;
             }
             this.setWebGLContext(gl);
+
+            
             this.init();
         } else {
 
@@ -54,7 +59,7 @@ class Square extends ObjectContainer2D {
     }
 
     init () {
-         
+        
         this.setAutoUpdate(true);
         
     }
@@ -72,11 +77,11 @@ class Square extends ObjectContainer2D {
     }
 
     setAutoUpdate (b) {
-
-        if(_autoUpdate !== b) {
-            _autoUpdate = b;
+        if(this._autoUpdate !== b) {
+           this._autoUpdate = b;
 
             if(b){
+               
                 addMeydan(this);
             } else {
                 removeMeydan(this);
@@ -92,24 +97,42 @@ class Square extends ObjectContainer2D {
     //     this.testChilderen.push(quad);
     // }
 
-    update2 () {
-            
-        // this.update();
+    createFrameBufferTexture () {
 
-            
+        var gl = this.context;
+        var frameBuffer = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
+        var frameBufferTexture  = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, frameBufferTexture);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 600, 600, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, frameBufferTexture, 0);
+        
+        this.frameBuffer = frameBuffer;
+        return new ImageObject(frameBufferTexture);
+    }
 
+    clear () {
+
+        var gl = this.context;
+        gl.viewport(0,0,600,600);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+    }
+
+    update () {
+            
         this.dispacthEvent(Square.ENTER_FRAME, undefined);
         var gl = this.context;
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-        //gl.DEPTH_BUFFER_BIT
-        gl.clearColor(0.3,0.3,0.3,1);
-            
-
-        gl.clear(gl.COLOR_BUFFER_BIT);
-            
-
+        if(this.frameBuffer) {
+            gl.bindFramebuffer(gl.FRAMEBUFFER, this.frameBuffer);
+        }
+        
         this.renderer.prepareForRender(this.camera);
-        //this.renderEachChildren();
         this.renderReqursively(this.children);
         this.renderer.present3(this.camera);
     }
@@ -134,26 +157,17 @@ class Square extends ObjectContainer2D {
 
 }
 
-
-// function drawObjects(renderer, objects, context, camera) {
-
-//     renderer.renderObject();
-
-//     for (var i = 0; i < objects.length; i++) {
-//         var element = objects[i];
-//         this.list.push(element);
-//         drawObjects(element.children, context, camera);
-//     }
-// }
-
-
-var _autoUpdate;
-
+var isUpdateWorking = false;
 var _meydanInstances = [];
 function addMeydan(meydan){
     if(_meydanInstances.indexOf(meydan) == -1){
         _meydanInstances.push(meydan);
-        requestAnimationFrame(updateMeydans);
+
+        if(!isUpdateWorking) {
+            isUpdateWorking = true;
+            requestAnimationFrame(updateMeydans);
+        }
+        
     }
 }
 
@@ -163,13 +177,18 @@ function removeMeydan(meydan){
 
 function updateMeydans(){
 
-
     for (var i = 0; i < _meydanInstances.length; i++) {
-        _meydanInstances[i].update2();
+        
+        if(_meydanInstances[i].allowAutoClear) {
+            _meydanInstances[i].clear();
+        }
+        _meydanInstances[i].update();
     }
         
     if(_meydanInstances.length > 0){
         requestAnimationFrame(updateMeydans);
+    } else {
+        isUpdateWorking = false;
     }
 
 }

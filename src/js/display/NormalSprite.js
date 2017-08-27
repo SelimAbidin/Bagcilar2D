@@ -11,8 +11,6 @@ class NormalSprite extends ObjectContainer2D {
         super();
 
         this.translate = new Transform2D();
-        this.width = 10;
-        this.height = 30;
         
         var f = 16;
         this.texture = texture;
@@ -23,6 +21,8 @@ class NormalSprite extends ObjectContainer2D {
             new Vector2(f,  f), // right - top
             new Vector2(f, -f), // right - bottom
         ];
+        
+        this.size = new Vector2(15,18);
         
         this.colors = [];
 
@@ -55,16 +55,23 @@ class NormalSprite extends ObjectContainer2D {
             this.colors[i + 2] = b;
             
         }
+    }
 
+    setSize (x, y) {
+        this.size.x = x;
+        this.size.y = y;
+    }
 
+    getSize () {
+        return this.size;
     }
 
     update () {
 
         super.update();
 
-        var bh = 18;
-        var bw = 15;
+        var bh = this.size.y;
+        var bw = this.size.x;
         
         var w = bw * this.scaleX;
         var h = bh * this.scaleY;
@@ -84,10 +91,7 @@ class NormalSprite extends ObjectContainer2D {
         var p4x = w; 
         var p4y = -h;
         
-        var rot = this.rotation;
-
-        
-        
+        var rot = this.rotation;        
 
         var mm00 = Math.cos(rot);
         var mm01 = Math.sin(rot);

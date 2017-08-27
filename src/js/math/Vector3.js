@@ -21,7 +21,7 @@ class Vector3 {
         this.x = ma[0] * v1 + ma[3] * v2 + ma[6] * v3;
         this.y = ma[1] * v1 + ma[4] * v2 + ma[7] * v3;
         this.w = ma[2] * v1 + ma[5] * v2 + ma[8] * v3;
-
+        
         return this;
     }
     
