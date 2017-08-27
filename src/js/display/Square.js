@@ -72,7 +72,7 @@ class Square extends ObjectContainer2D {
 
             // gl.enable(gl.DEPTH_TEST);
             gl.viewport(0, 0, this.renderDom.width, this.renderDom.height);
-            gl.clearColor(0.6, 0.6, 0.6, 1.0);
+            gl.clearColor(0.6, 0.6, 0.6, 0.0);
         }
     }
 

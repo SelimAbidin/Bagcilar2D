@@ -1416,6 +1416,7 @@
 	    constructor (canvasID) {
 	            
 	        super(canvasID);
+	        this.allowAutoClear = true;
 	        this.userFrameBuffer = false;
 	        this.min = 500000;
 	        this.max = -500000;
@@ -1477,7 +1478,7 @@
 
 	            // gl.enable(gl.DEPTH_TEST);
 	            gl.viewport(0, 0, this.renderDom.width, this.renderDom.height);
-	            gl.clearColor(0.6, 0.6, 0.6, 1.0);
+	            gl.clearColor(0.6, 0.6, 0.6, 0.0);
 	        }
 	    }
 
@@ -1583,7 +1584,10 @@
 	function updateMeydans(){
 
 	    for (var i = 0; i < _meydanInstances.length; i++) {
-	        //_meydanInstances[i].clear();
+	        
+	        if(_meydanInstances[i].allowAutoClear) {
+	            _meydanInstances[i].clear();
+	        }
 	        _meydanInstances[i].update();
 	    }
 	        

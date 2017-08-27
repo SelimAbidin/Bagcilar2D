@@ -64,6 +64,7 @@
 
 
         var meydan2 = new Bagcilar.Square("renderCanvas");
+        meydan2.allowAutoClear = false;
         meydan2.camera = meydan.camera;
         var texture =  meydan.createFrameBufferTexture();
         var bs = new Bagcilar.NormalSprite(texture);
