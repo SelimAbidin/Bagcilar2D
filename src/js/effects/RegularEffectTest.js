@@ -23,11 +23,6 @@ class RegularEffectTest extends DefaultEffect {
         this.vertexDataCount = vertexDataCount;
         this.vertices       = new Float32Array(vertexDataCount * MAX_INSTANCE);
 
-        // this.vertices       = new Float32Array(8 * MAX_INSTANCE);
-        // this.textureIds     = new Float32Array(4 * MAX_INSTANCE);
-        // this.uvs            = new Float32Array(8 * MAX_INSTANCE);
-        // this.colors         = new Float32Array(12 * MAX_INSTANCE);
-        
         this.indices        = new Uint16Array(6 * MAX_INSTANCE);
         var r,g,b;
 
@@ -114,15 +109,15 @@ class RegularEffectTest extends DefaultEffect {
 
 
     
-    appendVec2Verices (vertices, textureID , colors) {
+    appendVec2Verices (vertices, texture , colors) {
 
         var i = 0;
        
-        if(this.textureIDHolder[textureID.id] !== undefined) {
-            i = this.textureIDHolder[textureID.id];
+        if(this.textureIDHolder[texture.id] !== undefined) {
+            i = this.textureIDHolder[texture.id];
         } else {
-            this.textureIDHolder[textureID.id] = this.textures.length;
-            this.textures.push(textureID);
+            this.textureIDHolder[texture.id] = this.textures.length;
+            this.textures.push(texture);
         }
 
 
@@ -241,7 +236,7 @@ class RegularEffectTest extends DefaultEffect {
             `;
 
             var fragmentShaderSRC = `
-                precision lowp float;
+                precision mediump float;
                 uniform sampler2D uSampler[16];
                 varying vec2 uvData;
                 varying vec3 colorVar;

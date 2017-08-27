@@ -47,7 +47,6 @@ class WebGLRenderer extends EventableObject
 
         if(material.getLenght() <= 0) return;
 
-
         var uniform = material.uniform;
 
         gl.useProgram(material.shaderProgram);
