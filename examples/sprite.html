@@ -6,24 +6,64 @@
 
 
 
-<script id="vertexShader" type="x-shader/x-vertex">
+<script id="vertexShaderInstanced" type="x-shader/x-vertex">
 
     uniform mat3 projectionMatrix; 
     uniform mat3 viewMatrix;
     attribute vec2 position;
+    attribute vec2 uv;
+    attribute vec2 offset;
+    attribute float rotation;
+    attribute vec3 color;
+    varying vec3 colorVar;
+    varying vec2 uvVar;
+
+    mat3 getRotationMatrix(float r){
+        mat3 rotationM = mat3(
+                            cos(r),   sin(r),       0.0,
+                            -sin(r),   cos(r),      0.0,
+                            0.0,         0.0,       1.0
+                            );
+
+
+        return rotationM;
+    } 
+
+    mat3 getPositionMatrix (float posX, float posY){ 
+
+        mat3 translateMat = mat3(
+                                    1.0,  0.0,  0.0,
+                                    0.0,  1.0,  0.0,
+                                    posX,  posY,  1.0
+                                    );
+        return translateMat;
+    } 
+
     void main() {
         
-        vec3 newPos = vec3(position.x, position.y, 1.0 ) * (projectionMatrix * viewMatrix);
-        gl_Position = vec4(newPos , 1.0);
+        colorVar = color;
+        vec3 pos3V = vec3(position.x, position.y, 1.0);
+        mat3 modelMatrix = getPositionMatrix(offset.x, offset.y) * getRotationMatrix(rotation);
+        mat3 modeViewProjection =  projectionMatrix * viewMatrix * modelMatrix;
+
+
+        
+        uvVar = uv;
+        float xx = offset.x + rotation;
+        vec3 worlPosition = modeViewProjection * pos3V;
+        gl_Position = vec4(worlPosition.x, worlPosition.y, 0, 1.0);
+
     }
 </script>
 
-<script id="fragmentShader" type="x-shader/x-fragment">
+<script id="fragmentShaderInstanced" type="x-shader/x-fragment">
     precision mediump float;
+    varying vec3 colorVar;
+    varying vec2 uvVar;
+    uniform sampler2D uSampler;
     
     void main() { 
-
-        vec4 c =  vec4(1.0, 1.0, 0.5, 1.0);
+        vec4 c = texture2D( uSampler, uvVar) * vec4(colorVar, 1.0);
         gl_FragColor = c;
     }
 </script>
@@ -31,7 +71,7 @@
 
 
 <script src="../libs/stats.min.js" ></script>
-<script src="../build/Bagcilar2d.js" ></script>
+<script src="../build/bagcilar.js" ></script>
 
 <script>
 
@@ -110,7 +150,11 @@
     function dataEkle(m) {
         
         var sp;
-        sp = new Bagcilar.DenemeSprite();
+        if(m === undefined) {
+            sp = new Bagcilar.Sprite();
+        } else {
+            sp = new Bagcilar.Sprite({material:m});
+        }
         
         sp.id = "id_" + sprites.length;
         meydan.addChild(sp);
@@ -126,8 +170,9 @@
     var say = 1;
     function cokDataEkle() {
         say +=1;
-        for (var i = 0; i < 1; i++) {
-            dataEkle();
+        var instanced = new Bagcilar.InstancedMaterial();
+        for (var i = 0; i < 30000; i++) {
+            dataEkle(instanced);
         }
 
 
@@ -137,7 +182,6 @@
 
     function updateScreen() {
 
-        
        stats.begin();
         meydan.update2();
         requestAnimationFrame(updateScreen);

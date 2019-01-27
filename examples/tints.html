@@ -6,8 +6,9 @@
 
 
 
+
 <script src="../libs/stats.min.js" ></script>
-<script src="../build/Bagcilar2d.js" ></script>
+<script src="../build/bagcilar.js" ></script>
 
 <script>
 
@@ -24,7 +25,6 @@
     var offset = 0;
     function enterFrame(event) {
         
-        meydan.clear();
 
         for (var i = 0; i < sprites.length; i++) {
             
@@ -44,7 +44,7 @@
 
         meydan = new Bagcilar.Square("renderCanvas");
         meydan.camera = new Bagcilar.Camera();
-
+        
         var xGap = 600 / xCount;
         var yGap = 600 / yCount;
         for (var i = 0; i < yCount; i++) {
@@ -55,51 +55,13 @@
                 meydan.addChild(sp);
                 sp.position.x = (j * xGap) - (300 - xGap / 2);
                 sp.position.y = (i * yGap) - (300 - yGap / 2);
+
                
                 sprites.push(sp);
             }
             
         }
 
-
-
-        var meydan2 = new Bagcilar.Square("renderCanvas");
-        meydan2.allowAutoClear = false;
-        meydan2.camera = meydan.camera;
-        var texture =  meydan.createFrameBufferTexture();
-        var bs = new Bagcilar.NormalSprite(texture);
-        bs.scaleY = -1;
-        bs.setSize(150, 150);
-        bs.position.x = -150;
-        bs.position.y = -150;
-        bs.setTintColor(1,0,0);
-        meydan2.addChild(bs);
-
-
-        var bs2 = new Bagcilar.NormalSprite(texture);
-        bs2.scaleY = -1;
-        bs2.setSize(150, 150);
-        bs2.position.x = -150;
-        bs2.position.y = 150;
-        bs2.setTintColor(0,1,1);
-        meydan2.addChild(bs2);
-
-        var bs3 = new Bagcilar.NormalSprite(texture);
-        bs3.scaleY = -1;
-        bs3.setSize(150, 150);
-        bs3.position.x = 150;
-        bs3.position.y = 150;
-        bs3.setTintColor(1,0,1);
-        meydan2.addChild(bs3);
-     
-        var bs4 = new Bagcilar.NormalSprite(texture);
-        bs4.scaleY = -1;
-        bs4.setSize(150, 150);
-        bs4.position.x = 150;
-        bs4.position.y = -150;
-        bs4.setTintColor(1,1,0);
-        meydan2.addChild(bs4);
-        
         meydan.addEventListener(Bagcilar.Square.ENTER_FRAME, this, enterFrame);
     }
 

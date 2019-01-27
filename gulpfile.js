@@ -12,7 +12,7 @@ gulp.task('watch-dev', function (callBack) {
     connect.server({
         livereload: true,
         root:'./',
-        port:8080,
+        port:6080,
     });
 
     console.log("Bundle Başlıyor");

@@ -38,18 +38,36 @@
 
 
 <script src="../libs/stats.min.js" ></script>
-<script src="../build/Bagcilar2d.js" ></script>
+<script src="../build/bagcilar.js" ></script>
 
 <script>
 
 
-    function init() {
 
+
+    function init(){
+
+        window.flame = new Image();
+        window.flame.onload = function() {
+            
+            baslat();
+        }
+
+        flame.src = "bunny.png"; 
+    }
+
+
+
+    function baslat() {
+    
+       
         window.meydan = new Bagcilar.Square("renderCanvas");
         window.meydan.addEventListener(Bagcilar.Square.ENTER_FRAME, this, enterFrame);
         meydan.camera = new Bagcilar.Camera();
         meydan.setAutoUpdate(false);
         window.sprites = [];
+
+        dataEkle();
 
         var sp;
         var gravity = 0.1;
@@ -59,28 +77,29 @@
         var minY = -300;
 
         var isPressed = false;
-        document.getElementById("renderCanvas").addEventListener("mousedown", function (){
+        document.addEventListener("mousedown", function (){
              isPressed = true;
         });
 
-        document.getElementById("renderCanvas").addEventListener("mouseup", function (){
+        document.addEventListener("mouseup", function (){
            isPressed = false;
         });
         
-        addSprites();
 
         function enterFrame(event) {
+            
 
             if(isPressed) {
-                addSprites();
+                cokDataEkle();
             }
+
+
 
             for (var i = 0; i < sprites.length; i++)
             {
                 var sp = sprites[i];
                 //bunny.rotation += 0.1
-                
-                
+
                 sp.position.x += sp.speedX;
                 sp.position.y += sp.speedY;
                 sp.rotation += sp.rotationSpeed;
@@ -107,47 +126,63 @@
                     {
                         sp.speedY -= Math.random() * 6;
                     }
-                } else if (sp.y < minY) {
+                }
+                else if (sp.position.y < minY)
+                {
                     sp.speedY = 0;
                     sp.position.y = minY;
                 }
+
             }
         }
+        
+
          requestAnimationFrame(updateScreen);
+
+         
     }
 
 
-    var texture = new Bagcilar.ImageObject("assets/bunny.png");
-    var texture2 = new Bagcilar.ImageObject("assets/face.png");
+    var texture = new Bagcilar.ImageObject("bunny2.png");
+    var texture2 = new Bagcilar.ImageObject("face.png");
+
     var txts = [texture, texture2];
 
     var isLeft = true;
-    function addSprite(m) {
+    function dataEkle(m) {
         
         var sp;
+
         var m = Math.floor(Math.random() * txts.length);
 
-       if(m) {
+       if(h) {
             sp = new Bagcilar.NormalSprite(txts[0]);
-       } else {   
+       } else 
+        {   
              sp = new Bagcilar.NormalSprite(txts[1]);
         }
         
         sp.id = "id_" + sprites.length;
         meydan.addChild(sp);
 
-        sp.speedX = Math.random() * 5;
-        sp.speedY = (Math.random() * 5) - 5;
+        /*
+        sp.vx = 1 + Math.random() * 2;
+        sp.vy = 1 + Math.random() * 2;
+        sp.rv = Math.random() * 0.1;
+        */
+
+        sp.speedX = Math.random() * 1;
+        sp.speedY = (Math.random() * 1) - 5;
         
         sp.rotationSpeed = Math.random() * 0.1;
 
         if(isLeft) {
             sp.position.x = -300;
         } else {
-            sp.position.x = 300;
+            sp.position.y = 300;
         }
         isLeft = !isLeft;
-        sp.position.y = -300;
+        sp.y = -300;
         //sp.scaleY = sp.scaleX = 0.1 + Math.random();
 
         sprites.push(sp);
@@ -157,12 +192,12 @@
     var h = true;
     var say = 1;
     var lastBunnyCount = 0;
-    function addSprites() {
+    function cokDataEkle() {
         say +=1;
 
         h = !h;
-        for (var i = 0; i < 100; i++) {
-            addSprite();
+        for (var i = 0; i < 300; i++) {
+            dataEkle();
         }
 
         if(lastBunnyCount != sprites.length) {
@@ -172,17 +207,20 @@
         
     }
 
-    var last = 0;
     var say = 0;
     function updateScreen() {
+        meydan.update2();
+        requestAnimationFrame(updateScreen);
+    }
 
-         requestAnimationFrame(updateScreen);
 
-         meydan.update();  
-    }    
+
+
+
+
+    
 
 </script>
-
 <body onload="init()" style="background-color: #cc0000">
 
 <canvas id="renderCanvas" width="600" height="600" ></canvas>
