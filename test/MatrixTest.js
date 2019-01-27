@@ -1,12 +1,8 @@
 
-
-
 describe('Matrix3 Creation Is Identity', () => {
     
     var matrix = new Bagcilar.Matrix3();
-
     it('passes if equal', function() {
-
         var exampleIdentityArray = [
                                     1,0,0,
                                     0,1,0,

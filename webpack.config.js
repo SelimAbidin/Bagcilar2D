@@ -5,6 +5,7 @@ module.exports = {
     entry: {
         Bagcilar:'./src/js/Bagcilar2D.js'
     },
+    
     output: {
         libraryTarget: 'umd',
         path: join(__dirname, 'build'),

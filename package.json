@@ -4,13 +4,11 @@
   "description": "2D pet engine",
   "main": "index.js",
   "scripts": {
+    "dev" : "webpack-dev-server",
     "test": "karma start",
-    "dev": "gulp dev",
-    "before-travis": "karma start && eslint ./src/js/*/*.js",
-    "watch-dev": "gulp watch-dev",
-    "eslint": "eslint ./src/js/*/*.js",
-    "eslint-fix": "eslint ./src/js/*/*.js --fix",
-    "karma-init": "karma init"
+    "test:watch": "karma start --no-single-run --auto-watch",
+    "build":"webpack --mode production",
+    "eslint": "eslint ./src/js/*/*.js"
   },
   "repository": {
     "type": "git",

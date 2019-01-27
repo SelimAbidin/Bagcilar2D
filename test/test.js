@@ -11,7 +11,6 @@
 
 
 describe('Canvas Test', () => {
-
    
     var d = document.getElementById("testCanvas");
     it('Should exist', function() {
