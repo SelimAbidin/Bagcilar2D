@@ -1,4 +1,3 @@
-
 import {ObjectContainer2D} from "../display/ObjectContainer2D";
 import {WebGLRenderer} from "../renderer/WebGLRenderer";
 import {ImageObject} from "../display/ImageObject";
@@ -78,7 +77,7 @@ class Square extends ObjectContainer2D {
 
     setAutoUpdate (b) {
         if(this._autoUpdate !== b) {
-           this._autoUpdate = b;
+            this._autoUpdate = b;
 
             if(b){
                

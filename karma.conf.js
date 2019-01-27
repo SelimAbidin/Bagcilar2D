@@ -15,11 +15,9 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'build/Bagcilar2d.js',
-      'build/TestJS.js',
+      'build/bagcilar.js',
       'test/*.js',
       {pattern: 'test/*.png', watched: false, included: false, served: true},
-
     ],
 
 
