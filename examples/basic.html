@@ -5,10 +5,8 @@
 </head>
 
 
-
-
 <script src="../libs/stats.min.js" ></script>
-<script src="../build/Bagcilar2d.js" ></script>
+<script src="../build/bagcilar.js" ></script>
 
 <script>
 
@@ -25,7 +23,6 @@
 
     var angle = 0;
     function enterFrame(e){
-
         xtranslateSprite.position.x = -200 + Math.cos(angle) * 100;
         ytranslateSprite.position.y = -200 + Math.cos(angle) * 100;
         rotateSprite.rotation = angle;
@@ -55,7 +52,6 @@
         parentSprite.position.x = 100;
         parentSprite.position.y = 100;
         meydan.addChild(parentSprite);
-        
         
 
         childSprite = new Bagcilar.NormalSprite(face);

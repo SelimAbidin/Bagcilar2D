@@ -7,10 +7,8 @@ class Vector2 {
         this.x = x;
         this.y = y;
     }
-    
 
     mulMatrix3 (matrix3) {
-
         var v1 = this.x;
         var v2 = this.y;
         
